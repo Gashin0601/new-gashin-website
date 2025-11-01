@@ -55,36 +55,31 @@
 
 ---
 
-## 第2章：幼稚園（2009年頃）
+## 第2章：工作と探究心
 
 ### 映像演出
-- 幼稚園の外観（朝のランニング風景）
-- ベートーヴェンをドイツ語で歌う子どもたち（少しコミカルに）
-- 小さな文字を必死に読む少年の姿（ぼやけた視界の演出）
+1. **工作のシーン**
+   - 映像：色紙やダンボールで何かを作る小さな手
+   - 完成した作品（ロボット、建物など）
+   - 目を近づけて細部を見る姿
+
+2. **賞状のシーン**
+   - 映像：研究発表の様子
+   - 習字を書く手元（墨と筆）
+   - 賞状を受け取る笑顔
+
+3. **星空を見上げる**
+   - 映像：夜、空を見上げる少年
+   - POV視点：ぼやけた星空（フォーカスが合わない演出）
+   - 本人の表情：どうすればいいんだろう…
+   - テキスト表示：「見たい。もっとはっきりと」
 
 ### テキスト・ナレーション
-「障害があると入園を断られることも多いと聞くが、兄がすでに通っていたこともあり、何とか受け入れてもらえた。そこはとても厳しい幼稚園で、朝からランニングをし、算数の問題を解き、ベートーヴェンをドイツ語で歌うという、少し変わったスパルタ教育だった。」
+「小さい頃、すごく工作が好きな子供だった。手を動かして何かを作ることが楽しくて、夢中になって作品を作り続けた。研究や習字でも賞を取ったりした。ある日、星空を見ようとした。でも、肉眼ではぼやけて見えない。どうすればいいんだろう――そんな疑問が、いつも心にあった。」
 
 ---
 
-## 第3章：小学生時代（2012-2018年）
-
-### 映像演出
-1. **駄菓子屋のシーン**
-   - 映像：きなこ棒を手に取る
-   - 友達の声：「おっ、当たりじゃん！」
-   - カメラが寄る：先端は赤くない
-   - 周りの笑い声（エコー効果）
-   - 本人の引きずった笑顔
-
-2. **決意の瞬間**
-   - 映像：漢字テストの0点の答案用紙
-   - 次のカット：必死に勉強する姿
-   - テキスト表示：「こんな環境は嫌だと思い、小学5年生のときに中学受験を決意した」
-
----
-
-## 第4章：国立盲学校（2018-2024年）
+## 第3章：国立盲学校（2018-2024年）
 
 ### 映像演出
 1. **新しい環境**
@@ -109,21 +104,21 @@
 
 ---
 
-## 第5章：中高の活動（2018-2024年）
+## 第4章：高校の活動（2021-2024年）
 
 ### 映像演出
 - モンタージュ形式で活動を次々と表示
   1. iPadセミナーの様子
   2. アプリ開発中の画面
   3. エストニアの風景
-  4. 短冊に「慶應」と書く手
+  4. 慶應SFCの校舎を見上げる姿
 
 ### テキスト・ナレーション
-「視覚障害のある子どもたちを対象にiPad活用セミナーを開催したり、視覚障害をシミュレートできるアプリを開発したり、さらにはメディアを立ち上げて、エストニアを訪れたこともある。」
+「視覚障害のある子どもたちを対象にiPad活用セミナーを開催したり、視覚障害をシミュレートできるアプリを開発したり、さらにはメディアを立ち上げて、エストニアを訪れたこともある。こうした活動を続けてきたこともあり、AO入試で念願の慶應義塾大学に入学することができた。」
 
 ---
 
-## 第6章：慶應SFC入学（2023年）
+## 第5章：慶應SFC入学（2023年）
 
 ### 映像演出
 1. **期待と現実**
@@ -145,7 +140,7 @@
 
 ---
 
-## 第7章：ローソンでの出来事（2024年）
+## 第6章：ローソンでの出来事（2024年）
 
 ### 映像演出
 1. **日常のシーン**
@@ -170,7 +165,7 @@
 
 ---
 
-## 第8章：YouTube開始（2024年〜）
+## 第7章：YouTube開始（2024年〜）
 
 ### 映像演出
 1. **決意**
@@ -235,41 +230,28 @@
     },
     {
       "chapter": 2,
-      "year": 2009,
-      "title": "幼稚園",
+      "title": "工作と探究心",
       "layout": "left",
-      "body": "障害があると入園を断られることも多いと聞くが、兄がすでに通っていたこともあり、何とか受け入れてもらえた。そこはとても厳しい幼稚園で、朝からランニングをし、算数の問題を解き、ベートーヴェンをドイツ語で歌うという、少し変わったスパルタ教育だった。それでも視覚障害のある私も友達と一緒に学び、遊んでいた。小さな文字を読むのは本当に大変だったはずなのに、どうやって勉強していたのか――今思えば不思議で仕方ないが、その頃の記憶はほとんど残っていない。",
-      "audioNarration": "/audio/narration/chapter-02-kindergarten.mp3",
+      "body": "小さい頃、すごく工作が好きな子供だった。手を動かして何かを作ることが楽しくて、夢中になって作品を作り続けた。研究や習字でも賞を取ったりした。ある日、星空を見ようとした。でも、肉眼ではぼやけて見えない。どうすればいいんだろう――そんな疑問が、いつも心にあった。",
+      "audioNarration": "/audio/narration/chapter-02-crafts.mp3",
+      "videoSrc": "/videos/story/chapter-02-crafts.mp4",
+      "videoEffects": [
+        { "time": 0, "description": "工作のシーン" },
+        { "time": 10, "description": "賞状を受け取る" },
+        { "time": 20, "filter": "blur(3px)", "description": "ぼやけた星空（POV）" }
+      ],
       "media": [
         {
-          "type": "image",
-          "src": "/images/story/kindergarten.jpg",
-          "alt": "幼稚園での様子",
-          "audioDescription": "/audio/images/chapter-02-kindergarten.mp3"
+          "type": "video",
+          "src": "/videos/story/chapter-02-crafts.mp4",
+          "poster": "/images/story/crafts.jpg",
+          "alt": "工作と星空",
+          "audioDescription": "/audio/images/chapter-02-crafts.mp3"
         }
       ]
     },
     {
       "chapter": 3,
-      "year": 2012,
-      "yearRange": "2012-2018",
-      "title": "小学生時代",
-      "layout": "right",
-      "videoSrc": "/videos/story/chapter-03-elementary.mp4",
-      "body": "小学生の頃は、軽いいじめにあっていた。駄菓子屋で私がきなこ棒を買うと、友達の一人が「おっ、当たりじゃん！」と教えてくれた。少し遅れて他の子たちも「あっ、本当だ！」と盛り上がる。私も嬉しくなって「やった！」と笑って見せたのだが、目に近づけてよく見ると先端は赤くない。それを見て友達が笑う――そんなことがよくあった。いじめとまでは言えないからかいが続き、引きずった笑いが得意になった6年間である。こんな環境は嫌だと思い、小学5年生のときに中学受験を決意した。漢字のテストで0点を取るような子どもだったが、そのときばかりは必死に勉強した。",
-      "audioNarration": "/audio/narration/chapter-03-elementary.mp3",
-      "media": [
-        {
-          "type": "video",
-          "src": "/videos/story/chapter-03-elementary.mp4",
-          "poster": "/images/story/elementary.jpg",
-          "alt": "小学生時代の思い出",
-          "audioDescription": "/audio/images/chapter-03-elementary.mp3"
-        }
-      ]
-    },
-    {
-      "chapter": 4,
       "year": 2018,
       "yearRange": "2018-2024",
       "title": "国立盲学校",
@@ -288,78 +270,78 @@
       ]
     },
     {
-      "chapter": 5,
-      "year": 2018,
-      "yearRange": "2018-2024",
-      "title": "中高の活動",
-      "layout": "left",
-      "body": "この成功体験をきっかけに、中学・高校と進む中でさまざまな活動をした。視覚障害のある子どもたちを対象にiPad活用セミナーを開催したり、視覚障害をシミュレートできるアプリを開発したり、さらにはメディアを立ち上げて、マイナンバーカードのモデルになったとも言われるIT先進国エストニアを訪れ、現地の電子政府の専門家に話を聞いたこともある。こうした活動を続けてきたこともあり、AO入試で念願の慶應義塾大学に入学することができた。",
-      "audioNarration": "/audio/narration/chapter-05-activities.mp3",
+      "chapter": 4,
+      "year": 2021,
+      "yearRange": "2021-2024",
+      "title": "高校の活動",
+      "layout": "right",
+      "body": "視覚障害のある子どもたちを対象にiPad活用セミナーを開催したり、視覚障害をシミュレートできるアプリを開発したり、さらにはメディアを立ち上げて、マイナンバーカードのモデルになったとも言われるIT先進国エストニアを訪れ、現地の電子政府の専門家に話を聞いたこともある。こうした活動を続けてきたこともあり、AO入試で念願の慶應義塾大学に入学することができた。",
+      "audioNarration": "/audio/narration/chapter-04-activities.mp3",
       "media": [
         {
           "type": "image",
           "src": "/images/story/activities-montage.jpg",
-          "alt": "中高での様々な活動",
-          "audioDescription": "/audio/images/chapter-05-activities.mp3"
+          "alt": "高校での様々な活動",
+          "audioDescription": "/audio/images/chapter-04-activities.mp3"
         }
       ]
     },
     {
-      "chapter": 6,
+      "chapter": 5,
       "year": 2023,
       "title": "慶應SFC入学",
-      "layout": "right",
-      "videoSrc": "/videos/story/chapter-06-sfc.mp4",
+      "layout": "left",
+      "videoSrc": "/videos/story/chapter-05-sfc.mp4",
       "videoEffects": [
         { "time": 0, "filter": "grayscale(0%)", "description": "カラフルなキャンパス" },
         { "time": 10, "filter": "grayscale(50%)", "description": "授業シーン" },
         { "time": 20, "filter": "grayscale(100%)", "brightness": "0.3", "description": "心の闇" }
       ],
       "body": "留学生も多く、私のように障害のある学生もいる――そんなインクルーシブで障害への理解がある環境だと思っていた。しかし、現実はそれほど甘くなかった。ある授業で「出生前診断で障害があると分かったら産むか否か」というテーマで議論する機会があった。すると、「障害があると幸せになれない」「周囲から反対されそう」「障害があると分かっていて産むなんて正気じゃない」といった言葉が飛び交った。私は生きていてはいけないのだろうか。今までの活動は無駄だったのだろうか。そう思い悩む日々が、やってきた。",
-      "audioNarration": "/audio/narration/chapter-06-sfc.mp3",
+      "audioNarration": "/audio/narration/chapter-05-sfc.mp3",
       "media": [
         {
           "type": "video",
-          "src": "/videos/story/chapter-06-sfc.mp3",
+          "src": "/videos/story/chapter-05-sfc.mp4",
           "poster": "/images/story/sfc-campus.jpg",
           "alt": "SFCキャンパス",
-          "audioDescription": "/audio/images/chapter-06-sfc.mp3"
+          "audioDescription": "/audio/images/chapter-05-sfc.mp3"
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "year": 2024,
+      "title": "ローソンでの出来事",
+      "layout": "right",
+      "videoSrc": "/videos/story/chapter-06-lawson.mp4",
+      "videoEffects": [
+        { "time": 0, "brightness": "0.5", "description": "暗いトーン" },
+        { "time": 20, "brightness": "1.0", "description": "徐々に明るく" }
+      ],
+      "body": "そんなある日、大学内のローソンで昼ご飯を買おうとしたとき、「店内での写真・動画の撮影はご遠慮ください」というアナウンスが流れた。私ははいつもスマホのカメラでおにぎりの具や値段を拡大して確認しているため、その言葉を聞いた瞬間、とても不安な気持ちになった。――ああ、私は一人で昼食を買うことすらできないのだろうか。そんな思いに駆られ、Xに投稿したところ、瞬く間に拡散され、Yahoo!ニュースにも取り上げられた。今まで理解されにくかった障害を知ってもらえたことが、本当に嬉しかった。障害は誰かに否定されるものではない、自分は自信を持って生きていこう、そう思えた。",
+      "audioNarration": "/audio/narration/chapter-06-lawson.mp3",
+      "media": [
+        {
+          "type": "video",
+          "src": "/videos/story/chapter-06-lawson.mp4",
+          "poster": "/images/story/lawson.jpg",
+          "alt": "ローソンでの出来事",
+          "audioDescription": "/audio/images/chapter-06-lawson.mp3"
         }
       ]
     },
     {
       "chapter": 7,
       "year": 2024,
-      "title": "ローソンでの出来事",
-      "layout": "full",
-      "videoSrc": "/videos/story/chapter-07-lawson.mp4",
-      "videoEffects": [
-        { "time": 0, "brightness": "0.5", "description": "暗いトーン" },
-        { "time": 20, "brightness": "1.0", "description": "徐々に明るく" }
-      ],
-      "body": "そんなある日、大学内のローソンで昼ご飯を買おうとしたとき、「店内での写真・動画の撮影はご遠慮ください」というアナウンスが流れた。私ははいつもスマホのカメラでおにぎりの具や値段を拡大して確認しているため、その言葉を聞いた瞬間、とても不安な気持ちになった。――ああ、私は一人で昼食を買うことすらできないのだろうか。そんな思いに駆られ、Xに投稿したところ、瞬く間に拡散され、Yahoo!ニュースにも取り上げられた。今まで理解されにくかった障害を知ってもらえたことが、本当に嬉しかった。障害は誰かに否定されるものではない、自分は自信を持って生きていこう、そう思えた。",
-      "audioNarration": "/audio/narration/chapter-07-lawson.mp3",
-      "media": [
-        {
-          "type": "video",
-          "src": "/videos/story/chapter-07-lawson.mp4",
-          "poster": "/images/story/lawson.jpg",
-          "alt": "ローソンでの出来事",
-          "audioDescription": "/audio/images/chapter-07-lawson.mp3"
-        }
-      ]
-    },
-    {
-      "chapter": 8,
-      "year": 2024,
       "title": "YouTube開始",
       "layout": "full",
-      "videoSrc": "/videos/story/chapter-08-youtube.mp4",
+      "videoSrc": "/videos/story/chapter-07-youtube.mp4",
       "videoEffects": [
         { "time": 0, "filter": "grayscale(0%)", "brightness": "1.2", "description": "明るく鮮やか" }
       ],
       "body": "そして、「障害があっても人生を楽しんでるぜ！」ということを伝えるために、YouTubeを始めた。",
-      "audioNarration": "/audio/narration/chapter-08-youtube.mp3",
+      "audioNarration": "/audio/narration/chapter-07-youtube.mp3",
       "ctaButton": {
         "label": "YouTubeチャンネルを見る",
         "href": "https://youtube.com/@gashin",
@@ -368,10 +350,10 @@
       "media": [
         {
           "type": "video",
-          "src": "/videos/story/chapter-08-youtube.mp4",
+          "src": "/videos/story/chapter-07-youtube.mp4",
           "poster": "/images/story/youtube.jpg",
           "alt": "YouTube撮影風景",
-          "audioDescription": "/audio/images/chapter-08-youtube.mp3"
+          "audioDescription": "/audio/images/chapter-07-youtube.mp3"
         }
       ]
     }
@@ -383,26 +365,24 @@
 
 ## 音声ファイル録音リスト
 
-### ナレーション
+### ナレーション（全7章）
 - [ ] `/audio/narration/chapter-01-birth.mp3` - 第1章：横浜で生まれる
 - [ ] `/audio/narration/chapter-01-birth-sr.mp3` - 第1章：スクリーンリーダー用副音声
-- [ ] `/audio/narration/chapter-02-kindergarten.mp3` - 第2章：幼稚園
-- [ ] `/audio/narration/chapter-03-elementary.mp3` - 第3章：小学生時代
-- [ ] `/audio/narration/chapter-04-blind-school.mp3` - 第4章：国立盲学校
-- [ ] `/audio/narration/chapter-05-activities.mp3` - 第5章：中高の活動
-- [ ] `/audio/narration/chapter-06-sfc.mp3` - 第6章：慶應SFC入学
-- [ ] `/audio/narration/chapter-07-lawson.mp3` - 第7章：ローソンでの出来事
-- [ ] `/audio/narration/chapter-08-youtube.mp3` - 第8章：YouTube開始
+- [ ] `/audio/narration/chapter-02-crafts.mp3` - 第2章：工作と探究心
+- [ ] `/audio/narration/chapter-03-blind-school.mp3` - 第3章：国立盲学校
+- [ ] `/audio/narration/chapter-04-activities.mp3` - 第4章：高校の活動
+- [ ] `/audio/narration/chapter-05-sfc.mp3` - 第5章：慶應SFC入学
+- [ ] `/audio/narration/chapter-06-lawson.mp3` - 第6章：ローソンでの出来事
+- [ ] `/audio/narration/chapter-07-youtube.mp3` - 第7章：YouTube開始
 
-### 画像説明
+### 画像・動画説明
 - [ ] `/audio/images/chapter-01-baby.mp3` - 生まれたばかりの写真の説明
-- [ ] `/audio/images/chapter-02-kindergarten.mp3` - 幼稚園の写真の説明
-- [ ] `/audio/images/chapter-03-elementary.mp3` - 小学生時代の写真の説明
-- [ ] `/audio/images/chapter-04-blind-school.mp3` - 盲学校の写真の説明
-- [ ] `/audio/images/chapter-05-activities.mp3` - 活動の写真の説明
-- [ ] `/audio/images/chapter-06-sfc.mp3` - SFCの写真の説明
-- [ ] `/audio/images/chapter-07-lawson.mp3` - ローソンの写真の説明
-- [ ] `/audio/images/chapter-08-youtube.mp3` - YouTube撮影の写真の説明
+- [ ] `/audio/images/chapter-02-crafts.mp3` - 工作と星空の動画の説明
+- [ ] `/audio/images/chapter-03-blind-school.mp3` - 盲学校の動画の説明
+- [ ] `/audio/images/chapter-04-activities.mp3` - 活動の写真の説明
+- [ ] `/audio/images/chapter-05-sfc.mp3` - SFCの動画の説明
+- [ ] `/audio/images/chapter-06-lawson.mp3` - ローソンの動画の説明
+- [ ] `/audio/images/chapter-07-youtube.mp3` - YouTube撮影の動画の説明
 
 ### ボタン
 - [ ] `/audio/buttons/youtube-cta.mp3` - 「YouTubeチャンネルを見る」
@@ -414,13 +394,13 @@
 ### オープニング
 - [ ] `/videos/story-opening-sfc.mp4` - SFCキャンパス歩行（5秒、カラー→グレー→暗転）
 
-### 各章
+### 各章（全7章）
 - [ ] `/videos/story/chapter-01-birth.mp4` - 母親視点、積み木のシーン
-- [ ] `/videos/story/chapter-03-elementary.mp4` - 駄菓子屋のシーン
-- [ ] `/videos/story/chapter-04-blind-school.mp4` - 盲学校、コーディングシーン
-- [ ] `/videos/story/chapter-06-sfc.mp4` - SFCキャンパス、授業シーン
-- [ ] `/videos/story/chapter-07-lawson.mp4` - ローソン、スマホで撮影するシーン
-- [ ] `/videos/story/chapter-08-youtube.mp4` - YouTube撮影風景
+- [ ] `/videos/story/chapter-02-crafts.mp4` - 工作シーン、賞状、ぼやけた星空（POV）
+- [ ] `/videos/story/chapter-03-blind-school.mp4` - 盲学校、コーディングシーン
+- [ ] `/videos/story/chapter-05-sfc.mp4` - SFCキャンパス、授業シーン（カラー→グレー）
+- [ ] `/videos/story/chapter-06-lawson.mp4` - ローソン、スマホで撮影するシーン
+- [ ] `/videos/story/chapter-07-youtube.mp4` - YouTube撮影風景
 
 ---
 
