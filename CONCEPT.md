@@ -104,9 +104,9 @@
   - 音声キュー管理（順次再生・スキップ）
   - ユーザー設定永続化（localStorage）
 - **視覚体験シミュレーター**（第2章）：
-  - Three.js / Photo Sphere Viewer（360度パノラマ）
+  - Three.js / Photo Sphere Viewer（180度パノラマ）
   - Device Orientation API（ジャイロスコープ）
-  - getUserMedia API（カメラアクセス）
+  - getUserMedia API（カメラアクセス、180度撮影）
   - Canvas API（視覚フィルター：左目盲・視野狭窄）
   - リアルタイム切り替え機能
 - 動画：
@@ -450,8 +450,8 @@ connect-src 'self' https://vitals.vercel-insights.com;
   - [ ] スクリーンリーダー検出または手動切替
   - [ ] フォールバック機能（テキストalt）
 - [ ] **視覚体験シミュレーター実装**（第2章）
-  - [ ] 360度パノラマビューワー
-  - [ ] カメラ撮影機能またはサンプル画像
+  - [ ] 180度パノラマビューワー
+  - [ ] カメラ撮影機能（180度）またはサンプル画像
   - [ ] 視覚フィルター（左目盲・視野狭窄）
   - [ ] リアルタイム切り替えボタン
   - [ ] ジャイロスコープ対応
@@ -504,7 +504,7 @@ connect-src 'self' https://vitals.vercel-insights.com;
    - 使用する写真・動画の選定
      - 📋 **撮影リスト**: [`STORY_DRAFT.md`](./STORY_DRAFT.md#動画撮影リスト) を参照（6動画）
    - **視覚体験シミュレーター用素材**：
-     - サンプルパノラマ画像（360度、4096x2048px、Equirectangular形式）
+     - サンプルパノラマ画像（180度、2048x1024px、Equirectangular形式）
      - 📋 **素材リスト**: [`STORY_DRAFT.md`](./STORY_DRAFT.md#パノラマ画像素材リスト) を参照
    - ニュース記事データの整理
    - ストーリー年表の執筆（完了：[`STORY_DRAFT.md`](./STORY_DRAFT.md) 参照）

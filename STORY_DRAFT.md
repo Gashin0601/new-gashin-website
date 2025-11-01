@@ -94,12 +94,13 @@
 **コンセプト**: ユーザーが実際に視覚障害者の見え方を体験できるパノラマビューワー
 
 **機能仕様**:
-1. **パノラマ撮影**
-   - デバイスのカメラでその場のパノラマ写真を撮影
+1. **パノラマ撮影（180度）**
+   - デバイスのカメラでその場の180度パノラマ写真を撮影
    - または、サンプルパノラマ画像を使用（撮影できない場合）
+   - 180度で左右の視野を十分に表現可能、撮影も容易
 
 2. **ビューワーモード**
-   - VR/ストリートビューのような360度横スクロール
+   - 180度の横スクロールビューワー
    - ジャイロスコープ対応（デバイスの傾きで視点移動）
    - マウス/タッチドラッグで視点移動
 
@@ -298,10 +299,11 @@
           "panorama": {
             "enabled": true,
             "cameraCapture": true,
-            "sampleImage": "/images/story/sample-panorama.jpg"
+            "fieldOfView": 180,
+            "sampleImage": "/images/story/sample-panorama-180.jpg"
           },
           "viewer": {
-            "mode": "360-panorama",
+            "mode": "180-panorama",
             "gyroscope": true,
             "dragControl": true
           },
@@ -500,10 +502,10 @@
 ## パノラマ画像・素材リスト
 
 ### 視覚体験シミュレーター用
-- [ ] `/images/story/sample-panorama.jpg` - サンプルパノラマ画像（360度、カメラ撮影できない場合の代替）
+- [ ] `/images/story/sample-panorama-180.jpg` - サンプルパノラマ画像（180度、カメラ撮影できない場合の代替）
   - 推奨：横断歩道や街中のシーン
-  - サイズ：4096x2048px以上
-  - 形式：Equirectangular（正距円筒図法）
+  - サイズ：2048x1024px以上（180度用）
+  - 形式：Equirectangular（正距円筒図法）180度版
 
 ---
 
@@ -550,10 +552,10 @@ if (isScreenReaderUser || userPreference === 'audio-on') {
 ### 視覚体験シミュレーター（第2章）
 
 **技術スタック**:
-- Three.js または Photo Sphere Viewer（360度パノラマ表示）
+- Three.js または Photo Sphere Viewer（180度パノラマ表示）
 - Web API: Device Orientation API（ジャイロスコープ）
 - Canvas API（視覚フィルター適用）
-- getUserMedia API（カメラアクセス）
+- getUserMedia API（カメラアクセス、180度撮影）
 
 **実装例**:
 ```typescript
@@ -596,13 +598,17 @@ const applyVisionFilter = (canvas: HTMLCanvasElement, mode: VisionMode) => {
   }
 };
 
-// パノラマビューワーの初期化
+// パノラマビューワーの初期化（180度）
 const initPanoramaViewer = async () => {
   const viewer = new PhotoSphereViewer.Viewer({
     container: 'panorama-container',
     panorama: panoramaImageUrl,
     defaultYaw: 0,
     defaultPitch: 0,
+    minFov: 50,
+    maxFov: 90,
+    defaultLongitude: 0,
+    longitudeRange: [-Math.PI / 2, Math.PI / 2], // 180度制限（-90° to +90°）
     navbar: false,
     touchmoveTwoFingers: false,
     gyroscope: true, // ジャイロスコープ有効化
@@ -619,11 +625,16 @@ const initPanoramaViewer = async () => {
 ```typescript
 const capturePanorama = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: 'environment' }
+    video: {
+      facingMode: 'environment',
+      width: { ideal: 2048 },
+      height: { ideal: 1024 }
+    }
   });
 
-  // ユーザーに360度撮影を案内
-  // 複数枚の写真を撮影してステッチング（簡易版はスライドパノラマ）
+  // ユーザーに180度撮影を案内
+  // シンプル：1枚の広角写真、または
+  // 複数枚の写真を撮影してステッチング（2-3枚程度）
 
   // または、既存のサンプル画像を使用
   return samplePanoramaUrl;
