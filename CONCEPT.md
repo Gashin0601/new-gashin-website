@@ -233,12 +233,23 @@
 ### 2. ニュースセクション（統一レイアウト）
 ```
 ┌──────────────────────────────────────┐
-│ [画像]  タイトル                      │
-│  左固定  媒体名・日付                 │
-│         要約テキスト...               │
+│ [OGP画像] タイトル                    │
+│  左固定   媒体名・日付                │
+│          要約テキスト...              │
 └──────────────────────────────────────┘
 ```
 ※ 左右交互ではなく、統一配置で一覧性を重視
+
+**画像取得方法**:
+- OGP画像自動取得：記事URLから`og:image`を取得
+- 手動設定画像：任意の画像パスを指定
+- フォールバック：取得失敗時はデフォルト画像
+
+**詳細ページ機能**:
+- 記事サマリー・媒体・公開日
+- 外部リンク（`rel="noopener nofollow"`）
+- X（Twitter）埋め込み（該当記事）
+- 補足情報（旧ハンドルネームの説明など）
 
 ### 3. ストーリーページ「大根型」タイムライン
 
@@ -304,18 +315,75 @@
 ```json
 [
   {
-    "slug": "2024-12-10-abema-prime",
-    "title": "ABEMA Prime に出演：視覚×AIで学びを拓く",
-    "summary": "大学生活とAI活用について特集。",
-    "source": "ABEMA Prime",
-    "date": "2024-12-10",
-    "image": "/images/news/abema-prime.jpg",
-    "imageAlt": "ABEMA Prime スタジオでのインタビュー風景",
-    "audioNarration": "/audio/images/news-abema-prime.mp3",
-    "tags": ["TV", "Interview"],
-    "externalUrl": "https://example.com/article"
+    "slug": "2025-nikkan-spa",
+    "title": "日刊SPA!に取材していただきました",
+    "summary": "障害があるが故の悩み、そして私の人生について語りました。",
+    "source": "日刊SPA!",
+    "date": "2025-XX-XX",
+    "externalUrl": "https://nikkan-spa.jp/2117360/3",
+    "ogpImageFetch": true,
+    "image": null,
+    "imageAlt": "日刊SPA!の記事",
+    "audioNarration": "/audio/images/news-nikkan-spa.mp3"
+  },
+  {
+    "slug": "2025-07-jcast-lawson",
+    "title": "ローソンでの撮影禁止についてXの発信が話題に",
+    "summary": "2025年8月、Xにてローソンで撮影することが難しいという投稿が話題となり、8600いいね以上となり、ネットニュースになりました。記事内で掲載されている「シュライン」はXのハンドルネームです。現在は、鈴木我信および@Suzuki_Gashinとなっています。",
+    "source": "J-CASTニュース",
+    "date": "2025-07-19",
+    "externalUrl": "https://www.j-cast.com/2025/07/19506092.html?p=all",
+    "ogpImageFetch": true,
+    "image": null,
+    "imageAlt": "J-CASTニュースの記事",
+    "audioNarration": "/audio/images/news-jcast-lawson.mp3",
+    "embedTweet": {
+      "url": "https://x.com/suzuki_gashin/status/1945395481015898261?s=61",
+      "tweetId": "1945395481015898261"
+    },
+    "notes": "記事内の「シュライン」は旧ハンドルネーム。現在は「鈴木我信」(@Suzuki_Gashin)"
   }
 ]
+```
+
+**OGP画像の自動取得**:
+- `ogpImageFetch: true` の場合、`externalUrl` から OGP 画像を自動取得
+- サーバーサイドで fetch して `og:image` メタタグを解析
+- 取得した画像を Next.js Image Optimizer 経由で配信
+- フォールバック：取得失敗時はデフォルト画像またはテキストのみ表示
+
+**実装例**:
+```typescript
+// /app/api/ogp/route.ts
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const url = searchParams.get('url');
+
+  if (!url) {
+    return new Response('URL required', { status: 400 });
+  }
+
+  try {
+    const response = await fetch(url);
+    const html = await response.text();
+
+    // OGP画像を抽出
+    const ogImageMatch = html.match(/<meta property="og:image" content="([^"]+)"/);
+    const ogImage = ogImageMatch ? ogImageMatch[1] : null;
+
+    return Response.json({ ogImage });
+  } catch (error) {
+    return Response.json({ ogImage: null, error: 'Failed to fetch OGP' }, { status: 500 });
+  }
+}
+```
+
+**X埋め込み**:
+```typescript
+// react-tweet または @twitterdev/twitter-tweet-embed を使用
+import { Tweet } from 'react-tweet';
+
+<Tweet id={embedTweet.tweetId} />
 ```
 
 ### socials.json
