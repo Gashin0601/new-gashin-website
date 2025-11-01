@@ -1,0 +1,485 @@
+# 鈴木我信 ウェブサイト — プロジェクトコンセプト
+
+最終更新：2025-11-01
+ステータス：**コンセプト策定中**（実装前）
+
+---
+
+## 🎯 プロジェクトの目的
+
+個人ブランド・実績・物語を「速く・読みやすく・アクセシブル」に発信する。
+**最新のWeb技術** × **更新容易性** × **アクセシビリティ最優先**
+
+---
+
+## 🎬 オープニング演出
+
+### ローディング画面（初回訪問時）
+```
+┌─────────────────────┐
+│                     │
+│    ◯ ← 白黒ロゴ     │
+│   [━━━] ← ローディング │
+│  SUZUKI GASHIN      │
+│                     │
+└─────────────────────┘
+```
+
+**演出フロー**
+1. 鈴木我信の丸いミニマル白黒ロゴが表示
+2. ロゴの周りの黒い枠がローディングアニメーション（円周進行）
+3. "SUZUKI GASHIN"のテキスト
+4. **約2秒で白黒からカラーへフェード**
+5. メインページへ遷移
+
+**技術的考慮**
+- 初回のみ表示（sessionStorage使用）
+- スキップボタン提供（A11y配慮）
+- `prefers-reduced-motion`では即座にカラー表示
+
+---
+
+## 📐 サイト構成
+
+### ページ構成
+- **トップページ（`/`）** — 白テーマ
+  - ヒーローセクション（写真・キャッチフレーズ・プロフィール）
+  - メディア出演歴
+  - 開発アプリ
+  - YouTube投稿
+  - SNSリンク
+
+- **ストーリーページ（`/story`）** — 黒テーマ・シネマティック導入
+  - **オープニング動画**：慶應SFCキャンパスを歩く鮮やかな映像
+    - 5秒で徐々にグレースケールに
+    - 目が閉じる演出とともに画面が真っ暗に
+  - タイムライン年表UI（モバイル最適化）
+  - PCではスマホ閲覧を促すQRコード表示
+
+- **ニュース詳細（`/news/[slug]`）**
+  - メディア掲載記事の詳細
+
+### グローバルナビゲーション
+- 全ページ右上にハンバーガーメニュー
+- 各ページのテーマカラーに同期
+
+---
+
+## 🎨 デザインコンセプト
+
+### テーマカラー
+- **メインページ**：白ベース（`#ffffff` / `#0b0c10`）
+- **ストーリー**：黒ベース（`#0b0c10` / `#ffffff`）
+- **アクセント**：`#222284`（鈴木我信ブランドカラー）
+
+### タイポグラフィ
+- システムサンセリフ
+- 本文は行間1.7の読みやすいスタイル
+- コントラスト比：本文≥4.5:1、UI≥3:1
+
+### アニメーション
+- 200–300ms / ease-out
+- `prefers-reduced-motion`を尊重（アクセシビリティ配慮）
+
+---
+
+## 🛠 技術スタック（案）
+
+### フレームワーク・言語
+- **Next.js**（App Router, RSC）+ TypeScript
+- **Tailwind CSS v4**（`@tailwindcss/typography`）
+- CSS Variables（ページごとテーマ切替）
+
+### UI・コンポーネント
+- Headless自作コンポーネント（`aria-*` 準拠）
+- アイコン：Lucide
+- 画像最適化：`next/image`（AVIF/WEBP）
+- **音声ナレーションシステム**：
+  - カスタム`<AudioNarration>`コンポーネント
+  - Web Audio API（`HTMLAudioElement`）
+  - 再生状態管理（Context API / Zustand）
+  - 音声キュー管理（順次再生・スキップ）
+  - ユーザー設定永続化（localStorage）
+- 動画：
+  - **ホスト動画**：`<video>`タグ + Web API（`currentTime`, `ontimeupdate`）で精密制御
+  - YouTube：**no-cookie** 埋め込み（遅延読み込み）
+- 動画同期演出：
+  - JavaScript `requestAnimationFrame`でフィルター効果とタイムラインを同期
+  - CSS `filter`プロパティのスムーズな遷移
+  - カスタムオーバーレイアニメーション（目が閉じる演出など）
+
+### データ管理
+- ローカルJSON（`news.json`, `socials.json`, `story.json`）
+- 将来的にCMSへ移行可能な抽象化設計
+
+### SEO・メタデータ
+- Next.js `metadata` API
+- JSON-LD構造化データ
+- 動的OGP画像生成（`/api/og`）
+
+### 解析・監視
+- Vercel Analytics
+- 将来的にPlausible追加検討
+
+---
+
+## 🎯 パフォーマンス目標
+
+| 指標 | 目標値 |
+|-----|--------|
+| LCP (Largest Contentful Paint) | < 2.0s（4G/中端） |
+| CLS (Cumulative Layout Shift) | < 0.1 |
+| INP (Interaction to Next Paint) | < 200ms |
+| Lighthouse Performance | 95+ |
+| Lighthouse Accessibility | 100 |
+| 初期JS | ≤ 50KB (gzip) |
+| ローディング画面 | < 2.5s（スキップ可能） |
+| ストーリー動画 | < 1MB（適切な圧縮）、プリロード |
+| 音声ナレーション | < 100KB/ファイル（64kbps MP3推奨）、遅延読み込み |
+
+---
+
+## ♿️ アクセシビリティ要件
+
+### 🎙️ 音声ナレーション（本人録音）
+**コンセプト**：スクリーンリーダーユーザーに対して、通常の`alt`テキストやaria-labelではなく、**鈴木我信本人が録音した音声**を提供。
+
+**適用範囲**
+- ✅ すべての画像説明
+- ✅ ボタン・リンクのラベル
+- ✅ セクション見出し
+- ✅ ストーリー年表の各章
+
+**技術実装**
+- スクリーンリーダー検出（`navigator.userAgent`または手動切替）
+- 音声再生コントロール：
+  - 自動再生・手動再生の選択
+  - 一時停止・再生・スキップボタン
+  - 再生速度調整（0.5x - 2.0x）
+- フォールバック：音声読み込みエラー時は通常の`alt`/`aria-label`
+- 視覚ユーザーには音声なし（オプションで有効化可能）
+
+**音声ファイル構造**
+```
+/public/audio/
+  ├─ narration/
+  │   ├─ hero-intro.mp3           # ヒーロー自己紹介
+  │   ├─ story-2006.mp3           # 2006年の章
+  │   ├─ story-2023.mp3           # 2023年の章
+  │   └─ ...
+  ├─ buttons/
+  │   ├─ see-story.mp3            # 「ストーリーを見る」ボタン
+  │   ├─ skip-intro.mp3           # 「スキップ」ボタン
+  │   └─ ...
+  └─ images/
+      ├─ portrait-main.mp3        # メインポートレート説明
+      ├─ news-abema-prime.mp3     # ニュース画像説明
+      └─ ...
+```
+
+### 必須項目
+- ✅ フォーカスリング：2px以上、コントラスト≥3:1
+- ✅ 全UIをキーボードで操作可能
+- ✅ `prefers-reduced-motion`対応
+  - ローディング画面：即座にカラー表示
+  - ストーリー動画：静止画 + テキストで代替
+  - すべてのアニメーションを無効化
+- ✅ スクリーンリーダー順序と視覚順序の一致
+- ✅ 動画には字幕提供（本人音声ナレーション付き）
+- ✅ 自動再生動画：
+  - 映像は音声なし（`muted`）
+  - スキップボタン必須
+  - 一時停止ボタン提供
+- ✅ 音声ナレーション：
+  - すべての音声にテキスト代替（`alt`/`aria-label`フォールバック）
+  - 音声コントロール（再生・停止・速度調整）
+  - ユーザー設定で音声ON/OFF
+
+### ハンバーガーメニュー仕様
+- `role="dialog"`
+- フォーカストラップ
+- `Esc`キーで閉じる
+- バックドロップクリックで閉じる
+- スクロールロック
+
+---
+
+## 📊 コンテンツ構造
+
+### 1. ヒーローセクション
+```
+┌─────────────────────────────┐
+│   [大きなポートレート写真]    │
+│                              │
+│  我を信じて、世界をほどく。  │
+│                              │
+│  慶應SFCの学生。視覚とテク   │
+│  ノロジーで、学びと社会の垣  │
+│  根をゆるめる実験をしています│
+│                              │
+│   [ストーリーを見る →]       │
+└─────────────────────────────┘
+```
+
+### 2. ニュースセクション（統一レイアウト）
+```
+┌──────────────────────────────────────┐
+│ [画像]  タイトル                      │
+│  左固定  媒体名・日付                 │
+│         要約テキスト...               │
+└──────────────────────────────────────┘
+```
+※ 左右交互ではなく、統一配置で一覧性を重視
+
+### 3. ストーリーページ「大根型」タイムライン
+
+**オープニング動画演出**
+```
+[鮮やかなSFCキャンパス]
+      ↓ (0-5秒)
+[徐々にグレースケール化]
+      ↓ (5秒)
+  [目が閉じる]
+      ↓
+  [真っ暗な画面]
+      ↓
+  [年表開始]
+```
+
+**年表構造**
+```
+        │
+      ┌─┴─┐
+      │2006│ ← 左カード
+      └───┘
+        │
+      ┌─┴─┐
+      │2023│ ← 右カード
+      └───┘
+        │
+      ┌─┴─┐
+      │2024│ ← 全幅カード
+      └───┘
+        │
+```
+
+**技術仕様**
+- オープニング動画とスクロール位置の同期
+- 動画の再生時間とフィルター効果をコードで制御
+  - 0-5秒：`filter: grayscale(0%)` → `grayscale(100%)`
+  - 5秒：オーバーレイで「目が閉じる」アニメーション
+  - フェードアウト後、年表へ自動スクロール
+- 中央に太い縦軸（sticky配置）
+- 各章カード：IntersectionObserverでフェード/スライド演出
+- スキップボタン提供（すぐに年表へジャンプ）
+
+---
+
+## 📁 データスキーマ（案）
+
+### news.json
+```json
+[
+  {
+    "slug": "2024-12-10-abema-prime",
+    "title": "ABEMA Prime に出演：視覚×AIで学びを拓く",
+    "summary": "大学生活とAI活用について特集。",
+    "source": "ABEMA Prime",
+    "date": "2024-12-10",
+    "image": "/images/news/abema-prime.jpg",
+    "imageAlt": "ABEMA Prime スタジオでのインタビュー風景",
+    "audioNarration": "/audio/images/news-abema-prime.mp3",
+    "tags": ["TV", "Interview"],
+    "externalUrl": "https://example.com/article"
+  }
+]
+```
+
+### socials.json
+```json
+{
+  "youtube": "https://youtube.com/@gashin",
+  "tiktok": "https://www.tiktok.com/@gashin",
+  "x": "https://x.com/gashin_lv",
+  "instagram": "https://instagram.com/gashin",
+  "threads": "https://www.threads.net/@gashin_lv",
+  "bluesky": "https://bsky.app/profile/gashin.example"
+}
+```
+
+### story.json
+```json
+{
+  "opening": {
+    "videoSrc": "/videos/story-opening-sfc.mp4",
+    "duration": 5,
+    "effects": [
+      {
+        "time": 0,
+        "filter": "grayscale(0%)",
+        "description": "鮮やかなSFCキャンパス"
+      },
+      {
+        "time": 5,
+        "filter": "grayscale(100%)",
+        "description": "徐々にグレースケール化"
+      },
+      {
+        "time": 5.5,
+        "overlay": "eye-closing",
+        "description": "目が閉じる演出"
+      },
+      {
+        "time": 6,
+        "fadeOut": true,
+        "description": "真っ暗な画面へ"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "year": 2006,
+      "title": "横浜で生まれる",
+      "layout": "full",
+      "body": "全盲と診断。家族と共に育つ日々の始まり。",
+      "audioNarration": "/audio/narration/story-2006.mp3",
+      "media": [
+        {
+          "type": "image",
+          "src": "/images/story/2006-baby.jpg",
+          "alt": "幼少期の写真",
+          "audioDescription": "/audio/images/story-2006-baby.mp3"
+        }
+      ],
+      "accent": "#222284"
+    },
+    {
+      "year": 2023,
+      "title": "慶應SFC 入学",
+      "layout": "left",
+      "body": "テクノロジーと社会デザインに没頭。",
+      "audioNarration": "/audio/narration/story-2023.mp3",
+      "media": [
+        {
+          "type": "image",
+          "src": "/images/story/2023-sfc.jpg",
+          "alt": "SFCキャンパス",
+          "audioDescription": "/audio/images/story-2023-sfc.mp3"
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## 🚀 デプロイ・運用
+
+### プラットフォーム
+- **Vercel** Production（`main`ブランチ）
+- **Vercel** Preview（プルリクエスト）
+
+### 更新フロー
+1. JSONファイルを編集（`news.json`, `socials.json`, `story.json`）
+2. 画像を`/public/images/`に配置
+3. 音声ナレーションを録音し、`/public/audio/`に配置
+4. JSONファイルに音声パスを追加
+5. gitコミット & プッシュ
+6. 自動デプロイ
+
+### ドメイン
+- 例：`gashin.jp`（apex + www）
+
+---
+
+## 🔐 セキュリティ・プライバシー
+
+### CSP（推奨設定）
+```
+default-src 'self';
+img-src 'self' data: https:;
+script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube-nocookie.com;
+style-src 'self' 'unsafe-inline';
+frame-src https://www.youtube-nocookie.com;
+connect-src 'self' https://vitals.vercel-insights.com;
+```
+
+### ヘッダー
+- `X-Frame-Options: SAMEORIGIN`
+- 外部リンクは`rel="noopener nofollow"`
+
+---
+
+## ✅ MVP完了条件
+
+- [ ] ローディング画面（白黒→カラー、2秒、スキップ可能）
+- [ ] `/`、`/story`、`/news/[slug]`が仕様通り動作
+- [ ] ストーリーオープニング動画演出（カラー→グレー→目が閉じる→暗転）
+- [ ] 動画とコードの精密な同期（filter効果、タイムライン制御）
+- [ ] **音声ナレーションシステム完全実装**
+  - [ ] すべての画像・ボタン・セクションに本人録音音声
+  - [ ] 音声コントロール（再生・停止・速度調整）
+  - [ ] スクリーンリーダー検出または手動切替
+  - [ ] フォールバック機能（テキストalt）
+- [ ] ハンバーガーメニューのA11y完全対応
+- [ ] `prefers-reduced-motion`完全対応（静止画代替）
+- [ ] OGP、JSON-LD、sitemap、robots.txt実装
+- [ ] Lighthouse基準達成（Performance 95+, A11y 100）
+- [ ] JSONファイル編集のみで更新可能（音声パス含む）
+- [ ] レスポンシブ対応（320px〜）
+
+---
+
+## 📝 プレースホルダー文面
+
+### キャッチフレーズ
+> 我を信じて、世界をほどく。
+
+### 自己紹介
+> 慶應SFCの学生。視覚とテクノロジーで、学びと社会の垣根をゆるめる実験をしています。動画と文章で日々を記録。
+
+### 章タイトル例
+- はじまりの白
+- SFCという森
+- 見えない地図の描き方
+
+---
+
+## 🎓 次のステップ
+
+1. **技術選定の最終確認**
+   - Next.js 15 + Tailwind v4 でOK？
+   - その他のライブラリ・ツール
+
+2. **デザインモックアップ**
+   - Figmaでワイヤーフレーム作成？
+   - それとも直接実装？
+
+3. **コンテンツ準備**
+   - ロゴデザイン（丸いミニマル白黒ロゴ）
+   - ストーリーオープニング動画（SFCキャンパス歩行、5秒）
+   - 「目が閉じる」アニメーション素材
+   - **音声ナレーション録音**：
+     - すべての画像説明（各セクション）
+     - ボタン・リンクのラベル音声
+     - ストーリー年表の各章ナレーション
+     - ヒーロー自己紹介
+   - 音声ファイル編集・最適化（MP3、適切なビットレート）
+   - 使用する写真・動画の選定
+   - ニュース記事データの整理
+   - ストーリー年表の執筆
+
+4. **実装開始**
+   - プロジェクト初期化
+   - コンポーネント設計
+   - データ構造実装
+
+---
+
+## 📚 参考リンク
+
+- [Next.js App Router](https://nextjs.org/docs/app)
+- [Tailwind CSS v4](https://tailwindcss.com/docs)
+- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
+- [Web Vitals](https://web.dev/vitals/)
