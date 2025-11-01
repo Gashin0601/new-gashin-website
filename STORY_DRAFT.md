@@ -55,7 +55,7 @@
 
 ---
 
-## 第2章：工作と探究心
+## 第2章：工作と探究心、そして見え方
 
 ### 映像演出
 1. **工作のシーン**
@@ -74,8 +74,56 @@
    - 本人の表情：どうすればいいんだろう…
    - テキスト表示：「見たい。もっとはっきりと」
 
+4. **白杖での通学**
+   - 映像：学校へ白杖を持って通う姿
+   - 朝の通学路（周りには他の学生たち）
+   - 白杖で地面を確認しながら歩く
+
+5. **車に轢かれそうになる**
+   - 映像：道路を渡ろうとするシーン
+   - 急ブレーキの音
+   - ぼやけた視界の演出（視野が狭く、左側が見えない）
+   - テキスト表示：「左目が見えなくて、視野が狭くぼやけて見える」
+
+6. **インタラクティブ体験への誘導**
+   - テキスト表示：「私の見え方を、実際に体験してみてください」
+   - 画面中央に体験ボタン表示
+
+### 🎮 インタラクティブ体験機能（重要）
+
+**コンセプト**: ユーザーが実際に視覚障害者の見え方を体験できるパノラマビューワー
+
+**機能仕様**:
+1. **パノラマ撮影**
+   - デバイスのカメラでその場のパノラマ写真を撮影
+   - または、サンプルパノラマ画像を使用（撮影できない場合）
+
+2. **ビューワーモード**
+   - VR/ストリートビューのような360度横スクロール
+   - ジャイロスコープ対応（デバイスの傾きで視点移動）
+   - マウス/タッチドラッグで視点移動
+
+3. **見え方切り替えボタン**
+   - **通常モード**: クリアな視界
+   - **視覚障害モード**:
+     - 左側が完全に暗い（左目が見えない）
+     - 右側も中心のみフォーカス、周辺はぼやけ（視野狭窄）
+     - フィルター：`blur(5px)` + 視野マスク
+   - ボタン一つで即座に切り替え可能
+
+4. **UI要素**
+   - 画面下部：切り替えボタン「通常の見え方 ⇄ 私の見え方」
+   - 音声ガイド：「これが私の日常の見え方です」
+   - 閉じるボタン：体験終了
+
 ### テキスト・ナレーション
-「小さい頃、すごく工作が好きな子供だった。手を動かして何かを作ることが楽しくて、夢中になって作品を作り続けた。研究や習字でも賞を取ったりした。ある日、星空を見ようとした。でも、肉眼ではぼやけて見えない。どうすればいいんだろう――そんな疑問が、いつも心にあった。」
+「小さい頃、すごく工作が好きな子供だった。手を動かして何かを作ることが楽しくて、夢中になって作品を作り続けた。研究や習字でも賞を取ったりした。
+
+ある日、星空を見ようとした。でも、肉眼ではぼやけて見えない。どうすればいいんだろう――そんな疑問が、いつも心にあった。
+
+学校へは白杖を持って通うようになった。でも私は左目が見えなくて、視野が狭くぼやけて見える。だから、車に轢かれそうになる――そんなこともある。
+
+私の見え方を、実際に体験してみてください。」
 
 ---
 
@@ -230,22 +278,65 @@
     },
     {
       "chapter": 2,
-      "title": "工作と探究心",
+      "title": "工作と探究心、そして見え方",
       "layout": "left",
-      "body": "小さい頃、すごく工作が好きな子供だった。手を動かして何かを作ることが楽しくて、夢中になって作品を作り続けた。研究や習字でも賞を取ったりした。ある日、星空を見ようとした。でも、肉眼ではぼやけて見えない。どうすればいいんだろう――そんな疑問が、いつも心にあった。",
+      "body": "小さい頃、すごく工作が好きな子供だった。手を動かして何かを作ることが楽しくて、夢中になって作品を作り続けた。研究や習字でも賞を取ったりした。ある日、星空を見ようとした。でも、肉眼ではぼやけて見えない。どうすればいいんだろう――そんな疑問が、いつも心にあった。学校へは白杖を持って通うようになった。でも私は左目が見えなくて、視野が狭くぼやけて見える。だから、車に轢かれそうになる――そんなこともある。私の見え方を、実際に体験してみてください。",
       "audioNarration": "/audio/narration/chapter-02-crafts.mp3",
       "videoSrc": "/videos/story/chapter-02-crafts.mp4",
       "videoEffects": [
         { "time": 0, "description": "工作のシーン" },
         { "time": 10, "description": "賞状を受け取る" },
-        { "time": 20, "filter": "blur(3px)", "description": "ぼやけた星空（POV）" }
+        { "time": 20, "filter": "blur(3px)", "description": "ぼやけた星空（POV）" },
+        { "time": 30, "description": "白杖で通学" },
+        { "time": 40, "description": "車に轢かれそうになる、ぼやけた視界" }
       ],
+      "interactiveExperience": {
+        "type": "vision-simulator",
+        "ctaText": "私の見え方を体験する",
+        "ctaAudio": "/audio/buttons/vision-experience-cta.mp3",
+        "features": {
+          "panorama": {
+            "enabled": true,
+            "cameraCapture": true,
+            "sampleImage": "/images/story/sample-panorama.jpg"
+          },
+          "viewer": {
+            "mode": "360-panorama",
+            "gyroscope": true,
+            "dragControl": true
+          },
+          "visionModes": [
+            {
+              "id": "normal",
+              "label": "通常の見え方",
+              "filters": []
+            },
+            {
+              "id": "impaired",
+              "label": "私の見え方",
+              "filters": [
+                { "type": "left-blind", "description": "左目が見えない" },
+                { "type": "tunnel-vision", "blur": "5px", "vignette": "0.4", "description": "視野狭窄" }
+              ],
+              "audioGuide": "/audio/experience/vision-guide.mp3"
+            }
+          ],
+          "toggleButton": {
+            "label": "通常の見え方 ⇄ 私の見え方",
+            "position": "bottom-center"
+          },
+          "closeButton": {
+            "label": "体験を終了",
+            "position": "top-right"
+          }
+        }
+      },
       "media": [
         {
           "type": "video",
           "src": "/videos/story/chapter-02-crafts.mp4",
           "poster": "/images/story/crafts.jpg",
-          "alt": "工作と星空",
+          "alt": "工作と星空、白杖での通学",
           "audioDescription": "/audio/images/chapter-02-crafts.mp3"
         }
       ]
@@ -386,6 +477,10 @@
 
 ### ボタン
 - [ ] `/audio/buttons/youtube-cta.mp3` - 「YouTubeチャンネルを見る」
+- [ ] `/audio/buttons/vision-experience-cta.mp3` - 「私の見え方を体験する」
+
+### 体験機能用音声
+- [ ] `/audio/experience/vision-guide.mp3` - 視覚体験の音声ガイド「これが私の日常の見え方です」
 
 ---
 
@@ -396,11 +491,19 @@
 
 ### 各章（全7章）
 - [ ] `/videos/story/chapter-01-birth.mp4` - 母親視点、積み木のシーン
-- [ ] `/videos/story/chapter-02-crafts.mp4` - 工作シーン、賞状、ぼやけた星空（POV）
+- [ ] `/videos/story/chapter-02-crafts.mp4` - 工作シーン、賞状、ぼやけた星空、白杖での通学、車に轢かれそうになる
 - [ ] `/videos/story/chapter-03-blind-school.mp4` - 盲学校、コーディングシーン
 - [ ] `/videos/story/chapter-05-sfc.mp4` - SFCキャンパス、授業シーン（カラー→グレー）
 - [ ] `/videos/story/chapter-06-lawson.mp4` - ローソン、スマホで撮影するシーン
 - [ ] `/videos/story/chapter-07-youtube.mp4` - YouTube撮影風景
+
+## パノラマ画像・素材リスト
+
+### 視覚体験シミュレーター用
+- [ ] `/images/story/sample-panorama.jpg` - サンプルパノラマ画像（360度、カメラ撮影できない場合の代替）
+  - 推奨：横断歩道や街中のシーン
+  - サイズ：4096x2048px以上
+  - 形式：Equirectangular（正距円筒図法）
 
 ---
 
@@ -443,6 +546,94 @@ if (isScreenReaderUser || userPreference === 'audio-on') {
   playNarration(chapter.audioNarration);
 }
 ```
+
+### 視覚体験シミュレーター（第2章）
+
+**技術スタック**:
+- Three.js または Photo Sphere Viewer（360度パノラマ表示）
+- Web API: Device Orientation API（ジャイロスコープ）
+- Canvas API（視覚フィルター適用）
+- getUserMedia API（カメラアクセス）
+
+**実装例**:
+```typescript
+interface VisionSimulator {
+  panorama: {
+    source: 'camera' | 'sample';
+    imageUrl?: string;
+  };
+  visionMode: 'normal' | 'impaired';
+  filters: VisionFilter[];
+}
+
+interface VisionFilter {
+  type: 'left-blind' | 'tunnel-vision' | 'blur';
+  params: {
+    blur?: string;
+    vignette?: number;
+    maskPosition?: 'left' | 'right';
+  };
+}
+
+// Canvas での視覚フィルター適用
+const applyVisionFilter = (canvas: HTMLCanvasElement, mode: VisionMode) => {
+  const ctx = canvas.getContext('2d');
+
+  if (mode === 'impaired') {
+    // 左側を暗くする（左目が見えない）
+    ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+    ctx.fillRect(0, 0, canvas.width / 2, canvas.height);
+
+    // 右側に視野狭窄効果（中心のみクリア、周辺ぼやけ）
+    const gradient = ctx.createRadialGradient(
+      canvas.width * 0.75, canvas.height / 2, 100,
+      canvas.width * 0.75, canvas.height / 2, canvas.width * 0.4
+    );
+    gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(canvas.width / 2, 0, canvas.width / 2, canvas.height);
+  }
+};
+
+// パノラマビューワーの初期化
+const initPanoramaViewer = async () => {
+  const viewer = new PhotoSphereViewer.Viewer({
+    container: 'panorama-container',
+    panorama: panoramaImageUrl,
+    defaultYaw: 0,
+    defaultPitch: 0,
+    navbar: false,
+    touchmoveTwoFingers: false,
+    gyroscope: true, // ジャイロスコープ有効化
+  });
+
+  // 視覚フィルターをオーバーレイとして適用
+  const canvas = document.createElement('canvas');
+  applyVisionFilter(canvas, currentVisionMode);
+  viewer.renderer.domElement.appendChild(canvas);
+};
+```
+
+**パノラマ撮影の実装**:
+```typescript
+const capturePanorama = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'environment' }
+  });
+
+  // ユーザーに360度撮影を案内
+  // 複数枚の写真を撮影してステッチング（簡易版はスライドパノラマ）
+
+  // または、既存のサンプル画像を使用
+  return samplePanoramaUrl;
+};
+```
+
+**アクセシビリティ**:
+- スクリーンリーダーユーザーには音声ガイド再生
+- キーボード操作：矢印キーで視点移動、Enterでモード切替、Escで終了
+- `prefers-reduced-motion`では自動回転を無効化
 
 ---
 
