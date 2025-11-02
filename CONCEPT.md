@@ -539,6 +539,116 @@
 
 ---
 
+## 📝 ファイル命名規則
+
+### 動画ファイル
+**場所**: `/public/videos/shorts/`
+
+**命名規則**:
+- IDベース: `video-001.mp4`, `video-002.mp4`, ...
+- または説明的: `vision-experience.mp4`, `sfc-campus-tour.mp4`
+- **推奨**: IDベース（管理しやすい）
+
+**サムネイル**: `/public/images/videos/`
+- `video-001-thumb.jpg`, `vision-experience-thumb.jpg`
+
+**例**:
+```
+/public/videos/shorts/video-001.mp4
+/public/images/videos/video-001-thumb.jpg
+```
+
+### ニュース記事画像
+**場所**: `/public/images/news/`
+
+#### 1. サムネイル画像（OGPの代わり）
+**命名規則**: `{slug}.jpg` または `{slug}.png`
+
+**使用方法**:
+- `ogpImageFetch: false` にする
+- `image: "/images/news/2025-nikkan-spa.jpg"` を指定
+
+**例**:
+```json
+{
+  "slug": "2025-nikkan-spa",
+  "ogpImageFetch": false,
+  "image": "/images/news/2025-nikkan-spa.jpg",
+  "imageAlt": "日刊SPA!の記事"
+}
+```
+
+**ファイル配置**:
+```
+/public/images/news/2025-nikkan-spa.jpg
+/public/images/news/2025-07-jcast-lawson.jpg
+```
+
+#### 2. 記事内の画像（複数）
+**命名規則**: `{slug}-{連番}.jpg`
+
+**使用方法**:
+- `articleImages` 配列に追加
+
+**例**:
+```json
+{
+  "slug": "2025-nikkan-spa",
+  "articleImages": [
+    {
+      "src": "/images/news/2025-nikkan-spa-01.jpg",
+      "alt": "インタビューの様子",
+      "caption": "日刊SPA!編集部でのインタビュー",
+      "audioNarration": "/audio/images/news-nikkan-spa-01.mp3"
+    },
+    {
+      "src": "/images/news/2025-nikkan-spa-02.jpg",
+      "alt": "記事の誌面",
+      "caption": "掲載された誌面",
+      "audioNarration": "/audio/images/news-nikkan-spa-02.mp3"
+    }
+  ]
+}
+```
+
+**ファイル配置**:
+```
+/public/images/news/2025-nikkan-spa-01.jpg
+/public/images/news/2025-nikkan-spa-02.jpg
+/public/images/news/2025-nikkan-spa-03.jpg
+```
+
+### ストーリー画像
+**場所**: `/public/images/story/`
+
+**命名規則**: `{year}-{description}.jpg`
+
+**例**:
+```
+/public/images/story/2006-baby.jpg
+/public/images/story/2018-blind-school.jpg
+/public/images/story/2023-sfc-campus.jpg
+```
+
+### 音声ファイル
+**場所**: `/public/audio/{category}/`
+
+**命名規則**:
+- ナレーション: `story-{year}.mp3`, `hero-intro.mp3`
+- 画像説明: `news-{slug}.mp3`, `story-{year}-{description}.mp3`
+- ボタン: `see-story.mp3`, `skip-intro.mp3`
+- セクション: `video-account-intro.mp3`, `daily-account-intro.mp3`
+
+**例**:
+```
+/public/audio/narration/story-2006.mp3
+/public/audio/images/news-nikkan-spa.mp3
+/public/audio/buttons/see-story.mp3
+/public/audio/sections/video-account-intro.mp3
+```
+
+---
+
 ## 📁 データスキーマ（案）
 
 ### videos.json
@@ -602,7 +712,9 @@
     "ogpImageFetch": true,
     "image": null,
     "imageAlt": "日刊SPA!の記事",
-    "audioNarration": "/audio/images/news-nikkan-spa.mp3"
+    "audioNarration": "/audio/images/news-nikkan-spa.mp3",
+    "articleImages": [],
+    "notes": ""
   },
   {
     "slug": "2025-07-jcast-lawson",
@@ -619,16 +731,30 @@
       "url": "https://x.com/suzuki_gashin/status/1945395481015898261?s=61",
       "tweetId": "1945395481015898261"
     },
+    "articleImages": [],
     "notes": "記事内の「シュライン」は旧ハンドルネーム。現在は「鈴木我信」(@Suzuki_Gashin)"
   }
 ]
 ```
 
-**OGP画像の自動取得**:
+**サムネイル画像の取得方法**:
+
+**1. OGP自動取得**（推奨）
 - `ogpImageFetch: true` の場合、`externalUrl` から OGP 画像を自動取得
 - サーバーサイドで fetch して `og:image` メタタグを解析
 - 取得した画像を Next.js Image Optimizer 経由で配信
 - フォールバック：取得失敗時はデフォルト画像またはテキストのみ表示
+
+**2. 独自画像を使用**
+- `ogpImageFetch: false` にする
+- `image: "/images/news/{slug}.jpg"` を指定
+- `/public/images/news/` に画像ファイルを配置
+- 命名規則: `{slug}.jpg` または `{slug}.png`
+
+**記事内の画像**:
+- `articleImages` 配列に画像を追加
+- 各画像にキャプションと音声ナレーションを設定可能
+- 命名規則: `{slug}-{連番}.jpg`（例: `2025-nikkan-spa-01.jpg`）
 
 **実装例**:
 ```typescript
