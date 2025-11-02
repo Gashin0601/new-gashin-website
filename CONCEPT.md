@@ -657,7 +657,6 @@
   {
     "id": "video-001",
     "title": "視覚障害者の見え方体験",
-    "description": "180度パノラマで視覚障害者の視界を体験できます",
     "videoSrc": "/videos/shorts/vision-experience.mp4",
     "thumbnail": "/images/videos/vision-experience-thumb.jpg",
     "duration": 30,
@@ -674,7 +673,6 @@
   {
     "id": "video-002",
     "title": "慶應SFCキャンパスツアー",
-    "description": "視覚障害者が歩くSFCキャンパスの日常",
     "videoSrc": "/videos/shorts/sfc-campus-tour.mp4",
     "thumbnail": "/images/videos/sfc-campus-thumb.jpg",
     "duration": 45,
@@ -729,7 +727,8 @@
     "audioNarration": "/audio/images/news-jcast-lawson.mp3",
     "embedTweet": {
       "url": "https://x.com/suzuki_gashin/status/1945395481015898261?s=61",
-      "tweetId": "1945395481015898261"
+      "tweetId": "1945395481015898261",
+      "hideConversation": false
     },
     "articleImages": [],
     "notes": "記事内の「シュライン」は旧ハンドルネーム。現在は「鈴木我信」(@Suzuki_Gashin)"
@@ -783,11 +782,35 @@ export async function GET(request: Request) {
 ```
 
 **X埋め込み**:
-```typescript
-// react-tweet または @twitterdev/twitter-tweet-embed を使用
-import { Tweet } from 'react-tweet';
 
-<Tweet id={embedTweet.tweetId} />
+**会話（リプライ）の表示制御**:
+- `hideConversation: false` — 会話を表示（デフォルト）
+  - リプライの場合、親ポストも一緒に表示される
+- `hideConversation: true` — 会話を非表示
+  - リプライの場合でも、そのポストだけを表示
+
+**実装方法**:
+Twitter Widgets APIを直接使用（react-tweetは会話制御をサポートしていないため）
+
+```typescript
+// Twitter Widgets APIを使用
+useEffect(() => {
+  const script = document.createElement('script');
+  script.src = 'https://platform.twitter.com/widgets.js';
+  script.async = true;
+  document.body.appendChild(script);
+
+  script.onload = () => {
+    window.twttr.widgets.createTweet(
+      embedTweet.tweetId,
+      document.getElementById('tweet-container'),
+      {
+        conversation: embedTweet.hideConversation ? 'none' : 'all',
+        theme: 'light' // or 'dark'
+      }
+    );
+  };
+}, [embedTweet]);
 ```
 
 ### socials.json

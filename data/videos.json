@@ -2,7 +2,6 @@
   {
     "id": "video-001",
     "title": "サンプル動画",
-    "description": "説明文",
     "videoSrc": "/videos/shorts/sample.mp4",
     "thumbnail": "/images/videos/sample-thumb.jpg",
     "duration": 30,

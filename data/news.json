@@ -26,7 +26,8 @@
     "audioNarration": "/audio/images/news-jcast-lawson.mp3",
     "embedTweet": {
       "url": "https://x.com/suzuki_gashin/status/1945395481015898261?s=61",
-      "tweetId": "1945395481015898261"
+      "tweetId": "1945395481015898261",
+      "hideConversation": false
     },
     "articleImages": [],
     "notes": "記事内の「シュライン」は旧ハンドルネーム。現在は「鈴木我信」(@Suzuki_Gashin)"
