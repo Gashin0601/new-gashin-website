@@ -56,10 +56,16 @@
 ### ページ構成
 - **トップページ（`/`）** — 白テーマ
   - ヒーローセクション（写真・キャッチフレーズ・プロフィール）
-  - ショート動画セクション（自動カルーセル、すりガラス演出）
+  - **動画投稿アカウント** — Gashin / 弱視慶應生（@gashin_lv）
+    - アカウント説明
+    - SNSアイコン（YouTube, TikTok, Instagram, X）
+    - ショート動画セクション（自動カルーセル、すりガラス演出）
   - メディア出演歴（カルーセル、すりガラス演出）
   - 開発アプリ
-  - SNSリンク
+  - **日常アカウント** — 独立セクション
+    - アカウント説明
+    - SNSアイコン（X, Instagram, Facebook）
+    - Instagram投稿埋め込み（サンプル投稿）
 
 - **ストーリーページ（`/story`）** — 黒テーマ・シネマティック導入
   - **オープニング動画**：慶應SFCキャンパスを歩く鮮やかな映像
@@ -162,13 +168,17 @@
   - getUserMedia API（カメラアクセス、180度撮影）
   - Canvas API（視覚フィルター：左目盲・視野狭窄）
   - リアルタイム切り替え機能
-- 動画：
+- **動画**：
   - **ホスト動画**：`<video>`タグ + Web API（`currentTime`, `ontimeupdate`）で精密制御
   - YouTube：**no-cookie** 埋め込み（遅延読み込み）
-- 動画同期演出：
+- **動画同期演出**：
   - JavaScript `requestAnimationFrame`でフィルター効果とタイムラインを同期
   - CSS `filter`プロパティのスムーズな遷移
   - カスタムオーバーレイアニメーション（目が閉じる演出など）
+- **SNS埋め込み**：
+  - X（Twitter）：`react-tweet` または `@twitterdev/twitter-tweet-embed`
+  - Instagram：Instagram Embed API または `react-instagram-embed`
+  - 遅延読み込み（IntersectionObserver）
 
 ### データ管理
 - **ローカルJSON**（`videos.json`, `news.json`, `socials.json`, `story.json`）
@@ -406,7 +416,72 @@
 - 自動切り替え：5秒間隔
 - すりガラス効果：CSS `backdrop-filter`
 
-### 4. ストーリーページ「大根型」タイムライン
+### 4. SNSアカウントセクション
+
+#### 4-1. 動画投稿アカウント
+
+**レイアウト**
+```
+┌──────────────────────────────────┐
+│  Gashin / 弱視慶應生             │
+│  @gashin_lv                      │
+│                                  │
+│  視覚障害について、日々の学び、  │
+│  そして慶應SFCでの挑戦を動画で   │
+│  発信しています。                │
+│                                  │
+│  [YouTube] [TikTok] [Instagram] [X]│
+│                                  │
+│  [ショート動画カルーセル]        │
+└──────────────────────────────────┘
+```
+
+**機能仕様**
+- **アカウント名**: Gashin / 弱視慶應生
+- **ハンドル**: @gashin_lv
+- **説明文**: 視覚障害、学び、慶應SFCでの挑戦を動画で発信
+- **SNSリンク**:
+  - YouTube: https://youtube.com/@gashin_lv
+  - TikTok: https://www.tiktok.com/@gashin_lv
+  - Instagram: https://instagram.com/gashin_lv
+  - X: https://x.com/gashin_lv
+- **下部**: ショート動画カルーセル（すりガラス演出、10秒自動切り替え）
+
+#### 4-2. 日常アカウント
+
+**レイアウト**
+```
+┌──────────────────────────────────┐
+│  鈴木我信 / Gashin Suzuki        │
+│  @suzuki_gashin                  │
+│                                  │
+│  日常の出来事や考えを綴っています│
+│  気軽にフォローしてください。    │
+│                                  │
+│  [X] [Instagram] [Facebook]      │
+│                                  │
+│  [Instagram投稿埋め込み]         │
+└──────────────────────────────────┘
+```
+
+**機能仕様**
+- **アカウント名**: 鈴木我信 / Gashin Suzuki
+- **ハンドル**: @suzuki_gashin
+- **説明文**: 日常の出来事や考えを綴っています
+- **SNSリンク**:
+  - X: https://x.com/suzuki_gashin
+  - Instagram: https://instagram.com/suzuki_gashin
+  - Facebook: https://facebook.com/suzuki.gashin
+- **Instagram埋め込み**: サンプル投稿を1件表示
+  - `react-instagram-embed` または Instagram oEmbed API使用
+  - 投稿URLから自動埋め込み
+
+**技術実装**
+- Instagram埋め込み: Instagram Embed API
+- SNSアイコン: Lucideアイコン + ブランドカラー
+- レスポンシブ対応: モバイルでアイコンを縦並び
+
+### 5. ストーリーページ「大根型」タイムライン
 
 > **詳細な章構成**: [`STORY_DRAFT.md`](./STORY_DRAFT.md) を参照
 
@@ -592,12 +667,33 @@ import { Tweet } from 'react-tweet';
 ### socials.json
 ```json
 {
-  "youtube": "https://youtube.com/@gashin",
-  "tiktok": "https://www.tiktok.com/@gashin",
-  "x": "https://x.com/gashin_lv",
-  "instagram": "https://instagram.com/gashin",
-  "threads": "https://www.threads.net/@gashin_lv",
-  "bluesky": "https://bsky.app/profile/gashin.example"
+  "videoAccount": {
+    "name": "Gashin / 弱視慶應生",
+    "handle": "@gashin_lv",
+    "description": "視覚障害について、日々の学び、そして慶應SFCでの挑戦を動画で発信しています。",
+    "platforms": {
+      "youtube": "https://youtube.com/@gashin_lv",
+      "tiktok": "https://www.tiktok.com/@gashin_lv",
+      "instagram": "https://instagram.com/gashin_lv",
+      "x": "https://x.com/gashin_lv"
+    },
+    "audioNarration": "/audio/sections/video-account-intro.mp3"
+  },
+  "dailyAccount": {
+    "name": "鈴木我信 / Gashin Suzuki",
+    "handle": "@suzuki_gashin",
+    "description": "日常の出来事や考えを綴っています。気軽にフォローしてください。",
+    "platforms": {
+      "x": "https://x.com/suzuki_gashin",
+      "instagram": "https://instagram.com/suzuki_gashin",
+      "facebook": "https://facebook.com/suzuki.gashin"
+    },
+    "instagramEmbed": {
+      "postUrl": "https://www.instagram.com/p/xxxxx/",
+      "postId": "xxxxx"
+    },
+    "audioNarration": "/audio/sections/daily-account-intro.mp3"
+  }
 }
 ```
 
@@ -697,10 +793,10 @@ import { Tweet } from 'react-tweet';
 ```
 default-src 'self';
 img-src 'self' data: https:;
-script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube-nocookie.com;
+script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube-nocookie.com https://platform.instagram.com https://connect.facebook.net;
 style-src 'self' 'unsafe-inline';
-frame-src https://www.youtube-nocookie.com;
-connect-src 'self' https://vitals.vercel-insights.com;
+frame-src https://www.youtube-nocookie.com https://www.instagram.com https://platform.instagram.com https://www.facebook.com;
+connect-src 'self' https://vitals.vercel-insights.com https://www.instagram.com;
 ```
 
 ### ヘッダー
@@ -724,6 +820,15 @@ connect-src 'self' https://vitals.vercel-insights.com;
   - [ ] すりガラスカルーセル（4件以上の場合、5秒間隔）
   - [ ] 3件以下の場合は全表示
   - [ ] 「さらに見る」ボタンで`/news`へ遷移
+- [ ] **SNSアカウントセクション実装**
+  - [ ] 動画投稿アカウント（@gashin_lv）
+    - [ ] アカウント名・ハンドル・説明文表示
+    - [ ] SNSアイコン（YouTube, TikTok, Instagram, X）とリンク
+    - [ ] ショート動画カルーセルとの連携
+  - [ ] 日常アカウント（@suzuki_gashin）
+    - [ ] アカウント名・ハンドル・説明文表示
+    - [ ] SNSアイコン（X, Instagram, Facebook）とリンク
+    - [ ] Instagram投稿埋め込み（1件）
 - [ ] **動的ページ生成実装**
   - [ ] `/videos` — `videos.json`から全動画一覧を生成
   - [ ] `/news` — `news.json`から全ニュース一覧を生成
