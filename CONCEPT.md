@@ -657,7 +657,6 @@
   {
     "id": "video-001",
     "title": "視覚障害者の見え方体験",
-    "description": "180度パノラマで視覚障害者の視界を体験できます",
     "videoSrc": "/videos/shorts/vision-experience.mp4",
     "thumbnail": "/images/videos/vision-experience-thumb.jpg",
     "duration": 30,
@@ -674,7 +673,6 @@
   {
     "id": "video-002",
     "title": "慶應SFCキャンパスツアー",
-    "description": "視覚障害者が歩くSFCキャンパスの日常",
     "videoSrc": "/videos/shorts/sfc-campus-tour.mp4",
     "thumbnail": "/images/videos/sfc-campus-thumb.jpg",
     "duration": 45,
