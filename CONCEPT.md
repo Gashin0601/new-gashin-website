@@ -687,7 +687,7 @@ import { Tweet } from 'react-tweet';
 7. 自動デプロイ
 
 ### ドメイン
-- 例：`gashin.jp`（apex + www）
+- `gashin.me`（apex + www）
 
 ---
 
