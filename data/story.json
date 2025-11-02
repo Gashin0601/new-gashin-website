@@ -1,0 +1,29 @@
+{
+  "opening": {
+    "videoSrc": "/videos/story-opening-sfc.mp4",
+    "duration": 6,
+    "effects": [
+      {
+        "time": 0,
+        "filter": "grayscale(0%)",
+        "description": "鮮やかなSFCキャンパス"
+      },
+      {
+        "time": 5,
+        "filter": "grayscale(100%)",
+        "description": "徐々にグレースケール化"
+      },
+      {
+        "time": 5.5,
+        "overlay": "eye-closing",
+        "description": "目が閉じる演出"
+      },
+      {
+        "time": 6,
+        "fadeOut": true,
+        "description": "真っ暗な画面へ"
+      }
+    ]
+  },
+  "timeline": []
+}

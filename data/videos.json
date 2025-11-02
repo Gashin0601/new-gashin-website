@@ -1,0 +1,19 @@
+[
+  {
+    "id": "video-001",
+    "title": "サンプル動画",
+    "description": "説明文",
+    "videoSrc": "/videos/shorts/sample.mp4",
+    "thumbnail": "/images/videos/sample-thumb.jpg",
+    "duration": 30,
+    "aspectRatio": "9:16",
+    "date": "2025-XX-XX",
+    "socialLinks": {
+      "youtube": "https://youtube.com/shorts/xxxxx",
+      "tiktok": "https://www.tiktok.com/@gashin_lv/video/xxxxx",
+      "instagram": "https://www.instagram.com/reel/xxxxx",
+      "x": "https://x.com/gashin_lv/status/xxxxx"
+    },
+    "audioNarration": "/audio/videos/video-001-narration.mp3"
+  }
+]
