@@ -56,9 +56,9 @@
 ### ページ構成
 - **トップページ（`/`）** — 白テーマ
   - ヒーローセクション（写真・キャッチフレーズ・プロフィール）
-  - メディア出演歴
+  - ショート動画セクション（自動カルーセル、すりガラス演出）
+  - メディア出演歴（カルーセル、すりガラス演出）
   - 開発アプリ
-  - YouTube投稿
   - SNSリンク
 
 - **ストーリーページ（`/story`）** — 黒テーマ・シネマティック導入
@@ -71,7 +71,16 @@
   - PCではスマホ閲覧を促すQRコード表示
   - **詳細**: [`STORY_DRAFT.md`](./STORY_DRAFT.md) を参照
 
-- **ニュース詳細（`/news/[slug]`）**
+- **動画一覧（`/videos`）** — 動的生成
+  - すべてのショート動画を表示
+  - グリッドレイアウト
+  - 各動画からSNSリンクへアクセス可能
+
+- **ニュース一覧（`/news`）** — 動的生成
+  - すべてのメディア掲載記事を表示
+  - 時系列で並び替え
+
+- **ニュース詳細（`/news/[slug]`）** — 動的生成
   - メディア掲載記事の詳細
 
 ### グローバルナビゲーション
@@ -162,7 +171,13 @@
   - カスタムオーバーレイアニメーション（目が閉じる演出など）
 
 ### データ管理
-- ローカルJSON（`news.json`, `socials.json`, `story.json`）
+- **ローカルJSON**（`videos.json`, `news.json`, `socials.json`, `story.json`）
+- **動的ページ生成**：
+  - `/videos` — `videos.json`から全動画を動的生成
+  - `/news` — `news.json`から全ニュース記事を動的生成
+  - `/news/[slug]` — 各記事の詳細ページを動的生成
+  - Next.js `generateStaticParams` を使用したSSG（Static Site Generation）
+  - ビルド時に全ページを事前生成、高速配信
 - 将来的にCMSへ移行可能な抽象化設計
 
 ### SEO・メタデータ
@@ -306,7 +321,53 @@
 └─────────────────────────────┘
 ```
 
-### 2. ニュースセクション（統一レイアウト）
+### 2. ショート動画セクション（すりガラスカルーセル）
+
+**レイアウト**
+```
+┌──────────────────────────────────┐
+│     [すりガラス]                  │
+│        前の動画                    │
+│     ┌──────────────┐              │
+│     │   現在の動画  │              │
+│     │   (音付き再生) │              │
+│     │                │              │
+│     │   [タップで    │              │
+│     │    SNSアイコン表示] │         │
+│     └──────────────┘              │
+│        次の動画                    │
+│     [すりガラス]                  │
+└──────────────────────────────────┘
+```
+
+**機能仕様**
+- **動画形式**：ショート動画（縦長、9:16推奨）
+- **動画保存場所**：`/public/videos/shorts/` にローカル保存
+- **再生方式**：音付き自動再生（`autoplay muted={false}`）
+- **自動切り替え**：10秒おきに自動で次の動画にスライド
+- **すりガラス演出**：
+  - 現在の動画の左側に前の動画をすりガラス効果で表示
+  - 現在の動画の右側に次の動画をすりガラス効果で表示
+  - CSS `backdrop-filter: blur(20px) saturate(120%)`
+  - 透明度：`opacity: 0.4`
+  - スケール：`scale(0.8)`
+  - 左右の動画は半分だけ見える演出
+- **SNSリンク機能**：
+  - 動画をタップすると、SNSアイコン（YouTube, TikTok, Instagram, X）がオーバーレイ表示
+  - 各アイコンをタップすると該当SNSの動画ページに遷移
+  - アイコンは円形ボタン、適切なスペーシング
+  - 再度タップまたは外側をタップで閉じる
+- **「もっと見る」ボタン**：`/videos` へ遷移
+
+**技術実装**
+- カルーセル：SwiperまたはEmbla Carousel
+- 自動再生タイマー：`setTimeout` + `setInterval`（10秒間隔）
+- 動画：`<video>` タグ + Web Video API
+- アクセシビリティ：一時停止ボタン、音量コントロール
+
+### 3. ニュースセクション（すりガラスカルーセル）
+
+**レイアウト**
 ```
 ┌──────────────────────────────────────┐
 │ [OGP画像] タイトル                    │
@@ -314,7 +375,20 @@
 │          要約テキスト...              │
 └──────────────────────────────────────┘
 ```
-※ 左右交互ではなく、統一配置で一覧性を重視
+
+**機能仕様**
+- **表示ルール**：
+  - 記事が3件以下：すべて表示（カルーセルなし）
+  - 記事が4件以上：すりガラスカルーセルで自動切り替え
+- **カルーセル演出**（4件以上の場合）：
+  - 現在の記事を中央に表示
+  - 前後の記事をすりガラス効果で薄く表示
+  - CSS `backdrop-filter: blur(10px) saturate(110%)`
+  - 透明度：`opacity: 0.3`
+  - スケール：`scale(0.95)`
+  - 自動切り替え：5秒間隔
+- **「さらに見る」ボタン**：`/news` へ遷移
+- **レイアウト**：左右交互ではなく、統一配置で一覧性を重視
 
 **画像取得方法**:
 - OGP画像自動取得：記事URLから`og:image`を取得
@@ -327,7 +401,12 @@
 - X（Twitter）埋め込み（該当記事）
 - 補足情報（旧ハンドルネームの説明など）
 
-### 3. ストーリーページ「大根型」タイムライン
+**技術実装**
+- カルーセル：SwiperまたはEmbla Carousel
+- 自動切り替え：5秒間隔
+- すりガラス効果：CSS `backdrop-filter`
+
+### 4. ストーリーページ「大根型」タイムライン
 
 > **詳細な章構成**: [`STORY_DRAFT.md`](./STORY_DRAFT.md) を参照
 
@@ -386,6 +465,54 @@
 ---
 
 ## 📁 データスキーマ（案）
+
+### videos.json
+```json
+[
+  {
+    "id": "video-001",
+    "title": "視覚障害者の見え方体験",
+    "description": "180度パノラマで視覚障害者の視界を体験できます",
+    "videoSrc": "/videos/shorts/vision-experience.mp4",
+    "thumbnail": "/images/videos/vision-experience-thumb.jpg",
+    "duration": 30,
+    "aspectRatio": "9:16",
+    "date": "2025-XX-XX",
+    "socialLinks": {
+      "youtube": "https://youtube.com/shorts/xxxxx",
+      "tiktok": "https://www.tiktok.com/@gashin/video/xxxxx",
+      "instagram": "https://www.instagram.com/reel/xxxxx",
+      "x": "https://x.com/suzuki_gashin/status/xxxxx"
+    },
+    "audioNarration": "/audio/videos/video-001-narration.mp3"
+  },
+  {
+    "id": "video-002",
+    "title": "慶應SFCキャンパスツアー",
+    "description": "視覚障害者が歩くSFCキャンパスの日常",
+    "videoSrc": "/videos/shorts/sfc-campus-tour.mp4",
+    "thumbnail": "/images/videos/sfc-campus-thumb.jpg",
+    "duration": 45,
+    "aspectRatio": "9:16",
+    "date": "2025-XX-XX",
+    "socialLinks": {
+      "youtube": "https://youtube.com/shorts/xxxxx",
+      "tiktok": "https://www.tiktok.com/@gashin/video/xxxxx",
+      "instagram": "https://www.instagram.com/reel/xxxxx",
+      "x": "https://x.com/suzuki_gashin/status/xxxxx"
+    },
+    "audioNarration": "/audio/videos/video-002-narration.mp3"
+  }
+]
+```
+
+**動画セクション仕様**
+- **動画形式**：MP4、H.264/H.265コーデック推奨
+- **動画サイズ**：縦長（9:16）、最適サイズ 1080x1920px
+- **ファイルサイズ**：< 10MB/動画（圧縮推奨）
+- **音声**：AAC、128kbps推奨
+- **SNSリンク**：各プラットフォームへの直接リンク
+- **自動再生**：音付き、10秒間隔で自動切り替え
 
 ### news.json
 ```json
@@ -551,12 +678,13 @@ import { Tweet } from 'react-tweet';
 - **Vercel** Preview（プルリクエスト）
 
 ### 更新フロー
-1. JSONファイルを編集（`news.json`, `socials.json`, `story.json`）
-2. 画像を`/public/images/`に配置
-3. 音声ナレーションを録音し、`/public/audio/`に配置
-4. JSONファイルに音声パスを追加
-5. gitコミット & プッシュ
-6. 自動デプロイ
+1. JSONファイルを編集（`videos.json`, `news.json`, `socials.json`, `story.json`）
+2. 動画を`/public/videos/shorts/`に配置（ショート動画の場合）
+3. 画像を`/public/images/`に配置
+4. 音声ナレーションを録音し、`/public/audio/`に配置
+5. JSONファイルに動画・音声パスを追加
+6. gitコミット & プッシュ
+7. 自動デプロイ
 
 ### ドメイン
 - 例：`gashin.jp`（apex + www）
@@ -585,7 +713,22 @@ connect-src 'self' https://vitals.vercel-insights.com;
 
 - [ ] ローディング画面（白黒ロゴ、スキップ可能）
 - [ ] ヒーローセクション（白黒→カラー演出、2秒）
-- [ ] `/`、`/story`、`/news/[slug]`が仕様通り動作
+- [ ] `/`、`/story`、`/videos`、`/news`、`/news/[slug]`が仕様通り動作
+- [ ] **ショート動画セクション実装**
+  - [ ] すりガラスカルーセル（前後の動画を薄く表示）
+  - [ ] 音付き自動再生（10秒間隔で自動切り替え）
+  - [ ] SNSアイコンオーバーレイ（YouTube, TikTok, Instagram, X）
+  - [ ] 各SNSリンクへの遷移機能
+  - [ ] 「もっと見る」ボタンで`/videos`へ遷移
+- [ ] **ニュースセクション実装**
+  - [ ] すりガラスカルーセル（4件以上の場合、5秒間隔）
+  - [ ] 3件以下の場合は全表示
+  - [ ] 「さらに見る」ボタンで`/news`へ遷移
+- [ ] **動的ページ生成実装**
+  - [ ] `/videos` — `videos.json`から全動画一覧を生成
+  - [ ] `/news` — `news.json`から全ニュース一覧を生成
+  - [ ] `/news/[slug]` — 各記事詳細ページを動的生成
+  - [ ] Next.js `generateStaticParams`でSSG
 - [ ] ストーリーオープニング動画演出（カラー→グレー→目が閉じる→暗転）
 - [ ] 全7章のストーリー実装（2006年誕生 → 2024年YouTube開始）
 - [ ] 動画とコードの精密な同期（filter効果、タイムライン制御）
@@ -640,6 +783,12 @@ connect-src 'self' https://vitals.vercel-insights.com;
 
 3. **コンテンツ準備**
    - ロゴデザイン（丸いミニマル白黒ロゴ）
+   - **ショート動画の撮影・編集**：
+     - 縦長フォーマット（9:16、1080x1920px推奨）
+     - 各動画30-60秒程度
+     - 音声付き
+     - 各SNS（YouTube Shorts, TikTok, Instagram Reels, X）へアップロード
+     - ローカル保存用（< 10MB/動画）
    - ストーリーオープニング動画（SFCキャンパス歩行、5秒）
    - 「目が閉じる」アニメーション素材
    - **音声ナレーション録音**：
