@@ -40,5 +40,5 @@ next-env.d.ts
 *~
 
 # Media files (too large for git)
-/public/videos/shorts/*.mp4
+# Note: *.mp4 files are now tracked with Git LFS
 /public/audio/**/*.mp3
