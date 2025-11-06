@@ -549,13 +549,14 @@
 - または説明的: `vision-experience.mp4`, `sfc-campus-tour.mp4`
 - **推奨**: IDベース（管理しやすい）
 
-**サムネイル**: `/public/images/videos/`
-- `video-001-thumb.jpg`, `vision-experience-thumb.jpg`
+**サムネイル**: 不要
+- 動画の最初のフレームが自動表示されます
+- `<video>` タグの preload="metadata" を使用
 
 **例**:
 ```
 /public/videos/shorts/video-001.mp4
-/public/images/videos/video-001-thumb.jpg
+/public/videos/shorts/video-002.mp4
 ```
 
 ### ニュース記事画像
@@ -658,7 +659,6 @@
     "id": "video-001",
     "title": "視覚障害者の見え方体験",
     "videoSrc": "/videos/shorts/vision-experience.mp4",
-    "thumbnail": "/images/videos/vision-experience-thumb.jpg",
     "duration": 30,
     "aspectRatio": "9:16",
     "date": "2025-XX-XX",
@@ -674,7 +674,6 @@
     "id": "video-002",
     "title": "慶應SFCキャンパスツアー",
     "videoSrc": "/videos/shorts/sfc-campus-tour.mp4",
-    "thumbnail": "/images/videos/sfc-campus-thumb.jpg",
     "duration": 45,
     "aspectRatio": "9:16",
     "date": "2025-XX-XX",
@@ -694,6 +693,9 @@
 - **動画サイズ**：縦長（9:16）、最適サイズ 1080x1920px
 - **ファイルサイズ**：< 10MB/動画（圧縮推奨）
 - **音声**：AAC、128kbps推奨
+- **サムネイル**：別途画像不要、動画の最初のフレームを自動表示
+  - `<video>` タグの preload="metadata" を使用
+  - poster属性は指定しない
 - **SNSリンク**：各プラットフォームへの直接リンク
 - **自動再生**：音付き、10秒間隔で自動切り替え
 

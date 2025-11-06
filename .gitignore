@@ -38,3 +38,7 @@ next-env.d.ts
 *.swp
 *.swo
 *~
+
+# Media files (too large for git)
+/public/videos/shorts/*.mp4
+/public/audio/**/*.mp3

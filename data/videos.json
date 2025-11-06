@@ -3,7 +3,6 @@
     "id": "video-001",
     "title": "サンプル動画",
     "videoSrc": "/videos/shorts/sample.mp4",
-    "thumbnail": "/images/videos/sample-thumb.jpg",
     "duration": 30,
     "aspectRatio": "9:16",
     "date": "2025-XX-XX",
