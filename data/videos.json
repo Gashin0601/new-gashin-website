@@ -1,8 +1,23 @@
 [
   {
     "id": "video-001",
-    "title": "サンプル動画",
-    "videoSrc": "/videos/shorts/sample.mp4",
+    "title": "弱視慶應生、炎上しました。",
+    "videoSrc": "/videos/shorts/video-001.mp4",
+    "duration": 30,
+    "aspectRatio": "9:16",
+    "date": "2025-XX-XX",
+    "socialLinks": {
+      "youtube": "https://youtube.com/shorts/3OeEtv1lnjQ?si=kzpnxOmzDZwu2ynS",
+      "tiktok": "https://www.tiktok.com/@gashin_lv/video/xxxxx",
+      "instagram": "https://www.instagram.com/reel/DNu1LJx5CFM/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "x": "https://x.com/gashin_lv/status/1959541190635950431/video/1"
+    },
+    "audioNarration": "/audio/videos/video-001-narration.mp3"
+  },
+  {
+    "id": "video-002",
+    "title": "サンプル動画2",
+    "videoSrc": "/videos/shorts/video-002.mp4",
     "duration": 30,
     "aspectRatio": "9:16",
     "date": "2025-XX-XX",
@@ -12,6 +27,21 @@
       "instagram": "https://www.instagram.com/reel/xxxxx",
       "x": "https://x.com/gashin_lv/status/xxxxx"
     },
-    "audioNarration": "/audio/videos/video-001-narration.mp3"
+    "audioNarration": "/audio/videos/video-002-narration.mp3"
+  },
+  {
+    "id": "video-003",
+    "title": "サンプル動画3",
+    "videoSrc": "/videos/shorts/video-003.mp4",
+    "duration": 30,
+    "aspectRatio": "9:16",
+    "date": "2025-XX-XX",
+    "socialLinks": {
+      "youtube": "https://youtube.com/shorts/xxxxx",
+      "tiktok": "https://www.tiktok.com/@gashin_lv/video/xxxxx",
+      "instagram": "https://www.instagram.com/reel/xxxxx",
+      "x": "https://x.com/gashin_lv/status/xxxxx"
+    },
+    "audioNarration": "/audio/videos/video-003-narration.mp3"
   }
 ]
