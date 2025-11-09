@@ -2,6 +2,7 @@
   "videoAccount": {
     "name": "Gashin / 弱視慶應生",
     "handle": "@gashin_lv",
+    "profileImage": "/images/profile/gashin-lv.jpg",
     "description": "視覚障害について、日々の学び、そして慶應SFCでの挑戦を動画で発信しています。",
     "platforms": {
       "youtube": "https://youtube.com/@gashin_lv",
@@ -14,6 +15,7 @@
   "dailyAccount": {
     "name": "鈴木我信 / Gashin Suzuki",
     "handle": "@suzuki_gashin",
+    "profileImage": "/images/profile/suzuki-gashin.jpg",
     "description": "日常の出来事や考えを綴っています。気軽にフォローしてください。",
     "platforms": {
       "x": "https://x.com/suzuki_gashin",
