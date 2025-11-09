@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 export type Theme = 'light' | 'dark' | 'system';
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>('system');
+  const [theme, setTheme] = useState<Theme>('light'); // Default to light
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -14,6 +14,9 @@ export function useTheme() {
     const savedTheme = localStorage.getItem('theme') as Theme | null;
     if (savedTheme) {
       setTheme(savedTheme);
+    } else {
+      // First time: set default to light
+      setTheme('light');
     }
   }, []);
 

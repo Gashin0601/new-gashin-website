@@ -31,29 +31,29 @@ export function SocialAccount({
   instagramEmbed,
 }: SocialAccountProps) {
   return (
-    <div className="bg-[var(--bg-secondary)] rounded-2xl p-8">
+    <div className="bg-[var(--bg-secondary)] rounded-3xl p-10 md:p-12 shadow-sm border border-[var(--border-color)]">
       {/* Header */}
-      <div className="flex items-start gap-4 mb-6">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
         {profileImage && (
           <div className="flex-shrink-0">
             <Image
               src={profileImage}
               alt={`${name}のプロフィール画像`}
-              width={80}
-              height={80}
-              className="rounded-full"
+              width={120}
+              height={120}
+              className="rounded-full shadow-lg ring-2 ring-[var(--border-color)]"
             />
           </div>
         )}
-        <div className="flex-1">
-          <h3 className="text-2xl font-bold mb-1">{name}</h3>
-          <p className="text-[var(--text-secondary)] mb-3">{handle}</p>
-          <p className="text-[var(--text-secondary)] leading-relaxed">{description}</p>
+        <div className="flex-1 text-center md:text-left">
+          <h3 className="text-3xl md:text-4xl font-bold mb-2">{name}</h3>
+          <p className="text-xl text-[var(--text-secondary)] mb-4">{handle}</p>
+          <p className="text-lg text-[var(--text-secondary)] leading-relaxed">{description}</p>
         </div>
       </div>
 
       {/* Social Links */}
-      <div className="flex flex-wrap gap-3 mb-6">
+      <div className="flex flex-wrap justify-center md:justify-start gap-3 mb-8">
         {platforms.youtube && (
           <a
             href={platforms.youtube}
