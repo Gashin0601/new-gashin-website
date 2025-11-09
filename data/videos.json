@@ -16,31 +16,31 @@
   },
   {
     "id": "video-002",
-    "title": "サンプル動画2",
+    "title": "ついに登場！自分そっくりな動画を作れるAI「Sora2」って何？弱視の僕がわかりやすく解説",
     "videoSrc": "/videos/shorts/video-002.mp4",
     "duration": 30,
     "aspectRatio": "9:16",
     "date": "2025-XX-XX",
     "socialLinks": {
-      "youtube": "https://youtube.com/shorts/xxxxx",
-      "tiktok": "https://www.tiktok.com/@gashin_lv/video/xxxxx",
-      "instagram": "https://www.instagram.com/reel/xxxxx",
-      "x": "https://x.com/gashin_lv/status/xxxxx"
+      "youtube": "https://youtube.com/shorts/reOZ4qO9WZM?si=QKHtCx-v_V8_TaWg",
+      "tiktok": "https://www.tiktok.com/@gashin_lv/video/7557691144310738198?is_from_webapp=1&sender_device=pc&web_id=7570208210595300882",
+      "instagram": "https://www.instagram.com/reel/DPbNBfriZFY/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "x": "https://x.com/gashin_lv/status/1974791679468302717/video/1"
     },
     "audioNarration": "/audio/videos/video-002-narration.mp3"
   },
   {
     "id": "video-003",
-    "title": "サンプル動画3",
+    "title": "【大阪万博】視覚障害でも超楽しいバーレーン館を紹介！",
     "videoSrc": "/videos/shorts/video-003.mp4",
     "duration": 30,
     "aspectRatio": "9:16",
     "date": "2025-XX-XX",
     "socialLinks": {
-      "youtube": "https://youtube.com/shorts/xxxxx",
-      "tiktok": "https://www.tiktok.com/@gashin_lv/video/xxxxx",
-      "instagram": "https://www.instagram.com/reel/xxxxx",
-      "x": "https://x.com/gashin_lv/status/xxxxx"
+      "youtube": "https://youtube.com/shorts/TtC8JcTWxaM?si=QpYHzKzjaiDeVzkd",
+      "tiktok": "https://www.tiktok.com/@gashin_lv/video/7560819122343267606?is_from_webapp=1&sender_device=pc&web_id=7570208210595300882",
+      "instagram": "https://www.instagram.com/reel/DPv3VG8Er8e/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "x": "https://x.com/gashin_lv/status/1977698330550604162/video/1"
     },
     "audioNarration": "/audio/videos/video-003-narration.mp3"
   }
