@@ -5,9 +5,9 @@
     "profileImage": "/images/profile/gashin-lv.jpg",
     "description": "視覚障害について、日々の学び、そして慶應SFCでの挑戦を動画で発信しています。",
     "platforms": {
-      "youtube": "https://youtube.com/@gashin_lv",
+      "youtube": "https://www.youtube.com/@gashin_lv",
       "tiktok": "https://www.tiktok.com/@gashin_lv",
-      "instagram": "https://instagram.com/gashin_lv",
+      "instagram": "https://www.instagram.com/gashin_lv/",
       "x": "https://x.com/gashin_lv"
     },
     "audioNarration": "/audio/sections/video-account-intro.mp3"
@@ -18,9 +18,9 @@
     "profileImage": "/images/profile/suzuki-gashin.jpg",
     "description": "日常の出来事や考えを綴っています。気軽にフォローしてください。",
     "platforms": {
-      "x": "https://x.com/suzuki_gashin",
-      "instagram": "https://instagram.com/suzuki_gashin",
-      "facebook": "https://facebook.com/suzuki.gashin"
+      "x": "https://x.com/Suzuki_Gashin",
+      "instagram": "https://www.instagram.com/suzuki_gashin/",
+      "facebook": "https://www.facebook.com/SuzukiGashin/"
     },
     "instagramEmbed": {
       "postUrl": "https://www.instagram.com/p/xxxxx/",
