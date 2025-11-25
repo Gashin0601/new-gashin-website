@@ -116,6 +116,14 @@ function VideoPlayer({ video, isCurrent, poster, isTransitioning }: { video: Vid
         }
     }, [isCurrent, isLoaded, hasError]);
 
+    // Handle mute state changes
+    useEffect(() => {
+        const videoElement = videoRef.current;
+        if (videoElement) {
+            videoElement.muted = isMuted;
+        }
+    }, [isMuted]);
+
     // Helper to extract YouTube ID
     const getYouTubeId = (url: string) => {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
