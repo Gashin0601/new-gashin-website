@@ -46,6 +46,7 @@ export default function Header() {
         const newState = !audioEnabled;
         setAudioEnabled(newState);
         localStorage.setItem("audioEnabled", String(newState));
+        window.dispatchEvent(new CustomEvent("audioStateChange", { detail: { enabled: newState } }));
     };
 
     return (
