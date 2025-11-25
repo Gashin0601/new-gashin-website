@@ -12,8 +12,8 @@ export default function DailyAccount() {
                 <div className="text-center mb-12 sm:mb-14 md:mb-16 space-y-4 sm:space-y-6">
                     <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-full overflow-hidden shadow-xl border-2 border-white/10">
                         <Image
-                            src="/images/profile/gashin_lv.jpeg"
-                            alt="Gashin"
+                            src="/images/profile/suzuki_gashin.jpeg"
+                            alt="鈴木我信"
                             fill
                             className="object-cover"
                         />
