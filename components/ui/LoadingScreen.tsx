@@ -15,11 +15,11 @@ export default function LoadingScreen() {
       return;
     }
 
-    // Simulate loading time (e.g., 2.5 seconds)
+    // Simulate loading time (e.g., 3.5 seconds)
     const timer = setTimeout(() => {
       setIsLoading(false);
       sessionStorage.setItem("hasLoaded", "true");
-    }, 2500);
+    }, 3500);
 
     return () => clearTimeout(timer);
   }, []);
