@@ -53,8 +53,8 @@ export default function Header() {
             {/* Compact Header Bar */}
             <div className="flex items-center justify-between p-3 sm:p-4 md:p-6">
                 {/* Logo */}
-                <Link href="/" className="mix-blend-difference">
-                    <img src="/logo-horizontal-new.png" alt="Gashin Suzuki" className="w-24 sm:w-28 md:w-36 lg:w-40 invert" />
+                <Link href="/">
+                    <img src="/logo-handwritten-horizontal-cropped.png" alt="Gashin Suzuki" className="w-24 sm:w-28 md:w-36 lg:w-40" />
                 </Link>
 
                 {/* Hamburger Button */}
