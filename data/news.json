@@ -7,7 +7,9 @@
     "date": "2025-10-15",
     "externalUrl": "https://nikkan-spa.jp/2117360",
     "ogpImageFetch": false,
-    "image": "/images/news/nikkan-spa.jpg"
+    "image": "/images/news/nikkan-spa.jpg",
+    "type": "article",
+    "linkText": "記事を読む"
   },
   {
     "slug": "2025-07-jcast-lawson",
@@ -17,7 +19,9 @@
     "date": "2025-07-19",
     "externalUrl": "https://www.j-cast.com/2025/07/19506092.html?p=all",
     "ogpImageFetch": false,
-    "image": "/images/news/j-cast-lawson.jpg"
+    "image": "/images/news/j-cast-lawson.jpg",
+    "type": "article",
+    "linkText": "記事を読む"
   },
   {
     "slug": "2025-miterundesu",
@@ -27,6 +31,8 @@
     "date": "2025-11-24",
     "externalUrl": "https://www.miterundesu.jp",
     "ogpImageFetch": false,
-    "image": "/images/news/miterundesu.png"
+    "image": "/images/news/miterundesu.png",
+    "type": "app",
+    "linkText": "公式サイトへ"
   }
 ]

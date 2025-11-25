@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { ExternalLink } from 'lucide-react';
 import newsData from '@/data/news.json';
 
 export function generateStaticParams() {
@@ -14,12 +15,12 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
   if (!newsItem) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-6 py-20">
+      <main className="min-h-screen flex items-center justify-center px-6 py-20 bg-white">
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-4 text-gray-900">記事が見つかりません</h1>
           <Link
             href="/news"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--accent)] text-white rounded-lg font-semibold hover:bg-[var(--accent-hover)] transition-colors"
+            className="text-blue-600 hover:text-blue-800 underline"
           >
             ニュース一覧に戻る
           </Link>
@@ -28,13 +29,16 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
     );
   }
 
+  // Get link text based on type
+  const linkText = newsItem.linkText || (newsItem.type === 'app' ? '公式サイトへ' : '記事を読む');
+
   return (
-    <main className="min-h-screen px-6 py-20 pt-24">
+    <main className="min-h-screen px-6 py-20 pt-24 bg-white">
       <article className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4 text-gray-900">{newsItem.title}</h1>
-          <div className="flex items-center gap-3 text-[var(--text-secondary)] mb-6">
+          <div className="flex items-center gap-3 text-gray-500 mb-6">
             <span className="font-semibold">{newsItem.source}</span>
             <span>•</span>
             <time dateTime={newsItem.date}>
@@ -62,44 +66,33 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
         {/* Summary */}
         <div className="prose prose-lg max-w-none mb-8">
-          <p className="text-xl leading-relaxed">{newsItem.summary}</p>
+          <p className="text-xl leading-relaxed text-gray-700">{newsItem.summary}</p>
         </div>
 
-        {/* External Link */}
+        {/* External Link - Hyperlink style */}
         <div className="mb-8">
           <a
             href={newsItem.externalUrl}
             target="_blank"
-            rel="noopener nofollow"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--accent)] text-white rounded-lg font-semibold hover:bg-[var(--accent-hover)] transition-colors"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 underline underline-offset-2 text-lg"
           >
-            記事を読む
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M5 10h10M10 5l5 5-5 5" />
-            </svg>
+            {linkText}
+            <ExternalLink size={18} />
           </a>
         </div>
 
         {/* Navigation */}
-        <div className="flex gap-4 pt-8 border-t border-[var(--border-color)]">
+        <div className="flex gap-4 pt-8 border-t border-gray-200">
           <Link
             href="/news"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--bg-secondary)] rounded-lg font-semibold hover:bg-[var(--border-color)] transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-lg font-semibold text-gray-900 hover:bg-gray-200 transition-colors"
           >
             ニュース一覧
           </Link>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--bg-secondary)] rounded-lg font-semibold hover:bg-[var(--border-color)] transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-lg font-semibold text-gray-900 hover:bg-gray-200 transition-colors"
           >
             トップに戻る
           </Link>
