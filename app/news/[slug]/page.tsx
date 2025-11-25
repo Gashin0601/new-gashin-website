@@ -89,15 +89,6 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
           </a>
         </div>
 
-        {/* Notes */}
-        {newsItem.notes && (
-          <div className="mb-8 p-4 bg-[var(--bg-secondary)] rounded-lg">
-            <p className="text-sm text-[var(--text-secondary)]">
-              <strong>備考:</strong> {newsItem.notes}
-            </p>
-          </div>
-        )}
-
         {/* Navigation */}
         <div className="flex gap-4 pt-8 border-t border-[var(--border-color)]">
           <Link
