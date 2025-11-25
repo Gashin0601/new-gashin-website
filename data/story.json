@@ -25,5 +25,278 @@
       }
     ]
   },
-  "timeline": []
+  "timeline": [
+    {
+      "chapter": 1,
+      "year": 2006,
+      "date": "2006年6月1日",
+      "title": "横浜で生まれる",
+      "layout": "full",
+      "videoSrc": "/videos/story/chapter-01-birth.mp4",
+      "videoDuration": 30,
+      "videoEffects": [
+        {
+          "time": 0,
+          "effect": "black-screen",
+          "text": "2006年 - 横浜で生まれる"
+        },
+        {
+          "time": 3,
+          "effect": "eyes-opening",
+          "description": "母親の視点、まぶたが開く"
+        },
+        {
+          "time": 8,
+          "effect": "doctor-scene",
+          "blur": true
+        },
+        {
+          "time": 15,
+          "effect": "toy-blocks",
+          "description": "積み木を追う視線"
+        },
+        {
+          "time": 25,
+          "effect": "light-from-window",
+          "description": "希望の光"
+        }
+      ],
+      "body": "2006年6月1日、横浜で生まれた。生まれてすぐ、医師から「彼は全く見えていません」と告げられ、角膜の手術の話が進んでいた。しかし両親は「本当に見えていないのだろうか」と漠然とした違和感があったそうだ。ある日、積み木を動かしたときに、私がそれを目で追いながら笑っている姿を見て確信したという。すぐに東京・世田谷の生育医療センターでセカンドオピニオンを受けた結果、右目にわずかながら視力があると診断され、失明を免れた。\n\n両親は「障害があるから」と制限することなく、何でもやらせてくれた。幼稚園は良い意味で「スパルタ」で、毎朝の高跳びやマラソンなど、ハンデに関係なく挑戦する環境だった。そこで私は「諦めない心」を学んだ。",
+      "audioNarration": "/audio/narration/chapter-01-birth.mp3",
+      "audioDescriptionForScreenReader": "/audio/narration/chapter-01-birth-sr.mp3",
+      "media": [
+        {
+          "type": "video",
+          "src": "/videos/story/chapter-01-birth.mp4",
+          "poster": "/images/story/2006-baby.jpg",
+          "alt": "生まれたばかりの我信",
+          "audioDescription": "/audio/images/chapter-01-baby.mp3"
+        }
+      ],
+      "accent": "#222284"
+    },
+    {
+      "chapter": 2,
+      "title": "工作と探究心、そして見え方",
+      "layout": "left",
+      "body": "小学校は地元の学校に通った。わかりやすいイジメはなかったが、忘れられない出来事がある。駄菓子屋で「きなこ棒」を買ったときのことだ。友人たちが「あたりじゃん！あたってるよ」と言うので喜んだが、目を近づけてよく見ても、あたりを示す赤色ではない。友人たちは「どうせ見えていないから」と適当なことを言ってからかっていたのだ。くすくすと笑う声が聴こえて、なんだかどんよりしてしまった。\n\n星空を見上げても、肉眼ではぼやけて見えない。「どうすればいいんだろう」――そんな疑問が、いつも心にあった。私の見え方を、実際に体験してみてください。",
+      "audioNarration": "/audio/narration/chapter-02-crafts.mp3",
+      "videoSrc": "/videos/story/chapter-02-crafts.mp4",
+      "videoEffects": [
+        {
+          "time": 0,
+          "description": "工作のシーン"
+        },
+        {
+          "time": 10,
+          "description": "賞状を受け取る"
+        },
+        {
+          "time": 20,
+          "filter": "blur(3px)",
+          "description": "ぼやけた星空（POV）"
+        },
+        {
+          "time": 30,
+          "description": "白杖で通学"
+        },
+        {
+          "time": 40,
+          "description": "車に轢かれそうになる、ぼやけた視界"
+        }
+      ],
+      "interactiveExperience": {
+        "type": "vision-simulator",
+        "ctaText": "私の見え方を体験する",
+        "ctaAudio": "/audio/buttons/vision-experience-cta.mp3",
+        "features": {
+          "panorama": {
+            "enabled": true,
+            "cameraCapture": true,
+            "fieldOfView": 180,
+            "sampleImage": "/images/story/sample-panorama-180.jpg"
+          },
+          "viewer": {
+            "mode": "180-panorama",
+            "gyroscope": true,
+            "dragControl": true
+          },
+          "visionModes": [
+            {
+              "id": "normal",
+              "label": "通常の見え方",
+              "filters": []
+            },
+            {
+              "id": "impaired",
+              "label": "私の見え方",
+              "filters": [
+                {
+                  "type": "left-blind",
+                  "description": "左目が見えない"
+                },
+                {
+                  "type": "tunnel-vision",
+                  "blur": "5px",
+                  "vignette": "0.4",
+                  "description": "視野狭窄"
+                }
+              ],
+              "audioGuide": "/audio/experience/vision-guide.mp3"
+            }
+          ],
+          "toggleButton": {
+            "label": "通常の見え方 ⇄ 私の見え方",
+            "position": "bottom-center"
+          },
+          "closeButton": {
+            "label": "体験を終了",
+            "position": "top-right"
+          }
+        }
+      },
+      "media": [
+        {
+          "type": "video",
+          "src": "/videos/story/chapter-02-crafts.mp4",
+          "poster": "/images/story/crafts.jpg",
+          "alt": "工作と星空、白杖での通学",
+          "audioDescription": "/audio/images/chapter-02-crafts.mp3"
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "year": 2018,
+      "yearRange": "2018-2024",
+      "title": "国立盲学校",
+      "layout": "full",
+      "videoSrc": "/videos/story/chapter-04-blind-school.mp4",
+      "body": "「もっと勉強したい」と思い、小学5年生で受験を決意。猛勉強の末、日本で唯一の国立盲学校へ進学した。そこでは全盲の生徒も多く、私は「見えない側」から「助ける側」になることもあった。\n\n特に記憶に残っているのは、友人が毎朝「今日の給食は何？」と尋ねてきたことだ。最初は声に出して読んでいたが、「プログラミングで解決できるのではないか」と考えた。パソコンすら持っていない中で独学で学び、毎朝7時に学年のLINEへ献立を自動通知するシステムを作り上げた。友人から「今まで自分で知ることができなかった情報を、一人で知れるようになった」と喜ばれたとき、障害があっても自分にできることがあると強く実感した。",
+      "audioNarration": "/audio/narration/chapter-04-blind-school.mp3",
+      "media": [
+        {
+          "type": "video",
+          "src": "/videos/story/chapter-04-blind-school.mp4",
+          "poster": "/images/story/blind-school.jpg",
+          "alt": "国立盲学校での日々",
+          "audioDescription": "/audio/images/chapter-04-blind-school.mp3"
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "year": 2021,
+      "yearRange": "2021-2024",
+      "title": "高校の活動",
+      "layout": "right",
+      "body": "高校時代、ある疑問にぶつかった。マイナンバーカードの顔認証システムが、私の目を認識してくれなかったのだ。「これって社会の仕組みとしてどうなんだろう？」。そう思った私は、IT先進国エストニアへ飛んだ。そこでは、ネットが使えない人のための代替手段が必ず用意されていた。「誰一人取り残さない仕組みづくり」の大切さを肌で感じた。\n\n帰国後は、視覚障害のある子どもたちへのiPad活用セミナーや、視覚障害シミュレーターアプリの開発など、精力的に活動を続けた。",
+      "audioNarration": "/audio/narration/chapter-04-activities.mp3",
+      "media": [
+        {
+          "type": "image",
+          "src": "/images/story/activities-montage.jpg",
+          "alt": "高校での様々な活動",
+          "audioDescription": "/audio/images/chapter-04-activities.mp3"
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "year": 2023,
+      "title": "慶應SFC入学",
+      "layout": "left",
+      "videoSrc": "/videos/story/chapter-05-sfc.mp4",
+      "videoEffects": [
+        {
+          "time": 0,
+          "filter": "grayscale(0%)",
+          "description": "カラフルなキャンパス"
+        },
+        {
+          "time": 10,
+          "filter": "grayscale(50%)",
+          "description": "授業シーン"
+        },
+        {
+          "time": 20,
+          "filter": "grayscale(100%)",
+          "brightness": "0.3",
+          "description": "心の闇"
+        }
+      ],
+      "body": "多様な価値観が交差する場所、SFC。しかし、現実は甘くなかった。ある授業のディスカッションで「出生前診断で障害があると分かったら産むか否か」というテーマになったとき、ある学生が笑いながらこう言った。「障害があるとわかっているのに産むなんて、正気じゃない」。\n\nショックだった。差別意識を隠そうともしない人たちが、思ったよりも多くいることに。私は生きていてはいけないのだろうか。\n\nしかし、救いもあった。先生が「障害があることが大変だというのはあなたが思っていることでしょう」と諭してくれたこと。そして友人が「君がいてくれてよかった」と言ってくれたこと。知ろうとしてくれる人の存在が、私を支えてくれた。",
+      "audioNarration": "/audio/narration/chapter-05-sfc.mp3",
+      "media": [
+        {
+          "type": "video",
+          "src": "/videos/story/chapter-05-sfc.mp4",
+          "poster": "/images/story/sfc-campus.jpg",
+          "alt": "SFCキャンパス",
+          "audioDescription": "/audio/images/chapter-05-sfc.mp3"
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "year": 2024,
+      "title": "ローソンでの出来事",
+      "layout": "right",
+      "videoSrc": "/videos/story/chapter-06-lawson.mp4",
+      "videoEffects": [
+        {
+          "time": 0,
+          "brightness": "0.5",
+          "description": "暗いトーン"
+        },
+        {
+          "time": 20,
+          "brightness": "1.0",
+          "description": "徐々に明るく"
+        }
+      ],
+      "body": "ある日、大学内のローソンで「店内での写真・動画の撮影はご遠慮ください」というアナウンスが流れた。私はいつもスマホのカメラでおにぎりの具や値段を拡大して確認している。その言葉を聞いた瞬間、とても不安になった。「私は一人で昼食を買うことすらできないのだろうか」。\n\nそんな思いをXに投稿したところ、大きな反響があった。ネガティブな声もあったが、「弱視の人たちの状況がわかった」という声も多かった。隠してしまえば、それが差別意識の種になる。だからこそ、私は発信し続ける。",
+      "audioNarration": "/audio/narration/chapter-06-lawson.mp3",
+      "media": [
+        {
+          "type": "video",
+          "src": "/videos/story/chapter-06-lawson.mp4",
+          "poster": "/images/story/lawson.jpg",
+          "alt": "ローソンでの出来事",
+          "audioDescription": "/audio/images/chapter-06-lawson.mp3"
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "year": 2024,
+      "title": "未来の「当たり前」をデザインする",
+      "layout": "full",
+      "videoSrc": "/videos/story/chapter-07-youtube.mp4",
+      "videoEffects": [
+        {
+          "time": 0,
+          "filter": "grayscale(0%)",
+          "brightness": "1.2",
+          "description": "明るく鮮やか"
+        }
+      ],
+      "body": "私は絶望はしない。テクノロジーを使って、若い世代に対して障害について考えてもらう機会を創出したい。例えば、個人の見え方に合わせて変化する「インクルーシブな広告」や、VRのUIが見えなくなる問題の解決。\n\n見えないからこそ、見える世界がある。私はこれからも、社会に埋もれた無数の課題を照らし出し、誰もが自分らしく生きられる未来を切り拓いていく。",
+      "audioNarration": "/audio/narration/chapter-07-youtube.mp3",
+      "ctaButton": {
+        "label": "YouTubeチャンネルを見る",
+        "href": "https://youtube.com/@gashin",
+        "audioLabel": "/audio/buttons/youtube-cta.mp3"
+      },
+      "media": [
+        {
+          "type": "video",
+          "src": "/videos/story/chapter-07-youtube.mp4",
+          "poster": "/images/story/youtube.jpg",
+          "alt": "YouTube撮影風景",
+          "audioDescription": "/audio/images/chapter-07-youtube.mp3"
+        }
+      ]
+    }
+  ]
 }

@@ -1,0 +1,67 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight } from "lucide-react";
+
+export default function Hero() {
+    return (
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white">
+            {/* Content Container */}
+            <div className="relative z-10 max-w-6xl w-full px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center pt-20 sm:pt-24 md:pt-0">
+                {/* Text Content */}
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5, duration: 0.8 }}
+                    className="space-y-6 sm:space-y-8"
+                >
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-tight tracking-tight text-black">
+                        我を信じて<br />
+                        突き進む。
+                    </h1>
+
+                    <div className="space-y-3 sm:space-y-4 text-base sm:text-lg md:text-xl text-gray-600 max-w-md">
+                        <p>
+                            慶應義塾大学 環境情報学部 1年。
+                        </p>
+                        <p>
+                            生まれつきの視覚障害（弱視）で、<br />
+                            SNSでの発信やアプリ開発を通して、<br />
+                            障害を強みに変えるために活動中。
+                        </p>
+                    </div>
+
+                    <div className="pt-2 sm:pt-4">
+                        <Link
+                            href="/story"
+                            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gray-900 text-white text-sm sm:text-base rounded-full hover:bg-gray-800 transition-all hover:gap-4 shadow-lg"
+                        >
+                            ストーリーを見る
+                            <ArrowRight size={18} className="sm:w-5 sm:h-5" />
+                        </Link>
+                    </div>
+                </motion.div>
+
+                {/* Portrait Image */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.8, duration: 0.8 }}
+                    className="relative w-full max-w-md mx-auto"
+                >
+                    <Image
+                        src="/images/profile/profile.png"
+                        alt="Suzuki Gashin Portrait"
+                        width={500}
+                        height={600}
+                        className="object-contain drop-shadow-xl"
+                        priority
+                    />
+                </motion.div>
+            </div>
+        </section>
+    );
+}

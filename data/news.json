@@ -4,31 +4,29 @@
     "title": "日刊SPA!に取材していただきました",
     "summary": "障害があるが故の悩み、そして私の人生について語りました。",
     "source": "日刊SPA!",
-    "date": "2025-XX-XX",
-    "externalUrl": "https://nikkan-spa.jp/2117360/3",
-    "ogpImageFetch": true,
-    "image": null,
-    "imageAlt": "日刊SPA!の記事",
-    "audioNarration": "/audio/images/news-nikkan-spa.mp3",
-    "articleImages": [],
-    "notes": ""
+    "date": "2025-10-15",
+    "externalUrl": "https://nikkan-spa.jp/2117360",
+    "ogpImageFetch": false,
+    "image": "/images/news/nikkan-spa.jpg"
   },
   {
     "slug": "2025-07-jcast-lawson",
     "title": "ローソンでの撮影禁止についてXの発信が話題に",
-    "summary": "2025年8月、Xにてローソンで撮影することが難しいという投稿が話題となり、8600いいね以上となり、ネットニュースになりました。記事内で掲載されている「シュライン」はXのハンドルネームです。現在は、鈴木我信および@suzuki_gashinとなっています。",
+    "summary": "2025年8月、Xにてローソンで撮影することが難しいという投稿が話題となり、8600いいね以上となり、ネットニュースになりました。",
     "source": "J-CASTニュース",
     "date": "2025-07-19",
     "externalUrl": "https://www.j-cast.com/2025/07/19506092.html?p=all",
-    "ogpImageFetch": true,
-    "image": null,
-    "imageAlt": "J-CASTニュースの記事",
-    "audioNarration": "/audio/images/news-jcast-lawson.mp3",
-    "embedTweet": {
-      "url": "https://x.com/suzuki_gashin/status/1945395481015898261?s=61",
-      "tweetId": "1945395481015898261"
-    },
-    "articleImages": [],
-    "notes": "記事内の「シュライン」は旧ハンドルネーム。現在は「鈴木我信」(@suzuki_gashin)"
+    "ogpImageFetch": false,
+    "image": "/images/news/j-cast-lawson.jpg"
+  },
+  {
+    "slug": "2025-miterundesu",
+    "title": "拡大して見るための、まったく新しいアプリ「ミテルンデス」をリリース",
+    "summary": "視覚障害者の「見たい」を叶える、新しい拡大鏡アプリをリリースしました。",
+    "source": "Miterundesu",
+    "date": "2025-11-24",
+    "externalUrl": "https://www.miterundesu.jp",
+    "ogpImageFetch": false,
+    "image": "/images/news/miterundesu.png"
   }
 ]

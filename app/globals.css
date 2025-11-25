@@ -1,25 +1,44 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
+  /* Light Theme (Default) */
   --bg-primary: #ffffff;
   --text-primary: #0b0c10;
+  --text-secondary: #666666;
   --bg-secondary: #f5f5f5;
   --border-color: #e0e0e0;
-  --accent-color: #222284;
+
+  /* Accent Colors */
+  --accent: #667EEA;
+  --accent-hover: #5568D3;
+
+  /* SNS Brand Colors */
+  --sns-youtube: #FF0000;
+  --sns-instagram: #E4405F;
+  --sns-tiktok: #00F2EA;
+  /* Also #FF0050 */
+  --sns-x: #000000;
+  --sns-facebook: #1877F2;
 }
 
 [data-theme="dark"] {
   --bg-primary: #0b0c10;
   --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
   --bg-secondary: #1a1b1f;
   --border-color: #2a2b2f;
+
+  --accent: #667EEA;
+  --accent-hover: #7B8FF5;
+
+  --sns-x: #ffffff;
 }
 
 [data-theme="story"] {
   --bg-primary: #0b0c10;
   --text-primary: #ffffff;
+  --bg-secondary: #000000;
+  --border-color: #333333;
 }
 
 body {
@@ -27,4 +46,67 @@ body {
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.7;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] .glass {
+    background: rgba(11, 12, 16, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-heavy {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  [data-theme="dark"] .glass-heavy {
+    background: rgba(11, 12, 16, 0.6);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-noise {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Animation Utilities */
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in;
 }
