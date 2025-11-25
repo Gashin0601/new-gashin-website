@@ -101,19 +101,21 @@ function VideoPlayer({ src, isCurrent, poster, fallbackUrl }: { src: string; isC
         const videoId = getYouTubeId(fallbackUrl);
         if (videoId) {
             return (
-                <iframe
-                    src={`https://www.youtube.com/embed/${videoId}?autoplay=${isCurrent ? 1 : 0}&loop=1&playlist=${videoId}&controls=0&mute=1&playsinline=1&rel=0`}
-                    className="w-full h-full object-cover"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title="YouTube video player"
-                />
+                <div className="w-full h-full relative bg-black pointer-events-none">
+                    <iframe
+                        src={`https://www.youtube.com/embed/${videoId}?autoplay=${isCurrent ? 1 : 0}&loop=1&playlist=${videoId}&controls=0&mute=1&playsinline=1&rel=0`}
+                        className="w-full h-full object-cover pointer-events-auto"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title="YouTube video player"
+                    />
+                </div>
             );
         }
     }
 
     return (
-        <div className="w-full h-full relative bg-black">
+        <div className="w-full h-full relative bg-black pointer-events-none">
             {!isLoaded && !hasError && (
                 <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
