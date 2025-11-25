@@ -8,22 +8,22 @@ import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
     return (
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white">
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white pb-16 md:pb-20">
             {/* Content Container */}
-            <div className="relative z-10 max-w-7xl w-full px-6 sm:px-8 lg:px-12 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-12 md:gap-16 lg:gap-20 items-center pt-24 pb-12 sm:pt-28 sm:pb-16 md:pt-0 md:pb-0">
+            <div className="relative z-10 max-w-6xl w-full px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center pt-32 sm:pt-36 md:pt-0">
                 {/* Text Content */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5, duration: 0.8 }}
-                    className="space-y-8 sm:space-y-10 md:pr-4"
+                    className="space-y-6 sm:space-y-8"
                 >
-                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.15] tracking-tight text-black">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-tight tracking-tight text-black">
                         我を信じて<br />
                         突き進む。
                     </h1>
 
-                    <div className="space-y-4 sm:space-y-5 text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed max-w-lg">
+                    <div className="space-y-3 sm:space-y-4 text-base sm:text-lg md:text-xl text-gray-600 max-w-md">
                         <p>
                             慶應義塾大学 環境情報学部 1年。
                         </p>
@@ -34,10 +34,10 @@ export default function Hero() {
                         </p>
                     </div>
 
-                    <div className="pt-4 sm:pt-6">
+                    <div className="pt-2 sm:pt-4">
                         <Link
                             href="/story"
-                            className="inline-flex items-center gap-2 px-7 sm:px-9 py-3.5 sm:py-4 bg-gray-900 text-white text-sm sm:text-base font-medium rounded-full hover:bg-gray-800 transition-all hover:gap-4 shadow-lg hover:shadow-xl"
+                            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gray-900 text-white text-sm sm:text-base rounded-full hover:bg-gray-800 transition-all hover:gap-4 shadow-lg"
                         >
                             ストーリーを見る
                             <ArrowRight size={18} className="sm:w-5 sm:h-5" />
@@ -50,14 +50,14 @@ export default function Hero() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.8, duration: 0.8 }}
-                    className="relative w-full max-w-lg mx-auto md:mx-0 md:ml-auto"
+                    className="relative w-full max-w-md mx-auto"
                 >
                     <Image
                         src="/images/profile/profile.png"
                         alt="Suzuki Gashin Portrait"
                         width={500}
                         height={600}
-                        className="object-contain drop-shadow-2xl"
+                        className="object-contain drop-shadow-xl"
                         priority
                     />
                 </motion.div>
