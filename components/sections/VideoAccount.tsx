@@ -150,11 +150,37 @@ function VideoPlayer({ video, isCurrent, poster, isTransitioning, volume }: { vi
                 <div className="w-full h-full relative bg-black pointer-events-none">
                     <iframe
                         src={`https://www.youtube.com/embed/${videoId}?autoplay=${isCurrent ? 1 : 0}&loop=1&playlist=${videoId}&controls=0&mute=${isMuted ? 1 : 0}&playsinline=1&rel=0`}
-                        className="w-full h-full object-cover pointer-events-auto"
+                        className="w-full h-full object-cover"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                         title="YouTube video player"
                     />
+                    {isCurrent && !isTransitioning && (
+                        <>
+                            {/* Gradient overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70 pointer-events-none" />
+
+                            {/* Video info */}
+                            <div className="absolute bottom-0 left-0 right-0 p-5 text-white z-20 pointer-events-none">
+                                <h3 className="font-bold text-lg mb-1 line-clamp-2">{video.title}</h3>
+                            </div>
+
+                            {/* Hover overlay with social links */}
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-30 pointer-events-auto">
+                                <div className="flex gap-3">
+                                    {Object.entries(video.socialLinks).map(([platform, url]) => (
+                                        <SocialLink
+                                            key={platform}
+                                            platform={platform as "youtube" | "tiktok" | "instagram" | "x"}
+                                            url={url}
+                                            className="text-white bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 hover:scale-110 transition-all"
+                                            iconSize={22}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             );
         }
