@@ -54,7 +54,7 @@ export default function Header() {
             <div className="flex items-center justify-between p-3 sm:p-4 md:p-6">
                 {/* Logo */}
                 <Link href="/">
-                    <img src="/logo-handwritten-square.png" alt="Gashin Suzuki" className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20" />
+                    <img src="/logo-handwritten-square.png" alt="Gashin Suzuki" className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24" />
                 </Link>
 
                 {/* Hamburger Button */}
