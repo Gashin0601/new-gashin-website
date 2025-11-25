@@ -52,7 +52,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
           <div className="mb-8 rounded-xl overflow-hidden">
             <Image
               src={newsItem.image}
-              alt={newsItem.imageAlt}
+              alt={newsItem.title}
               width={800}
               height={450}
               className="w-full h-auto"

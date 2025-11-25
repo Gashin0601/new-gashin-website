@@ -29,7 +29,7 @@ export default function NewsPage() {
                   <div className="flex-shrink-0 w-32 h-32 bg-[var(--border-color)] rounded-lg overflow-hidden">
                     <Image
                       src={item.image}
-                      alt={item.imageAlt}
+                      alt={item.title}
                       width={128}
                       height={128}
                       className="w-full h-full object-cover"
