@@ -19,7 +19,7 @@ interface VideoData {
     };
 }
 
-function VideoPlayer({ video, isCurrent, poster, isTransitioning }: { video: VideoData; isCurrent: boolean; poster?: string; isTransitioning: boolean }) {
+function VideoPlayer({ video, isCurrent, poster, isTransitioning, volume }: { video: VideoData; isCurrent: boolean; poster?: string; isTransitioning: boolean; volume: number }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const hlsRef = useRef<Hls | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -124,6 +124,14 @@ function VideoPlayer({ video, isCurrent, poster, isTransitioning }: { video: Vid
         }
     }, [isMuted]);
 
+    // Handle volume changes based on visibility
+    useEffect(() => {
+        const videoElement = videoRef.current;
+        if (videoElement && !isMuted) {
+            videoElement.volume = Math.max(0, Math.min(1, volume));
+        }
+    }, [volume, isMuted]);
+
     // Helper to extract YouTube ID
     const getYouTubeId = (url: string) => {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -204,8 +212,51 @@ export default function VideoAccount() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [volume, setVolume] = useState(1);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const sectionRef = useRef<HTMLElement>(null);
+
+    // Track section visibility and adjust volume
+    useEffect(() => {
+        const section = sectionRef.current;
+        if (!section) return;
+
+        const handleScroll = () => {
+            const rect = section.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+
+            // Calculate how much of the section is visible
+            const sectionTop = rect.top;
+            const sectionBottom = rect.bottom;
+            const sectionHeight = rect.height;
+
+            // Calculate visibility ratio (0 to 1)
+            let visibleHeight = 0;
+            if (sectionTop < windowHeight && sectionBottom > 0) {
+                const visibleTop = Math.max(0, sectionTop);
+                const visibleBottom = Math.min(windowHeight, sectionBottom);
+                visibleHeight = visibleBottom - visibleTop;
+            }
+
+            const visibilityRatio = Math.max(0, Math.min(1, visibleHeight / sectionHeight));
+
+            // Apply easing for smoother fade (use squared for more dramatic fade at edges)
+            const easedVolume = Math.pow(visibilityRatio, 0.5);
+            setVolume(easedVolume);
+        };
+
+        // Initial check
+        handleScroll();
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        window.addEventListener('resize', handleScroll, { passive: true });
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleScroll);
+        };
+    }, []);
 
     // Auto-advance carousel
     useEffect(() => {
@@ -235,7 +286,7 @@ export default function VideoAccount() {
     const nextIndex = (currentIndex + 1) % videosData.length;
 
     return (
-        <section className="py-24 bg-white overflow-hidden">
+        <section ref={sectionRef} className="py-24 bg-white overflow-hidden">
             <div className="max-w-6xl mx-auto px-6">
                 {/* Account Header */}
                 <div className="text-center mb-16 space-y-6">
@@ -314,7 +365,7 @@ export default function VideoAccount() {
                                 }}
                             >
                                 <div className="w-full h-full bg-black relative group">
-                                    <VideoPlayer video={video} isCurrent={isCurrent} isTransitioning={isTransitioning} />
+                                    <VideoPlayer video={video} isCurrent={isCurrent} isTransitioning={isTransitioning} volume={volume} />
 
                                     {/* Navigation Overlay for Side Videos */}
                                     {!isCurrent && (
