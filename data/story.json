@@ -283,11 +283,6 @@
       ],
       "body": "私は絶望はしない。テクノロジーを使って、若い世代に対して障害について考えてもらう機会を創出したい。例えば、個人の見え方に合わせて変化する「インクルーシブな広告」や、VRのUIが見えなくなる問題の解決。\n\n見えないからこそ、見える世界がある。私はこれからも、社会に埋もれた無数の課題を照らし出し、誰もが自分らしく生きられる未来を切り拓いていく。",
       "audioNarration": "/audio/narration/chapter-07-youtube.mp3",
-      "ctaButton": {
-        "label": "YouTubeチャンネルを見る",
-        "href": "https://youtube.com/@gashin",
-        "audioLabel": "/audio/buttons/youtube-cta.mp3"
-      },
       "media": [
         {
           "type": "video",
