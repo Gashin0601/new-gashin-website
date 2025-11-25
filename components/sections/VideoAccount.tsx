@@ -1,37 +1,88 @@
 "use client";
 
 import Image from "next/image";
-
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play } from "lucide-react";
+import Hls from "hls.js";
 import SocialLink from "../ui/SocialLinks";
 import videosData from "@/data/videos.json";
 
-function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
+function VideoPlayer({ src, isCurrent, poster }: { src: string; isCurrent: boolean; poster?: string }) {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const hlsRef = useRef<Hls | null>(null);
+    const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        if (videoRef.current) {
-            if (isCurrent) {
-                videoRef.current.play().catch(() => {
-                    // Handle autoplay restriction
-                });
-            } else {
-                videoRef.current.pause();
-                videoRef.current.currentTime = 0; // Reset time
-            }
+        const video = videoRef.current;
+        if (!video) return;
+
+        // Check if source is HLS (.m3u8)
+        const isHLS = src.endsWith('.m3u8');
+
+        if (isHLS && Hls.isSupported()) {
+            // Use HLS.js for adaptive streaming
+            const hls = new Hls({
+                enableWorker: true,
+                lowLatencyMode: true,
+                backBufferLength: 90,
+            });
+            hlsRef.current = hls;
+            hls.loadSource(src);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                setIsLoaded(true);
+                if (isCurrent) {
+                    video.play().catch(() => {});
+                }
+            });
+        } else if (isHLS && video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Native HLS support (Safari)
+            video.src = src;
+            video.addEventListener('loadedmetadata', () => {
+                setIsLoaded(true);
+                if (isCurrent) {
+                    video.play().catch(() => {});
+                }
+            });
+        } else {
+            // Standard MP4 - optimized loading
+            video.src = src;
+            video.addEventListener('loadeddata', () => {
+                setIsLoaded(true);
+            });
         }
-    }, [isCurrent]);
+
+        return () => {
+            if (hlsRef.current) {
+                hlsRef.current.destroy();
+                hlsRef.current = null;
+            }
+        };
+    }, [src]);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video || !isLoaded) return;
+
+        if (isCurrent) {
+            video.play().catch(() => {
+                // Handle autoplay restriction
+            });
+        } else {
+            video.pause();
+            video.currentTime = 0;
+        }
+    }, [isCurrent, isLoaded]);
 
     return (
         <video
             ref={videoRef}
-            src={src}
-            className={`w-full h-full object-cover ${!isCurrent ? "opacity-60" : ""}`}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!isLoaded ? "opacity-0" : ""}`}
             muted
             loop
             playsInline
+            preload={isCurrent ? "auto" : "metadata"}
+            poster={poster}
         />
     );
 }
@@ -56,7 +107,6 @@ export default function VideoAccount() {
         };
     }, [isHovered]);
 
-    const currentVideo = videosData[currentIndex];
     const prevIndex = (currentIndex - 1 + videosData.length) % videosData.length;
     const nextIndex = (currentIndex + 1) % videosData.length;
 
@@ -87,18 +137,15 @@ export default function VideoAccount() {
                     </div>
                 </div>
 
-
-                {/* Carousel Container - Temporarily Hidden */}
-                {/* 
+                {/* Carousel Container */}
                 <div
-                    className="relative h-[600px] flex items-center justify-center perspective-1000"
+                    className="relative h-[500px] sm:h-[550px] md:h-[600px] flex items-center justify-center"
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                 >
                     <AnimatePresence initial={false} mode="popLayout">
                         {videosData.map((video, index) => {
                             // Calculate offset from current index
-                            // Handle wrapping: -1 (prev), 0 (current), 1 (next)
                             let offset = (index - currentIndex + videosData.length) % videosData.length;
                             if (offset > videosData.length / 2) offset -= videosData.length;
 
@@ -114,28 +161,28 @@ export default function VideoAccount() {
                                     key={video.id}
                                     layout
                                     className={`absolute rounded-3xl overflow-hidden transition-all duration-500 ease-in-out
-                                        ${isCurrent ? "z-20 shadow-2xl border border-gray-800" : "z-10 opacity-40 cursor-pointer glass"}
+                                        ${isCurrent ? "z-20 shadow-2xl ring-1 ring-black/10" : "z-10 opacity-50 cursor-pointer"}
                                     `}
                                     initial={{
-                                        scale: 0.9,
+                                        scale: 0.85,
                                         x: offset * 100 + "%",
                                         opacity: 0
                                     }}
                                     animate={{
-                                        scale: isCurrent ? 1 : 0.9,
-                                        x: isCurrent ? 0 : isPrev ? -380 : 380,
-                                        opacity: isCurrent ? 1 : 0.4,
+                                        scale: isCurrent ? 1 : 0.85,
+                                        x: isCurrent ? 0 : isPrev ? "-55%" : "55%",
+                                        opacity: isCurrent ? 1 : 0.5,
                                         zIndex: isCurrent ? 20 : 10,
                                     }}
                                     transition={{
                                         type: "spring",
-                                        stiffness: 400,
-                                        damping: 25,
-                                        mass: 0.8
+                                        stiffness: 300,
+                                        damping: 30,
+                                        mass: 1
                                     }}
                                     style={{
-                                        width: isCurrent ? "min(340px, 85vw)" : "min(280px, 70vw)",
-                                        height: isCurrent ? "min(600px, 75vh)" : "min(500px, 65vh)",
+                                        width: isCurrent ? "min(300px, 75vw)" : "min(240px, 60vw)",
+                                        height: isCurrent ? "min(530px, 70vh)" : "min(420px, 55vh)",
                                     }}
                                     onClick={() => {
                                         if (isPrev) setCurrentIndex(prevIndex);
@@ -156,21 +203,24 @@ export default function VideoAccount() {
 
                                         {isCurrent && (
                                             <>
-                                                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60 pointer-events-none" />
-                                                <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-20 pointer-events-none">
-                                                    <h3 className="font-bold text-xl mb-1">{video.title}</h3>
-                                                    <p className="text-sm opacity-80">{video.date}</p>
+                                                {/* Gradient overlay */}
+                                                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70 pointer-events-none" />
+
+                                                {/* Video info */}
+                                                <div className="absolute bottom-0 left-0 right-0 p-5 text-white z-20 pointer-events-none">
+                                                    <h3 className="font-bold text-lg mb-1 line-clamp-2">{video.title}</h3>
                                                 </div>
 
-                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 z-30">
-                                                    <div className="flex gap-4">
+                                                {/* Hover overlay with social links */}
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-30">
+                                                    <div className="flex gap-3">
                                                         {Object.entries(video.socialLinks).map(([platform, url]) => (
                                                             <SocialLink
                                                                 key={platform}
-                                                                platform={platform as any}
+                                                                platform={platform as "youtube" | "tiktok" | "instagram" | "x"}
                                                                 url={url}
-                                                                className="text-white bg-black/80 p-3 rounded-full hover:bg-black hover:scale-110 transition-all"
-                                                                iconSize={24}
+                                                                className="text-white bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 hover:scale-110 transition-all"
+                                                                iconSize={22}
                                                             />
                                                         ))}
                                                     </div>
@@ -183,7 +233,22 @@ export default function VideoAccount() {
                         })}
                     </AnimatePresence>
                 </div>
-                */}
+
+                {/* Carousel indicators */}
+                <div className="flex justify-center gap-2 mt-8">
+                    {videosData.map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => setCurrentIndex(index)}
+                            className={`w-2 h-2 rounded-full transition-all ${
+                                index === currentIndex
+                                    ? "bg-gray-900 w-6"
+                                    : "bg-gray-300 hover:bg-gray-400"
+                            }`}
+                            aria-label={`動画 ${index + 1} に移動`}
+                        />
+                    ))}
+                </div>
             </div>
         </section>
     );
