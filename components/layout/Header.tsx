@@ -1,38 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, Volume2, VolumeX, Moon, Sun, Monitor } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTheme } from "@/hooks/useTheme";
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
-    const [audioEnabled, setAudioEnabled] = useState(false);
-    const { theme, setTheme } = useTheme();
+    const pathname = usePathname();
 
-    // Initialize audio from localStorage
-    useEffect(() => {
-        const savedAudio = localStorage.getItem("audioEnabled");
-        if (savedAudio === "true") {
-            setAudioEnabled(true);
-        }
-    }, []);
-
-    const toggleAudio = () => {
-        const newState = !audioEnabled;
-        setAudioEnabled(newState);
-        localStorage.setItem("audioEnabled", String(newState));
-        window.dispatchEvent(new CustomEvent("audioStateChange", { detail: { enabled: newState } }));
-    };
+    // Story page has dark background, so use white button
+    const isStoryPage = pathname === "/story";
 
     return (
         <>
-            {/* Spacer to prevent content from being hidden behind fixed header */}
-            <div
-                className="h-[88px] sm:h-[112px] md:h-[144px]"
-                aria-hidden="true"
-            />
             <header
                 className="fixed top-0 left-0 right-0 z-40"
                 role="banner"
@@ -53,11 +35,12 @@ export default function Header() {
                 </Link>
 
                 {/* Hamburger Button */}
-                {/* In light mode and normal mode: black. In dark mode: white */}
                 <button
                     onClick={() => setIsOpen(true)}
-                    className={`p-2 rounded-full bg-[var(--bg-primary)]/80 backdrop-blur-md shadow-lg hover:scale-105 transition-transform ${
-                        theme === "dark" ? "text-white" : "text-black"
+                    className={`p-2 rounded-full backdrop-blur-md shadow-lg hover:scale-105 transition-transform ${
+                        isStoryPage
+                            ? "bg-white/80 text-black"
+                            : "bg-black/80 text-white"
                     }`}
                     aria-label="メニューを開く"
                     aria-expanded={isOpen}
@@ -76,7 +59,7 @@ export default function Header() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed inset-0 z-50 bg-[var(--bg-primary)] flex flex-col"
+                        className="fixed inset-0 z-50 bg-white flex flex-col"
                         role="dialog"
                         aria-modal="true"
                         aria-label="メインメニュー"
@@ -85,7 +68,7 @@ export default function Header() {
                         <div className="absolute top-6 right-6">
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="p-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors"
+                                className="p-2 rounded-full hover:bg-gray-100 transition-colors text-black"
                                 aria-label="メニューを閉じる"
                             >
                                 <X size={32} aria-hidden="true" />
@@ -93,89 +76,25 @@ export default function Header() {
                         </div>
 
                         {/* Menu Content */}
-                        <div className="flex-1 flex flex-col justify-center items-center p-8 space-y-12">
+                        <div className="flex-1 flex flex-col justify-center items-center p-8">
                             {/* Navigation Links */}
                             <nav
-                                className="flex flex-col items-center space-y-8 text-2xl font-light tracking-wider"
+                                className="flex flex-col items-center space-y-8 text-2xl font-light tracking-wider text-black"
                                 aria-label="メインナビゲーション"
                             >
-                                <Link href="/" onClick={() => setIsOpen(false)} className="hover:text-[var(--accent)] transition-colors">
+                                <Link href="/" onClick={() => setIsOpen(false)} className="hover:text-gray-600 transition-colors">
                                     TOP
                                     <span className="sr-only">（トップページへ）</span>
                                 </Link>
-                                <Link href="/story" onClick={() => setIsOpen(false)} className="hover:text-[var(--accent)] transition-colors">
+                                <Link href="/story" onClick={() => setIsOpen(false)} className="hover:text-gray-600 transition-colors">
                                     STORY
                                     <span className="sr-only">（ストーリーページへ）</span>
                                 </Link>
-                                <Link href="/news" onClick={() => setIsOpen(false)} className="hover:text-[var(--accent)] transition-colors">
+                                <Link href="/news" onClick={() => setIsOpen(false)} className="hover:text-gray-600 transition-colors">
                                     NEWS
                                     <span className="sr-only">（ニュースページへ）</span>
                                 </Link>
                             </nav>
-
-                            {/* Settings */}
-                            <div
-                                className="w-full max-w-xs space-y-8 pt-12 border-t border-[var(--border-color)]"
-                                role="group"
-                                aria-label="サイト設定"
-                            >
-                                {/* Audio Toggle */}
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm text-[var(--text-secondary)]" id="audio-toggle-label">音声読み上げ</span>
-                                    <button
-                                        onClick={toggleAudio}
-                                        aria-labelledby="audio-toggle-label"
-                                        aria-pressed={audioEnabled}
-                                        role="switch"
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${audioEnabled ? "bg-[var(--accent)] text-white" : "bg-[var(--bg-secondary)]"
-                                            }`}
-                                    >
-                                        {audioEnabled ? <Volume2 size={18} aria-hidden="true" /> : <VolumeX size={18} aria-hidden="true" />}
-                                        <span className="text-sm font-medium">{audioEnabled ? "ON" : "OFF"}</span>
-                                    </button>
-                                </div>
-
-                                {/* Theme Toggle */}
-                                <div className="space-y-2">
-                                    <span className="text-sm text-[var(--text-secondary)] block mb-2" id="theme-group-label">カラーテーマ</span>
-                                    <div
-                                        className="flex bg-[var(--bg-secondary)] rounded-full p-1"
-                                        role="radiogroup"
-                                        aria-labelledby="theme-group-label"
-                                    >
-                                        <button
-                                            onClick={() => setTheme("light")}
-                                            aria-label="ライトモードに切り替え"
-                                            role="radio"
-                                            aria-checked={theme === "light"}
-                                            className={`flex-1 flex justify-center py-2 rounded-full transition-colors ${theme === "light" ? "bg-[var(--bg-primary)] shadow-sm text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
-                                                }`}
-                                        >
-                                            <Sun size={18} aria-hidden="true" />
-                                        </button>
-                                        <button
-                                            onClick={() => setTheme("normal")}
-                                            aria-label="通常モード"
-                                            role="radio"
-                                            aria-checked={theme === "normal"}
-                                            className={`flex-1 flex justify-center py-2 rounded-full transition-colors ${theme === "normal" ? "bg-[var(--bg-primary)] shadow-sm text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
-                                                }`}
-                                        >
-                                            <Monitor size={18} aria-hidden="true" />
-                                        </button>
-                                        <button
-                                            onClick={() => setTheme("dark")}
-                                            aria-label="ダークモードに切り替え"
-                                            role="radio"
-                                            aria-checked={theme === "dark"}
-                                            className={`flex-1 flex justify-center py-2 rounded-full transition-colors ${theme === "dark" ? "bg-[var(--bg-primary)] shadow-sm text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
-                                                }`}
-                                        >
-                                            <Moon size={18} aria-hidden="true" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </motion.div>
                 )}

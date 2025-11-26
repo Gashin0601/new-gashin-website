@@ -23,11 +23,11 @@ export default function MediaSection() {
 
     return (
         <section
-            className="py-16 sm:py-20 md:py-24 bg-[var(--bg-primary)]"
+            className="py-12 sm:py-14 md:py-16 bg-[var(--bg-primary)]"
             aria-label="ニュース・メディア掲載"
         >
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
-                <div className="flex items-center justify-between mb-8 sm:mb-10 md:mb-12">
+                <div className="flex items-center justify-between mb-6 sm:mb-8 md:mb-10">
                     <h2 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)]" id="news-section-title">
                         ニュース
                     </h2>

@@ -70,12 +70,12 @@ export default function DailyAccount() {
 
     return (
         <section
-            className="py-24 bg-[var(--bg-primary)]"
+            className="py-12 md:py-14 bg-[var(--bg-primary)]"
             aria-label="鈴木我信 - 日常アカウント"
         >
             <div className="max-w-6xl mx-auto px-6">
                 {/* Account Header */}
-                <header className="text-center mb-16 space-y-6">
+                <header className="text-center mb-8 md:mb-10 space-y-3 md:space-y-4">
                     <div
                         className="relative w-24 h-24 mx-auto mb-6 rounded-full overflow-hidden shadow-xl border-2 border-white/10"
                         role="img"

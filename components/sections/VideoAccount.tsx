@@ -54,9 +54,16 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
             preloadVideo(src);
         }
 
-        // Apply styles - ensure video is centered
+        // Apply styles - different for mobile vs desktop
         video.className = `z-[1] transition-opacity duration-300`;
-        video.style.cssText = 'width: auto; height: 100%; min-width: 100%; min-height: 100%; object-fit: cover; object-position: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);';
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) {
+            // Mobile: use flexbox centering from container (no absolute positioning)
+            video.style.cssText = 'width: auto; height: 100%; min-width: 100%; min-height: 100%; object-fit: cover; object-position: center;';
+        } else {
+            // Desktop: use absolute positioning for precise centering
+            video.style.cssText = 'width: auto; height: 100%; min-width: 100%; min-height: 100%; object-fit: cover; object-position: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);';
+        }
 
         // Event listeners
         const handleLoadedData = () => setHasFirstFrame(true);
@@ -468,12 +475,12 @@ export default function VideoAccount() {
     return (
         <section
             ref={sectionRef}
-            className="py-16 md:py-20 bg-[var(--bg-primary)] overflow-hidden"
+            className="py-12 md:py-14 bg-[var(--bg-primary)] overflow-hidden"
             aria-label="Gashin / 弱視慶應生 - 動画アカウント"
         >
             <div className="max-w-6xl mx-auto px-6">
                 {/* Account Header */}
-                <header className="text-center mb-10 md:mb-12 space-y-4 md:space-y-6">
+                <header className="text-center mb-8 md:mb-10 space-y-3 md:space-y-4">
                     <div
                         className="relative w-24 h-24 mx-auto mb-6 rounded-full overflow-hidden shadow-xl border-2 border-white/10"
                         role="img"
