@@ -15,10 +15,10 @@ export function HamburgerButton({ onClick, isOpen }: HamburgerButtonProps) {
       className="fixed top-6 right-6 z-30 p-3 rounded-lg bg-[var(--bg-secondary)] hover:bg-[var(--border-color)] transition-colors shadow-lg"
       aria-label={isOpen ? 'メニューを閉じる' : 'メニューを開く'}
       aria-expanded={isOpen}
-      style={theme === 'normal' ? {
-        '--bg-secondary': '#f5f5f5',
-        '--text-primary': '#000000',
-        '--border-color': '#e0e0e0',
+      style={(theme === 'normal' || theme === 'light') ? {
+        '--bg-secondary': '#000000',
+        '--text-primary': '#ffffff',
+        '--border-color': '#333333',
       } as React.CSSProperties : undefined}
     >
       <div className="w-6 h-5 flex flex-col justify-between">
