@@ -3,63 +3,59 @@
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import SocialLink from "../ui/SocialLinks";
 import videosData from "@/data/videos.json";
 
+// Dynamic import to avoid SSR issues
+const ReactPlayer = dynamic(() => import("react-player/file"), { ssr: false });
+
 function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [isReady, setIsReady] = useState(false);
+    const playerRef = useRef<any>(null);
 
     useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
-
-        const handleLoadedData = () => setIsLoaded(true);
-        const handleCanPlay = () => {
-            if (isCurrent) {
-                video.play().catch(() => {});
-            }
-        };
-
-        video.addEventListener('loadeddata', handleLoadedData);
-        video.addEventListener('canplay', handleCanPlay);
-
-        // Set source
-        video.src = src;
-        video.load();
-
-        return () => {
-            video.removeEventListener('loadeddata', handleLoadedData);
-            video.removeEventListener('canplay', handleCanPlay);
-        };
-    }, [src]);
-
-    useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
-
-        if (isCurrent && isLoaded) {
-            video.play().catch(() => {});
-        } else {
-            video.pause();
-            video.currentTime = 0;
+        if (!isCurrent && playerRef.current) {
+            // Reset to beginning when not current
+            playerRef.current.seekTo(0);
         }
-    }, [isCurrent, isLoaded]);
+    }, [isCurrent]);
 
     return (
         <div className="w-full h-full relative bg-black">
-            {!isLoaded && (
+            {!isReady && (
                 <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </div>
             )}
-            <video
-                ref={videoRef}
-                className={`w-full h-full object-cover transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!isLoaded ? "opacity-0" : ""}`}
-                muted
+            <ReactPlayer
+                ref={playerRef}
+                url={src}
+                playing={isCurrent}
                 loop
-                playsInline
-                preload="auto"
+                muted
+                playsinline
+                width="100%"
+                height="100%"
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    opacity: isReady ? (isCurrent ? 1 : 0.6) : 0,
+                    transition: 'opacity 0.3s'
+                }}
+                onReady={() => setIsReady(true)}
+                onBuffer={() => {}}
+                onBufferEnd={() => {}}
+                config={{
+                    file: {
+                        attributes: {
+                            preload: 'auto',
+                            style: { objectFit: 'cover', width: '100%', height: '100%' }
+                        },
+                        forceVideo: true
+                    }
+                }}
             />
         </div>
     );
