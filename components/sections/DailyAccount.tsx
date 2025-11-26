@@ -82,7 +82,7 @@ export default function DailyAccount() {
                     </p>
 
                     <div className="flex justify-center gap-6">
-                        <SocialLink platform="x" url="https://x.com/suzuki_gashin" className="text-[var(--sns-x)] hover:scale-110" iconSize={32} />
+                        <SocialLink platform="x" url="https://x.com/suzuki_gashin" className="hover:scale-110" iconSize={32} />
                         <SocialLink platform="instagram" url="https://instagram.com/suzuki_gashin" className="text-[var(--sns-instagram)] hover:scale-110" iconSize={32} />
                         <SocialLink platform="facebook" url="https://facebook.com/suzuki.gashin" className="text-[var(--sns-facebook)] hover:scale-110" iconSize={32} />
                     </div>

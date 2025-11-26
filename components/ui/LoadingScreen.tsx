@@ -12,6 +12,9 @@ function preloadVideo(src: string): Promise<void> {
     video.preload = 'auto';
     video.muted = true;
     video.playsInline = true;
+    // iOS Safari requires setAttribute for playsinline to work properly
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
     video.crossOrigin = 'anonymous';
 
     const handleReady = () => {

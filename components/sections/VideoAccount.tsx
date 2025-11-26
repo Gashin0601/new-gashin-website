@@ -20,6 +20,9 @@ function preloadVideo(src: string): Promise<HTMLVideoElement> {
         video.preload = 'auto';
         video.muted = true;
         video.playsInline = true;
+        // iOS Safari requires setAttribute for playsinline to work properly
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
         video.crossOrigin = 'anonymous';
         video.oncanplaythrough = () => {
             preloadedVideos[src] = video;
@@ -40,6 +43,16 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
     useEffect(() => {
         preloadVideo(src);
     }, [src]);
+
+    // Set iOS Safari specific attributes via JavaScript
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        // iOS Safari requires setAttribute for playsinline to work properly
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
+    }, []);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -85,6 +98,11 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
         const video = videoRef.current;
         if (!video) return;
 
+        // Variables for cleanup
+        let canPlayHandler: (() => void) | null = null;
+        let retryTimeout: NodeJS.Timeout | null = null;
+        let isCancelled = false;
+
         // Clear any existing fade interval
         if (fadeIntervalRef.current) {
             clearInterval(fadeIntervalRef.current);
@@ -94,22 +112,56 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
         const shouldPlay = isCurrent && isVisible;
 
         if (shouldPlay) {
-            // Fade in
+            // iOS Safari: Always start playback muted, then unmute after play succeeds
+            // This prevents iOS from triggering fullscreen mode
+            video.muted = true;
             video.volume = 0;
-            video.play().catch(() => {});
 
-            let vol = 0;
-            fadeIntervalRef.current = setInterval(() => {
-                vol += 0.1;
-                if (vol >= 1) {
-                    vol = 1;
-                    if (fadeIntervalRef.current) {
-                        clearInterval(fadeIntervalRef.current);
-                        fadeIntervalRef.current = null;
+            const attemptPlay = () => {
+                if (isCancelled) return;
+
+                video.play()
+                    .then(() => {
+                        if (isCancelled) return;
+
+                        // After play succeeds, restore muted state if user had unmuted
+                        if (!isMuted) {
+                            video.muted = false;
+                        }
+
+                        // Fade in volume
+                        let vol = 0;
+                        fadeIntervalRef.current = setInterval(() => {
+                            vol += 0.1;
+                            if (vol >= 1) {
+                                vol = 1;
+                                if (fadeIntervalRef.current) {
+                                    clearInterval(fadeIntervalRef.current);
+                                    fadeIntervalRef.current = null;
+                                }
+                            }
+                            video.volume = vol;
+                        }, 50);
+                    })
+                    .catch(() => {
+                        if (isCancelled) return;
+                        // Retry after a short delay if play fails (e.g., video not ready yet)
+                        retryTimeout = setTimeout(attemptPlay, 500);
+                    });
+            };
+
+            // Try to play immediately, or wait for video to be ready
+            if (video.readyState >= 2) {
+                attemptPlay();
+            } else {
+                canPlayHandler = () => {
+                    attemptPlay();
+                    if (canPlayHandler) {
+                        video.removeEventListener('canplay', canPlayHandler);
                     }
-                }
-                video.volume = vol;
-            }, 50);
+                };
+                video.addEventListener('canplay', canPlayHandler);
+            }
         } else {
             // Fade out then pause
             let vol = video.volume;
@@ -133,12 +185,19 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
         }
 
         return () => {
+            isCancelled = true;
             if (fadeIntervalRef.current) {
                 clearInterval(fadeIntervalRef.current);
                 fadeIntervalRef.current = null;
             }
+            if (canPlayHandler && video) {
+                video.removeEventListener('canplay', canPlayHandler);
+            }
+            if (retryTimeout) {
+                clearTimeout(retryTimeout);
+            }
         };
-    }, [isCurrent, isLoaded, isVisible]);
+    }, [isCurrent, isLoaded, isVisible, isMuted]);
 
     return (
         <div className="w-full h-full relative bg-black overflow-hidden z-0">
@@ -197,16 +256,24 @@ export default function VideoAccount() {
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
-                    setIsVisible(entry.isIntersecting && entry.intersectionRatio > 0.3);
+                    // Play when even slightly visible (any intersection)
+                    setIsVisible(entry.isIntersecting);
                 });
             },
             {
-                threshold: [0, 0.3, 0.5, 0.7, 1],
-                rootMargin: '-10% 0px -10% 0px'
+                threshold: [0, 0.1, 0.5, 1],
+                rootMargin: '0px'
             }
         );
 
         observer.observe(section);
+
+        // Check initial visibility immediately
+        const rect = section.getBoundingClientRect();
+        const isInitiallyVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        if (isInitiallyVisible) {
+            setIsVisible(true);
+        }
 
         return () => {
             observer.disconnect();
@@ -333,7 +400,7 @@ export default function VideoAccount() {
                         <SocialLink platform="youtube" url="https://youtube.com/@gashin_lv" className="text-[var(--sns-youtube)] hover:scale-110" iconSize={32} />
                         <SocialLink platform="tiktok" url="https://www.tiktok.com/@gashin_lv" className="text-[var(--sns-tiktok)] hover:scale-110" iconSize={32} />
                         <SocialLink platform="instagram" url="https://instagram.com/gashin_lv" className="text-[var(--sns-instagram)] hover:scale-110" iconSize={32} />
-                        <SocialLink platform="x" url="https://x.com/gashin_lv" className="text-[var(--sns-x)] hover:scale-110" iconSize={32} />
+                        <SocialLink platform="x" url="https://x.com/gashin_lv" className="hover:scale-110" iconSize={32} />
                     </div>
                 </div>
 
