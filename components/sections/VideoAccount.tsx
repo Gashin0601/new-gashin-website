@@ -16,14 +16,23 @@ function preloadVideo(src: string): Promise<HTMLVideoElement> {
             return;
         }
         const video = document.createElement('video');
-        video.src = src;
         video.preload = 'auto';
         video.muted = true;
         video.playsInline = true;
+        video.autoplay = true;
         // iOS Safari requires setAttribute for playsinline to work properly
         video.setAttribute('playsinline', '');
         video.setAttribute('webkit-playsinline', '');
+        video.setAttribute('muted', '');
+        video.setAttribute('autoplay', '');
         video.crossOrigin = 'anonymous';
+
+        // Use source element with type for better iOS Safari compatibility
+        const source = document.createElement('source');
+        source.src = src;
+        source.type = 'video/mp4';
+        video.appendChild(source);
+
         video.oncanplaythrough = () => {
             preloadedVideos[src] = video;
             resolve(video);
@@ -90,11 +99,20 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
         const handleCanPlay = () => {
             setIsLoaded(true);
             setHasFirstFrame(true);
+            // Try to play immediately when ready (iOS Safari)
+            if (isCurrent && isVisible) {
+                video.play().catch(() => {});
+            }
+        };
+
+        const handlePlaying = () => {
+            setHasFirstFrame(true);
         };
 
         video.addEventListener('loadeddata', handleLoadedData);
         video.addEventListener('loadedmetadata', handleLoadedMetadata);
         video.addEventListener('canplay', handleCanPlay);
+        video.addEventListener('playing', handlePlaying);
 
         // Force load
         video.load();
@@ -103,8 +121,9 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
             video.removeEventListener('loadeddata', handleLoadedData);
             video.removeEventListener('loadedmetadata', handleLoadedMetadata);
             video.removeEventListener('canplay', handleCanPlay);
+            video.removeEventListener('playing', handlePlaying);
         };
-    }, [src]);
+    }, [src, isCurrent, isVisible]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -242,7 +261,6 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
             {/* iOS Safari fix: Use min-width/min-height + scale transform for object-fit: cover bug */}
             <video
                 ref={videoRef}
-                src={src}
                 className={`absolute z-[1] transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!hasFirstFrame ? "opacity-0" : ""}`}
                 style={{
                     top: '50%',
@@ -255,12 +273,15 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
                     objectFit: 'cover',
                     objectPosition: 'center',
                 }}
-                muted={isMuted}
+                autoPlay
+                muted
                 loop
                 playsInline
                 preload="auto"
                 crossOrigin="anonymous"
-            />
+            >
+                <source src={src} type="video/mp4" />
+            </video>
             {/* Mute indicator */}
             {isCurrent && isMuted && hasFirstFrame && (
                 <div
@@ -346,25 +367,43 @@ export default function VideoAccount() {
         };
     }, []);
 
-    // Try to unmute after any user interaction on the page
+    // Try to unmute and play after any user interaction on the page (required for iOS Safari)
     useEffect(() => {
+        let hasInteracted = false;
+
         const handleUserInteraction = () => {
+            if (hasInteracted) return;
+            hasInteracted = true;
+
             setIsMuted(false);
+
+            // Try to play all videos on first interaction (iOS Safari requirement)
+            const videos = document.querySelectorAll('video');
+            videos.forEach(video => {
+                if (video.paused) {
+                    video.muted = true; // Must be muted for autoplay
+                    video.play().catch(() => {});
+                }
+            });
+
             // Remove listeners after first interaction
             document.removeEventListener('click', handleUserInteraction);
             document.removeEventListener('touchstart', handleUserInteraction);
+            document.removeEventListener('touchend', handleUserInteraction);
             document.removeEventListener('scroll', handleUserInteraction);
             document.removeEventListener('keydown', handleUserInteraction);
         };
 
         document.addEventListener('click', handleUserInteraction);
         document.addEventListener('touchstart', handleUserInteraction);
-        document.addEventListener('scroll', handleUserInteraction);
+        document.addEventListener('touchend', handleUserInteraction);
+        document.addEventListener('scroll', handleUserInteraction, { passive: true });
         document.addEventListener('keydown', handleUserInteraction);
 
         return () => {
             document.removeEventListener('click', handleUserInteraction);
             document.removeEventListener('touchstart', handleUserInteraction);
+            document.removeEventListener('touchend', handleUserInteraction);
             document.removeEventListener('scroll', handleUserInteraction);
             document.removeEventListener('keydown', handleUserInteraction);
         };
