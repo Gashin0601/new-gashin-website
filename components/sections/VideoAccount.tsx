@@ -62,13 +62,15 @@ function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
                     onReady={() => setIsReady(true)}
                     onBuffer={() => setIsBuffering(true)}
                     onBufferEnd={() => setIsBuffering(false)}
-                    config={{
-                        file: {
-                            attributes: {
-                                style: { objectFit: 'cover', width: '100%', height: '100%' }
+                    {...{
+                        config: {
+                            file: {
+                                attributes: {
+                                    style: { objectFit: 'cover', width: '100%', height: '100%' }
+                                }
                             }
                         }
-                    }}
+                    } as any}
                 />
             </div>
         </div>
