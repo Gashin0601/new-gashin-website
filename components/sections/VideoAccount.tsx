@@ -9,16 +9,28 @@ import videosData from "@/data/videos.json";
 function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [hasFirstFrame, setHasFirstFrame] = useState(false);
 
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
-        const handleLoadedData = () => setIsLoaded(true);
+        const handleLoadedData = () => {
+            setIsLoaded(true);
+            setHasFirstFrame(true);
+        };
+
+        // loadedmetadata fires when first frame is available
+        const handleLoadedMetadata = () => {
+            setHasFirstFrame(true);
+        };
+
         video.addEventListener('loadeddata', handleLoadedData);
+        video.addEventListener('loadedmetadata', handleLoadedMetadata);
 
         return () => {
             video.removeEventListener('loadeddata', handleLoadedData);
+            video.removeEventListener('loadedmetadata', handleLoadedMetadata);
         };
     }, []);
 
@@ -26,9 +38,9 @@ function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
         const video = videoRef.current;
         if (!video) return;
 
-        if (isCurrent) {
+        if (isCurrent && isLoaded) {
             video.play().catch(() => {});
-        } else {
+        } else if (!isCurrent) {
             video.pause();
             video.currentTime = 0;
         }
@@ -36,7 +48,7 @@ function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
 
     return (
         <div className="w-full h-full relative bg-black overflow-hidden">
-            {!isLoaded && (
+            {!hasFirstFrame && (
                 <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </div>
@@ -44,11 +56,11 @@ function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
             <video
                 ref={videoRef}
                 src={src}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!isLoaded ? "opacity-0" : ""}`}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!hasFirstFrame ? "opacity-0" : ""}`}
                 muted
                 loop
                 playsInline
-                preload="auto"
+                preload={isCurrent ? "auto" : "metadata"}
                 crossOrigin="anonymous"
             />
         </div>
