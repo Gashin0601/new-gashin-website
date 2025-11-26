@@ -201,22 +201,62 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
         };
     }, [isCurrent, isVisible, isMuted]);
 
+    // Container ref to get dimensions
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [videoDimensions, setVideoDimensions] = useState({ width: '100%', height: '100%' });
+
+    // Calculate video dimensions to cover container (for 9:16 vertical video)
+    useEffect(() => {
+        const updateDimensions = () => {
+            const container = containerRef.current;
+            if (!container) return;
+
+            const containerWidth = container.offsetWidth;
+            const containerHeight = container.offsetHeight;
+            const containerRatio = containerWidth / containerHeight;
+            const videoRatio = 9 / 16; // Vertical video
+
+            let width, height;
+            if (containerRatio > videoRatio) {
+                // Container is wider - match width, overflow height
+                width = containerWidth;
+                height = containerWidth / videoRatio;
+            } else {
+                // Container is taller - match height, overflow width
+                height = containerHeight;
+                width = containerHeight * videoRatio;
+            }
+
+            setVideoDimensions({
+                width: `${width}px`,
+                height: `${height}px`
+            });
+        };
+
+        updateDimensions();
+        window.addEventListener('resize', updateDimensions);
+        return () => window.removeEventListener('resize', updateDimensions);
+    }, []);
+
     return (
-        <div className="w-full h-full relative bg-black overflow-hidden z-0">
+        <div ref={containerRef} className="w-full h-full relative bg-black overflow-hidden z-0">
             {!hasFirstFrame && (
                 <div className="absolute inset-0 flex items-center justify-center z-[5]">
                     <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </div>
             )}
-            {/* iOS Safari compatible video styling */}
+            {/* iOS Safari compatible: use calculated pixel dimensions */}
             <video
                 ref={videoRef}
-                className={`absolute inset-0 w-full h-full z-[1] transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!hasFirstFrame ? "opacity-0" : ""}`}
+                className={`absolute z-[1] transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!hasFirstFrame ? "opacity-0" : ""}`}
                 style={{
+                    top: '50%',
+                    left: '50%',
+                    width: videoDimensions.width,
+                    height: videoDimensions.height,
+                    transform: 'translate(-50%, -50%)',
                     objectFit: 'cover',
                     objectPosition: 'center',
-                    WebkitTransform: 'translateZ(0)',
-                    transform: 'translateZ(0)',
                 }}
                 autoPlay
                 muted
