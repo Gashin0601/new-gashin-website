@@ -53,9 +53,12 @@ export default function Header() {
                 </Link>
 
                 {/* Hamburger Button */}
+                {/* In light mode and normal mode: black. In dark mode: white */}
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="p-2 rounded-full bg-[var(--bg-primary)]/80 backdrop-blur-md shadow-lg hover:scale-105 transition-transform text-[var(--text-primary)]"
+                    className={`p-2 rounded-full bg-[var(--bg-primary)]/80 backdrop-blur-md shadow-lg hover:scale-105 transition-transform ${
+                        theme === "dark" ? "text-white" : "text-black"
+                    }`}
                     aria-label="メニューを開く"
                     aria-expanded={isOpen}
                     aria-controls="main-menu"

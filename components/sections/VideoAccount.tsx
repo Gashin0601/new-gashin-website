@@ -54,9 +54,9 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
             preloadVideo(src);
         }
 
-        // Apply styles
+        // Apply styles - ensure video is centered
         video.className = `z-[1] transition-opacity duration-300`;
-        video.style.cssText = 'width: auto; height: 100%; min-width: 100%; min-height: 100%; object-fit: cover;';
+        video.style.cssText = 'width: auto; height: 100%; min-width: 100%; min-height: 100%; object-fit: cover; object-position: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);';
 
         // Event listeners
         const handleLoadedData = () => setHasFirstFrame(true);
@@ -468,12 +468,12 @@ export default function VideoAccount() {
     return (
         <section
             ref={sectionRef}
-            className="py-24 bg-[var(--bg-primary)] overflow-hidden"
+            className="py-16 md:py-20 bg-[var(--bg-primary)] overflow-hidden"
             aria-label="Gashin / 弱視慶應生 - 動画アカウント"
         >
             <div className="max-w-6xl mx-auto px-6">
                 {/* Account Header */}
-                <header className="text-center mb-16 space-y-6">
+                <header className="text-center mb-10 md:mb-12 space-y-4 md:space-y-6">
                     <div
                         className="relative w-24 h-24 mx-auto mb-6 rounded-full overflow-hidden shadow-xl border-2 border-white/10"
                         role="img"
@@ -523,7 +523,7 @@ export default function VideoAccount() {
 
                 {/* Carousel Container */}
                 <div
-                    className="relative h-[500px] sm:h-[550px] md:h-[600px] flex items-center justify-center"
+                    className="relative h-[480px] sm:h-[520px] md:h-[540px] flex items-center justify-center"
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                     onTouchStart={handleTouchStart}
@@ -680,7 +680,7 @@ export default function VideoAccount() {
                 </div>
 
                 {/* Carousel indicators */}
-                <div className="flex justify-center gap-3 mt-8">
+                <div className="flex justify-center gap-3 mt-6">
                     {videosData.map((_, index) => (
                         <button
                             key={index}
