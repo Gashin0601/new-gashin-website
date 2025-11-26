@@ -292,12 +292,30 @@ export default function VideoAccount() {
     const touchStartRef = useRef<{ x: number; y: number } | null>(null);
     const overlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Preload all videos on mount
+    // Preload current, next, and previous videos first, then others
     useEffect(() => {
-        videosData.forEach((video) => {
-            preloadVideo(video.videoSrc);
+        // Priority order: current, next, previous, then rest
+        const preloadOrder = [
+            currentIndex,
+            (currentIndex + 1) % videosData.length,
+            (currentIndex - 1 + videosData.length) % videosData.length,
+            (currentIndex + 2) % videosData.length,
+        ];
+
+        // Add remaining videos
+        for (let i = 0; i < videosData.length; i++) {
+            if (!preloadOrder.includes(i)) {
+                preloadOrder.push(i);
+            }
+        }
+
+        // Preload in order with slight delays for prioritization
+        preloadOrder.forEach((index, i) => {
+            setTimeout(() => {
+                preloadVideo(videosData[index].videoSrc);
+            }, i * 100); // Stagger by 100ms
         });
-    }, []);
+    }, [currentIndex]);
 
     // Intersection Observer to detect section visibility
     useEffect(() => {
@@ -402,6 +420,10 @@ export default function VideoAccount() {
 
         const nextSlide = () => {
             setCurrentIndex((prev) => (prev + 1) % videosData.length);
+            // Vibration feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
         };
 
         timeoutRef.current = setInterval(nextSlide, 10000); // 10 seconds
@@ -413,6 +435,13 @@ export default function VideoAccount() {
 
     const handleUnmute = () => {
         setIsMuted(false);
+    };
+
+    // Vibration feedback when video changes
+    const triggerVibration = () => {
+        if (navigator.vibrate) {
+            navigator.vibrate(50); // 50ms short vibration
+        }
     };
 
     // Handle overlay toggle for mobile tap
@@ -596,6 +625,7 @@ export default function VideoAccount() {
 
                                             // If horizontal swipe detected, handle navigation
                                             if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                                                triggerVibration();
                                                 if (deltaX > 0) {
                                                     setCurrentIndex((prev) => (prev - 1 + videosData.length) % videosData.length);
                                                 } else {
@@ -629,6 +659,7 @@ export default function VideoAccount() {
                                             className="absolute inset-0 z-40 cursor-pointer"
                                             onClick={(e) => {
                                                 e.stopPropagation();
+                                                triggerVibration();
                                                 setCurrentIndex(index);
                                             }}
                                             role="button"
@@ -660,10 +691,12 @@ export default function VideoAccount() {
                                                 role="dialog"
                                                 aria-label={`${video.title}をSNSで見る`}
                                                 aria-hidden={!showOverlay}
+                                                onClick={(e) => e.stopPropagation()}
+                                                onTouchStart={(e) => e.stopPropagation()}
+                                                onTouchEnd={(e) => e.stopPropagation()}
                                             >
                                                 <nav
                                                     className="flex gap-4"
-                                                    onClick={(e) => e.stopPropagation()}
                                                     aria-label="この動画のSNSリンク"
                                                 >
                                                     {Object.entries(video.socialLinks).map(([platform, url]) => (
@@ -691,7 +724,12 @@ export default function VideoAccount() {
                     {videosData.map((_, index) => (
                         <button
                             key={index}
-                            onClick={() => setCurrentIndex(index)}
+                            onClick={() => {
+                                if (index !== currentIndex) {
+                                    triggerVibration();
+                                    setCurrentIndex(index);
+                                }
+                            }}
                             className={`h-3 rounded-full transition-all cursor-pointer ${index === currentIndex
                                 ? "bg-[var(--text-primary)] w-8"
                                 : "bg-[var(--border-color)] hover:bg-[var(--text-secondary)] w-3"
