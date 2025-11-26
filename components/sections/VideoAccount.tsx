@@ -45,17 +45,6 @@ function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
                     transition: 'opacity 0.3s'
                 }}
                 onReady={() => setIsReady(true)}
-                onBuffer={() => {}}
-                onBufferEnd={() => {}}
-                config={{
-                    file: {
-                        attributes: {
-                            preload: 'auto',
-                            style: { objectFit: 'cover', width: '100%', height: '100%' }
-                        },
-                        forceVideo: true
-                    }
-                }}
             />
         </div>
     );
