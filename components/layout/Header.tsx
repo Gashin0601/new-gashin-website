@@ -50,12 +50,18 @@ export default function Header() {
     };
 
     return (
-        <header
-            className="fixed top-0 left-0 right-0 z-40"
-            role="banner"
-        >
-            {/* Compact Header Bar */}
-            <div className="flex items-center justify-between p-3 sm:p-4 md:p-6">
+        <>
+            {/* Spacer to prevent content from being hidden behind fixed header */}
+            <div
+                className="h-[88px] sm:h-[112px] md:h-[144px]"
+                aria-hidden="true"
+            />
+            <header
+                className="fixed top-0 left-0 right-0 z-40"
+                role="banner"
+            >
+                {/* Compact Header Bar */}
+                <div className="flex items-center justify-between p-3 sm:p-4 md:p-6">
                 {/* Logo */}
                 <Link
                     href="/"
@@ -195,5 +201,6 @@ export default function Header() {
                 )}
             </AnimatePresence>
         </header>
+        </>
     );
 }
