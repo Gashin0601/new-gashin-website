@@ -1,50 +1,68 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
 import SocialLink from "../ui/SocialLinks";
 import videosData from "@/data/videos.json";
 
-// Dynamic import to avoid SSR issues
-const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
-
 function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
-    const [isReady, setIsReady] = useState(false);
-    const playerRef = useRef<any>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [isBuffering, setIsBuffering] = useState(false);
 
+    // Preload video when component mounts
     useEffect(() => {
-        if (!isCurrent && playerRef.current) {
-            // Reset to beginning when not current
-            playerRef.current.seekTo(0);
+        const video = videoRef.current;
+        if (!video) return;
+
+        // Event handlers
+        const handleLoadedData = () => setIsLoaded(true);
+        const handleWaiting = () => setIsBuffering(true);
+        const handlePlaying = () => setIsBuffering(false);
+        const handleCanPlayThrough = () => setIsBuffering(false);
+
+        video.addEventListener('loadeddata', handleLoadedData);
+        video.addEventListener('waiting', handleWaiting);
+        video.addEventListener('playing', handlePlaying);
+        video.addEventListener('canplaythrough', handleCanPlayThrough);
+
+        return () => {
+            video.removeEventListener('loadeddata', handleLoadedData);
+            video.removeEventListener('waiting', handleWaiting);
+            video.removeEventListener('playing', handlePlaying);
+            video.removeEventListener('canplaythrough', handleCanPlayThrough);
+        };
+    }, []);
+
+    // Handle play/pause based on current state
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (isCurrent) {
+            video.play().catch(() => {});
+        } else {
+            video.pause();
+            video.currentTime = 0;
         }
-    }, [isCurrent]);
+    }, [isCurrent, isLoaded]);
 
     return (
         <div className="w-full h-full relative bg-black">
-            {!isReady && (
+            {(!isLoaded || isBuffering) && (
                 <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </div>
             )}
-            <ReactPlayer
-                ref={playerRef}
-                url={src}
-                playing={isCurrent}
-                loop
+            <video
+                ref={videoRef}
+                src={src}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!isLoaded ? "opacity-0" : ""}`}
                 muted
-                playsinline
-                width="100%"
-                height="100%"
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    opacity: isReady ? (isCurrent ? 1 : 0.6) : 0,
-                    transition: 'opacity 0.3s'
-                }}
-                onReady={() => setIsReady(true)}
+                loop
+                playsInline
+                preload="auto"
             />
         </div>
     );
