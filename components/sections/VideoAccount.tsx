@@ -67,16 +67,9 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
 
         // Event listeners
         const handleLoadedData = () => setHasFirstFrame(true);
-        const handleCanPlay = () => {
-            setHasFirstFrame(true);
-            if (isCurrent && isVisible) {
-                video!.play().catch(() => { });
-            }
-        };
         const handlePlaying = () => setHasFirstFrame(true);
 
         video.addEventListener('loadeddata', handleLoadedData);
-        video.addEventListener('canplay', handleCanPlay);
         video.addEventListener('playing', handlePlaying);
 
         // Clear container and add video
@@ -87,13 +80,18 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
         // Check if already ready (from cache)
         if (isFromCache && video.readyState >= 2) {
             setHasFirstFrame(true);
+            // Attempt to play immediately if this is the current video and section is visible
+            if (isCurrent && isVisible) {
+                video.muted = true;
+                video.volume = 0;
+                video.play().catch(() => { });
+            }
         } else if (video.readyState < 2) {
             video.load();
         }
 
         return () => {
             video!.removeEventListener('loadeddata', handleLoadedData);
-            video!.removeEventListener('canplay', handleCanPlay);
             video!.removeEventListener('playing', handlePlaying);
         };
     }, [src]);
