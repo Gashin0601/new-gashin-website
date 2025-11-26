@@ -8,7 +8,7 @@ import { ArrowRight } from "lucide-react";
 export default function Hero() {
     return (
         <section
-            className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white pb-16 md:pb-20"
+            className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[var(--bg-primary)] pb-16 md:pb-20"
             aria-label="鈴木我信の紹介"
         >
             {/* Content Container */}
@@ -25,7 +25,7 @@ export default function Hero() {
                         The visual <br> is hidden from screen readers with aria-hidden
                     */}
                     <h1
-                        className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-tight tracking-tight text-black"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-tight tracking-tight text-[var(--text-primary)]"
                         aria-label="我を信じて突き進む。"
                     >
                         <span aria-hidden="true">
@@ -39,7 +39,7 @@ export default function Hero() {
                         Visual line breaks are hidden from assistive technology
                     */}
                     <div
-                        className="space-y-3 sm:space-y-4 text-base sm:text-lg md:text-xl text-gray-600 max-w-md"
+                        className="space-y-3 sm:space-y-4 text-base sm:text-lg md:text-xl text-[var(--text-secondary)] max-w-md"
                         role="paragraph"
                         aria-label="慶應義塾大学 環境情報学部 1年。生まれつきの視覚障害（弱視）で、SNSでの発信やアプリ開発を通して、障害を強みに変えるために活動中。"
                     >

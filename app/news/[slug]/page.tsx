@@ -66,12 +66,12 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
   if (!newsItem) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-6 py-20 bg-white">
+      <main className="min-h-screen flex items-center justify-center px-6 py-20 bg-[var(--bg-primary)]">
         <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4 text-gray-900">記事が見つかりません</h1>
+          <h1 className="text-3xl font-bold mb-4 text-[var(--text-primary)]">記事が見つかりません</h1>
           <Link
             href="/news"
-            className="text-blue-600 hover:text-blue-800 underline"
+            className="text-[var(--accent)] hover:text-[var(--accent-hover)] underline"
           >
             ニュース一覧に戻る
           </Link>
@@ -93,7 +93,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
         datePublished={newsItem.date}
       />
       <main
-        className="min-h-screen px-6 py-20 pt-24 bg-white"
+        className="min-h-screen px-6 py-20 pt-24 bg-[var(--bg-primary)]"
         aria-label={`${newsItem.title}の記事詳細ページ`}
       >
         <article
@@ -102,8 +102,8 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
         >
           {/* Header */}
           <header className="mb-8">
-            <h1 className="text-4xl font-bold mb-4 text-gray-900">{newsItem.title}</h1>
-            <div className="flex items-center gap-3 text-gray-500 mb-6">
+            <h1 className="text-4xl font-bold mb-4 text-[var(--text-primary)]">{newsItem.title}</h1>
+            <div className="flex items-center gap-3 text-[var(--text-secondary)] mb-6">
               <span className="font-semibold">{newsItem.source}</span>
               <span aria-hidden="true">•</span>
               <time dateTime={newsItem.date}>
@@ -133,7 +133,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
           {/* Summary */}
           <section className="prose prose-lg max-w-none mb-8" aria-label="記事概要">
-            <p className="text-xl leading-relaxed text-gray-700">{newsItem.summary}</p>
+            <p className="text-xl leading-relaxed text-[var(--text-secondary)]">{newsItem.summary}</p>
           </section>
 
           {/* External Link - Hyperlink style */}
@@ -142,7 +142,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
               href={newsItem.externalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 underline underline-offset-2 text-lg"
+              className="inline-flex items-center gap-1.5 text-[var(--accent)] hover:text-[var(--accent-hover)] underline underline-offset-2 text-lg"
               aria-label={`${linkText}（新しいタブで開きます）`}
             >
               {linkText}
@@ -152,19 +152,19 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
           {/* Navigation */}
           <nav
-            className="flex gap-4 pt-8 border-t border-gray-200"
+            className="flex gap-4 pt-8 border-t border-[var(--border-color)]"
             aria-label="ページナビゲーション"
           >
             <Link
               href="/news"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-lg font-semibold text-gray-900 hover:bg-gray-200 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--bg-secondary)] rounded-lg font-semibold text-[var(--text-primary)] hover:bg-[var(--border-color)] transition-colors"
               aria-label="ニュース一覧ページへ"
             >
               ニュース一覧
             </Link>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-lg font-semibold text-gray-900 hover:bg-gray-200 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--bg-secondary)] rounded-lg font-semibold text-[var(--text-primary)] hover:bg-[var(--border-color)] transition-colors"
               aria-label="トップページに戻る"
             >
               トップに戻る

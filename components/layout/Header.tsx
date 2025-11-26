@@ -4,43 +4,20 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X, Volume2, VolumeX, Moon, Sun, Monitor } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
-    const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
     const [audioEnabled, setAudioEnabled] = useState(false);
+    const { theme, setTheme } = useTheme();
 
-    // Initialize theme from localStorage
+    // Initialize audio from localStorage
     useEffect(() => {
-        const savedTheme = localStorage.getItem("theme") as "light" | "dark" | "system" | null;
-        if (savedTheme) {
-            setTheme(savedTheme);
-            applyTheme(savedTheme);
-        } else {
-            applyTheme("system");
-        }
-
         const savedAudio = localStorage.getItem("audioEnabled");
         if (savedAudio === "true") {
             setAudioEnabled(true);
         }
     }, []);
-
-    const applyTheme = (newTheme: "light" | "dark" | "system") => {
-        const root = document.documentElement;
-        if (newTheme === "system") {
-            const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-            root.setAttribute("data-theme", systemTheme);
-        } else {
-            root.setAttribute("data-theme", newTheme);
-        }
-    };
-
-    const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
-        setTheme(newTheme);
-        localStorage.setItem("theme", newTheme);
-        applyTheme(newTheme);
-    };
 
     const toggleAudio = () => {
         const newState = !audioEnabled;
@@ -164,7 +141,7 @@ export default function Header() {
                                         aria-labelledby="theme-group-label"
                                     >
                                         <button
-                                            onClick={() => handleThemeChange("light")}
+                                            onClick={() => setTheme("light")}
                                             aria-label="ライトモードに切り替え"
                                             role="radio"
                                             aria-checked={theme === "light"}
@@ -174,17 +151,17 @@ export default function Header() {
                                             <Sun size={18} aria-hidden="true" />
                                         </button>
                                         <button
-                                            onClick={() => handleThemeChange("system")}
-                                            aria-label="システム設定に合わせる"
+                                            onClick={() => setTheme("normal")}
+                                            aria-label="通常モード"
                                             role="radio"
-                                            aria-checked={theme === "system"}
-                                            className={`flex-1 flex justify-center py-2 rounded-full transition-colors ${theme === "system" ? "bg-white dark:bg-gray-800 shadow-sm text-black dark:text-white" : "text-gray-400"
+                                            aria-checked={theme === "normal"}
+                                            className={`flex-1 flex justify-center py-2 rounded-full transition-colors ${theme === "normal" ? "bg-white dark:bg-gray-800 shadow-sm text-black dark:text-white" : "text-gray-400"
                                                 }`}
                                         >
                                             <Monitor size={18} aria-hidden="true" />
                                         </button>
                                         <button
-                                            onClick={() => handleThemeChange("dark")}
+                                            onClick={() => setTheme("dark")}
                                             aria-label="ダークモードに切り替え"
                                             role="radio"
                                             aria-checked={theme === "dark"}

@@ -10,13 +10,13 @@ export default function NewsPage() {
 
   return (
     <main
-      className="min-h-screen px-6 py-20 pt-24 bg-white"
+      className="min-h-screen px-6 py-20 pt-24 bg-[var(--bg-primary)]"
       aria-label="メディア掲載一覧ページ"
     >
       <div className="max-w-4xl mx-auto">
         <header>
-          <h1 className="text-4xl font-bold mb-4 text-gray-900">メディア掲載</h1>
-          <p className="text-gray-600 mb-12">
+          <h1 className="text-4xl font-bold mb-4 text-[var(--text-primary)]">メディア掲載</h1>
+          <p className="text-[var(--text-secondary)] mb-12">
             {newsData.length}件の掲載記事
           </p>
         </header>
@@ -34,13 +34,13 @@ export default function NewsPage() {
             >
               <Link
                 href={`/news/${item.slug}`}
-                className="block bg-gray-50 rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
+                className="block bg-[var(--bg-secondary)] rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
                 aria-label={`${item.title}の記事を読む - ${item.source}、${new Date(item.date).toLocaleDateString('ja-JP')}`}
               >
                 <div className="flex gap-4 p-6">
                   {/* Image */}
                   {item.image && (
-                    <div className="flex-shrink-0 w-32 h-32 bg-gray-200 rounded-lg overflow-hidden">
+                    <div className="flex-shrink-0 w-32 h-32 bg-[var(--border-color)] rounded-lg overflow-hidden">
                       <Image
                         src={item.image}
                         alt=""
@@ -54,17 +54,17 @@ export default function NewsPage() {
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <h2 className="font-semibold text-xl mb-2 line-clamp-2 text-gray-900">
+                    <h2 className="font-semibold text-xl mb-2 line-clamp-2 text-[var(--text-primary)]">
                       {item.title}
                     </h2>
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                    <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] mb-3">
                       <span>{item.source}</span>
                       <span aria-hidden="true">•</span>
                       <time dateTime={item.date}>
                         {new Date(item.date).toLocaleDateString('ja-JP')}
                       </time>
                     </div>
-                    <p className="text-gray-600 line-clamp-3">
+                    <p className="text-[var(--text-secondary)] line-clamp-3">
                       {item.summary}
                     </p>
                   </div>
@@ -77,7 +77,7 @@ export default function NewsPage() {
         <nav className="text-center mt-12" aria-label="ページナビゲーション">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-lg font-semibold text-gray-900 hover:bg-gray-200 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--bg-secondary)] rounded-lg font-semibold text-[var(--text-primary)] hover:bg-[var(--border-color)] transition-colors"
             aria-label="トップページに戻る"
           >
             トップに戻る

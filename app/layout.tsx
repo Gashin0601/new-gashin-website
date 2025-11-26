@@ -4,6 +4,7 @@ import Header from "@/components/layout/Header";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import SkipLink from "@/components/ui/SkipLink";
 import JsonLd from "@/components/seo/JsonLd";
+import { ThemeProvider } from "@/hooks/useTheme";
 
 const baseUrl = "https://gashinsuzuki.com";
 
@@ -116,13 +117,15 @@ export default function RootLayout({
         <JsonLd />
       </head>
       <body suppressHydrationWarning>
-        <SkipLink />
-        <div className="bg-noise" aria-hidden="true" />
-        <LoadingScreen />
-        <Header />
-        <div id="main-content" tabIndex={-1}>
-          {children}
-        </div>
+        <ThemeProvider>
+          <SkipLink />
+          <div className="bg-noise" aria-hidden="true" />
+          <LoadingScreen />
+          <Header />
+          <div id="main-content" tabIndex={-1}>
+            {children}
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

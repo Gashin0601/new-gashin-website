@@ -23,12 +23,12 @@ export default function MediaSection() {
 
     return (
         <section
-            className="py-16 sm:py-20 md:py-24 bg-white"
+            className="py-16 sm:py-20 md:py-24 bg-[var(--bg-primary)]"
             aria-label="ニュース・メディア掲載"
         >
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
                 <div className="flex items-center justify-between mb-8 sm:mb-10 md:mb-12">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900" id="news-section-title">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)]" id="news-section-title">
                         ニュース
                     </h2>
                     <Link
@@ -63,7 +63,7 @@ export default function MediaSection() {
                                     href={`/news/${news.slug}`}
                                     aria-label={`${news.title}の記事を読む - ${news.source}、${new Date(news.date).toLocaleDateString('ja-JP')}`}
                                 >
-                                    <div className="aspect-video bg-gray-200 rounded-xl overflow-hidden mb-4 relative w-full">
+                                    <div className="aspect-video bg-[var(--bg-secondary)] rounded-xl overflow-hidden mb-4 relative w-full">
                                         <Image
                                             src={news.image || "/images/news/placeholder.png"}
                                             alt=""
@@ -80,7 +80,7 @@ export default function MediaSection() {
                                             <span aria-hidden="true">•</span>
                                             <time dateTime={news.date}>{news.date}</time>
                                         </div>
-                                        <h3 className="text-xl font-bold leading-snug text-gray-900 group-hover:text-[var(--accent)] transition-colors">
+                                        <h3 className="text-xl font-bold leading-snug text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
                                             {news.title}
                                         </h3>
                                         <p className="text-[var(--text-secondary)] line-clamp-2 text-sm">

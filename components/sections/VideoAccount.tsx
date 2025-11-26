@@ -458,7 +458,7 @@ export default function VideoAccount() {
     return (
         <section
             ref={sectionRef}
-            className="py-24 bg-white overflow-hidden"
+            className="py-24 bg-[var(--bg-primary)] overflow-hidden"
             aria-label="Gashin / 弱視慶應生 - 動画アカウント"
         >
             <div className="max-w-6xl mx-auto px-6">
@@ -477,10 +477,10 @@ export default function VideoAccount() {
                             aria-hidden="true"
                         />
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900" id="video-account-title">
+                    <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)]" id="video-account-title">
                         Gashin / 弱視慶應生
                     </h2>
-                    <p className="text-sm text-gray-400 font-mono -mt-4" aria-label="ユーザー名 アット gashin_lv">
+                    <p className="text-sm text-[var(--text-secondary)] font-mono -mt-4" aria-label="ユーザー名 アット gashin_lv">
                         @gashin_lv
                     </p>
                     <p
@@ -676,8 +676,8 @@ export default function VideoAccount() {
                             key={index}
                             onClick={() => setCurrentIndex(index)}
                             className={`h-3 rounded-full transition-all cursor-pointer ${index === currentIndex
-                                ? "bg-gray-900 w-8"
-                                : "bg-gray-300 hover:bg-gray-500 w-3"
+                                ? "bg-[var(--text-primary)] w-8"
+                                : "bg-[var(--border-color)] hover:bg-[var(--text-secondary)] w-3"
                                 }`}
                             aria-label={`動画 ${index + 1} に移動`}
                         />

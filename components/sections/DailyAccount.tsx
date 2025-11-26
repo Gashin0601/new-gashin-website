@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import SocialLink from "../ui/SocialLinks";
+import { useTheme } from "@/hooks/useTheme";
 
 declare global {
     interface Window {
@@ -18,6 +19,7 @@ export default function DailyAccount() {
     const tweetContainerRef = useRef<HTMLDivElement>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
+    const { resolvedTheme } = useTheme();
 
     useEffect(() => {
         const loadTwitterWidget = () => {
@@ -64,7 +66,7 @@ export default function DailyAccount() {
 
     return (
         <section
-            className="py-24 bg-white"
+            className="py-24 bg-[var(--bg-primary)]"
             aria-label="鈴木我信 - 日常アカウント"
         >
             <div className="max-w-6xl mx-auto px-6">
@@ -83,10 +85,10 @@ export default function DailyAccount() {
                             aria-hidden="true"
                         />
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900" id="daily-account-title">
+                    <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)]" id="daily-account-title">
                         鈴木我信
                     </h2>
-                    <p className="text-sm text-gray-400 font-mono -mt-4" aria-label="ユーザー名 アット suzuki_gashin">
+                    <p className="text-sm text-[var(--text-secondary)] font-mono -mt-4" aria-label="ユーザー名 アット suzuki_gashin">
                         @suzuki_gashin
                     </p>
                     <p
@@ -112,20 +114,20 @@ export default function DailyAccount() {
                     role="region"
                     aria-label="鈴木我信の最新のX（Twitter）投稿"
                 >
-                    <div ref={tweetContainerRef} className="bg-white rounded-xl overflow-hidden min-h-[200px]">
+                    <div ref={tweetContainerRef} className="bg-[var(--bg-secondary)] rounded-xl overflow-hidden min-h-[200px]">
                         {isLoading && !hasError && (
                             <div
                                 className="flex items-center justify-center h-[200px]"
                                 role="status"
                                 aria-label="投稿を読み込み中"
                             >
-                                <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-600 rounded-full animate-spin" aria-hidden="true"></div>
+                                <div className="w-8 h-8 border-4 border-[var(--border-color)] border-t-[var(--text-secondary)] rounded-full animate-spin" aria-hidden="true"></div>
                                 <span className="sr-only">読み込み中...</span>
                             </div>
                         )}
                         {hasError && (
                             <div
-                                className="flex flex-col items-center justify-center h-[200px] text-gray-500"
+                                className="flex flex-col items-center justify-center h-[200px] text-[var(--text-secondary)]"
                                 role="alert"
                             >
                                 <p className="mb-2">投稿を読み込めませんでした</p>
@@ -133,7 +135,7 @@ export default function DailyAccount() {
                                     href="https://x.com/suzuki_gashin"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-500 hover:underline"
+                                    className="text-[var(--accent)] hover:underline"
                                     aria-label="鈴木我信のXアカウントを新しいタブで開く"
                                 >
                                     Xで見る →
@@ -144,7 +146,7 @@ export default function DailyAccount() {
                             className="twitter-tweet"
                             data-lang="ja"
                             data-dnt="true"
-                            data-theme="light"
+                            data-theme={resolvedTheme}
                         >
                             <a href="https://twitter.com/suzuki_gashin/status/1968874968055214136">鈴木我信のツイート</a>
                         </blockquote>

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useTheme, type Theme } from '@/hooks/useTheme';
+import { useTheme, type ThemeMode } from '@/hooks/useTheme';
 import { useAudio } from '@/hooks/useAudio';
 
 interface HamburgerMenuProps {
@@ -12,7 +12,7 @@ interface HamburgerMenuProps {
 }
 
 export function HamburgerMenu({ isOpen, onClose, isStoryPage = false }: HamburgerMenuProps) {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { audioEnabled, toggleAudio } = useAudio();
   const menuRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -63,8 +63,8 @@ export function HamburgerMenu({ isOpen, onClose, isStoryPage = false }: Hamburge
     }
   }, [isOpen, onClose]);
 
-  const handleThemeChange = (newTheme: Theme) => {
-    toggleTheme(newTheme);
+  const handleThemeChange = (newTheme: ThemeMode) => {
+    setTheme(newTheme);
   };
 
   const handleAudioToggle = () => {
@@ -185,8 +185,7 @@ export function HamburgerMenu({ isOpen, onClose, isStoryPage = false }: Hamburge
             </div>
 
             {/* Theme Switcher */}
-            {!isStoryPage && (
-              <div>
+            <div>
                 <div className="flex items-center gap-3 mb-3 px-4">
                   <span className="text-xl" aria-hidden="true">🎨</span>
                   <span className="font-medium">カラーテーマ</span>
@@ -256,17 +255,17 @@ export function HamburgerMenu({ isOpen, onClose, isStoryPage = false }: Hamburge
                   </button>
                   <button
                     role="radio"
-                    aria-checked={theme === 'system'}
-                    onClick={() => handleThemeChange('system')}
+                    aria-checked={theme === 'normal'}
+                    onClick={() => handleThemeChange('normal')}
                     className={`w-full px-4 py-3 rounded-lg text-left transition-colors ${
-                      theme === 'system'
+                      theme === 'normal'
                         ? 'bg-[var(--accent)] text-white'
                         : 'bg-[var(--bg-secondary)] hover:bg-[var(--border-color)]'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span>システム設定</span>
-                      {theme === 'system' && (
+                      <span>通常</span>
+                      {theme === 'normal' && (
                         <svg
                           width="20"
                           height="20"
@@ -285,11 +284,10 @@ export function HamburgerMenu({ isOpen, onClose, isStoryPage = false }: Hamburge
                   </button>
                 </div>
               </div>
-            )}
 
             {isStoryPage && (
-              <p className="text-sm text-[var(--text-secondary)] px-4">
-                ストーリーページは常に黒テーマで表示されます
+              <p className="text-sm text-[var(--text-secondary)] px-4 mt-4">
+                通常モードではストーリーページは黒テーマで表示されます
               </p>
             )}
           </div>
