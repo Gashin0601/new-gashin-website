@@ -5,52 +5,22 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import SocialLink from "../ui/SocialLinks";
 import videosData from "@/data/videos.json";
-
-// Preload all videos on page load
-const preloadedVideos: { [key: string]: HTMLVideoElement } = {};
-
-function preloadVideo(src: string): Promise<HTMLVideoElement> {
-    return new Promise((resolve) => {
-        if (preloadedVideos[src]) {
-            resolve(preloadedVideos[src]);
-            return;
-        }
-        const video = document.createElement('video');
-        video.preload = 'auto';
-        video.muted = true;
-        video.playsInline = true;
-        video.autoplay = true;
-        // iOS Safari requires setAttribute for playsinline to work properly
-        video.setAttribute('playsinline', '');
-        video.setAttribute('webkit-playsinline', '');
-        video.setAttribute('muted', '');
-        video.setAttribute('autoplay', '');
-        video.crossOrigin = 'anonymous';
-
-        // Use source element with type for better iOS Safari compatibility
-        const source = document.createElement('source');
-        source.src = src;
-        source.type = 'video/mp4';
-        video.appendChild(source);
-
-        video.oncanplaythrough = () => {
-            preloadedVideos[src] = video;
-            resolve(video);
-        };
-        video.onerror = () => resolve(video);
-        video.load();
-    });
-}
+import { preloadVideo, isVideoPreloaded } from "@/lib/videoPreloader";
 
 function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCurrent: boolean; isMuted: boolean; isVisible: boolean }) {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [hasFirstFrame, setHasFirstFrame] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(() => isVideoPreloaded(src));
+    const [hasFirstFrame, setHasFirstFrame] = useState(() => isVideoPreloaded(src));
     const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Preload this video
+    // Ensure video is preloaded (may already be done by LoadingScreen)
     useEffect(() => {
-        preloadVideo(src);
+        if (!isVideoPreloaded(src)) {
+            preloadVideo(src).then(() => {
+                setIsLoaded(true);
+                setHasFirstFrame(true);
+            });
+        }
     }, [src]);
 
     // Set iOS Safari specific attributes via JavaScript

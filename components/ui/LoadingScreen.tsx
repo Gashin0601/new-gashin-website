@@ -3,32 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import videosData from "@/data/videos.json";
-
-// Preload video function
-function preloadVideo(src: string): Promise<void> {
-  return new Promise((resolve) => {
-    const video = document.createElement('video');
-    video.src = src;
-    video.preload = 'auto';
-    video.muted = true;
-    video.playsInline = true;
-    // iOS Safari requires setAttribute for playsinline to work properly
-    video.setAttribute('playsinline', '');
-    video.setAttribute('webkit-playsinline', '');
-    video.crossOrigin = 'anonymous';
-
-    const handleReady = () => {
-      resolve();
-    };
-
-    video.oncanplaythrough = handleReady;
-    video.onerror = handleReady; // Resolve even on error to not block loading
-    video.load();
-
-    // Timeout fallback
-    setTimeout(handleReady, 5000);
-  });
-}
+import { preloadAllVideos } from "@/lib/videoPreloader";
 
 export default function LoadingScreen() {
   const [isLoading, setIsLoading] = useState(true);
@@ -43,27 +18,20 @@ export default function LoadingScreen() {
       return;
     }
 
-    // Preload all videos
-    const preloadAllVideos = async () => {
-      const totalVideos = videosData.length;
-      let loadedCount = 0;
-
-      const promises = videosData.map(async (video) => {
-        await preloadVideo(video.videoSrc);
-        loadedCount++;
-        setLoadingProgress(Math.round((loadedCount / totalVideos) * 100));
+    // Preload all videos using shared preloader
+    const loadVideos = async () => {
+      await preloadAllVideos(videosData, (loaded, total) => {
+        setLoadingProgress(Math.round((loaded / total) * 100));
       });
 
-      await Promise.all(promises);
-
-      // Minimum display time of 2 seconds
+      // Minimum display time
       await new Promise(resolve => setTimeout(resolve, 500));
 
       setIsLoading(false);
       sessionStorage.setItem("hasLoaded", "true");
     };
 
-    preloadAllVideos();
+    loadVideos();
   }, []);
 
   // Prevent scrolling while loading
