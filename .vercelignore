@@ -1,0 +1,5 @@
+# Exclude large original video files
+public/videos/shorts/*-original.mp4
+public/videos/shorts/video-001.mp4
+public/videos/shorts/video-002.mp4
+public/videos/shorts/video-003.mp4
