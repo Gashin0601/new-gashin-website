@@ -63,7 +63,7 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
         const handleCanPlay = () => {
             setHasFirstFrame(true);
             if (isCurrent && isVisible) {
-                video!.play().catch(() => {});
+                video!.play().catch(() => { });
             }
         };
         const handlePlaying = () => setHasFirstFrame(true);
@@ -359,7 +359,7 @@ export default function VideoAccount() {
                 video.volume = 1;
                 // Try to play if paused (within gesture context)
                 if (video.paused) {
-                    video.play().catch(() => {});
+                    video.play().catch(() => { });
                 }
             });
 
@@ -532,151 +532,151 @@ export default function VideoAccount() {
                     aria-roledescription="動画カルーセル"
                     aria-label={`動画カルーセル、全${videosData.length}件、現在${currentIndex + 1}件目を表示中`}
                 >
-                        {videosData.map((video, index) => {
-                            // Calculate offset from current index
-                            let offset = (index - currentIndex + videosData.length) % videosData.length;
-                            if (offset > videosData.length / 2) offset -= videosData.length;
+                    {videosData.map((video, index) => {
+                        // Calculate offset from current index
+                        let offset = (index - currentIndex + videosData.length) % videosData.length;
+                        if (offset > videosData.length / 2) offset -= videosData.length;
 
-                            // Only render if it's current, prev, or next
-                            if (Math.abs(offset) > 1) return null;
+                        // Only render if it's current, prev, or next
+                        if (Math.abs(offset) > 1) return null;
 
-                            const isCurrent = offset === 0;
-                            const isPrev = offset === -1;
-                            const isNext = offset === 1;
+                        const isCurrent = offset === 0;
+                        const isPrev = offset === -1;
+                        const isNext = offset === 1;
 
-                            return (
-                                <motion.div
-                                    key={video.id}
-                                    className={`absolute rounded-3xl overflow-hidden
+                        return (
+                            <motion.div
+                                key={video.id}
+                                className={`absolute rounded-3xl overflow-hidden
                                         ${isCurrent ? "z-20 shadow-2xl ring-1 ring-black/10" : "z-10 cursor-pointer"}
                                     `}
-                                    initial={false}
-                                    animate={{
-                                        scale: isCurrent ? 1 : 0.85,
-                                        x: isCurrent ? 0 : isPrev ? -180 : 180,
-                                        opacity: isCurrent ? 1 : 0.6,
-                                    }}
-                                    transition={{
-                                        type: "spring",
-                                        stiffness: 300,
-                                        damping: 30,
-                                        mass: 1
-                                    }}
-                                    style={{
-                                        width: "min(280px, 72vw)",
-                                        height: "min(500px, 68vh)",
-                                        left: "50%",
-                                        top: "50%",
-                                        marginLeft: "min(-140px, -36vw)",
-                                        marginTop: "min(-250px, -34vh)",
-                                    }}
-                                    role="group"
-                                    aria-roledescription="動画スライド"
-                                    aria-label={`${video.title}${isCurrent ? '、現在表示中' : isPrev ? '、前の動画' : '、次の動画'}`}
-                                    aria-hidden={!isCurrent && !isPrev && !isNext}
-                                >
-                                    <div
-                                        className="w-full h-full bg-black relative touch-pan-y"
-                                        onMouseEnter={() => isCurrent && setShowOverlay(true)}
-                                        onMouseLeave={() => isCurrent && setShowOverlay(false)}
-                                        onTouchStart={handleTouchStart}
-                                        onTouchEnd={(e) => {
-                                            // Check if this was a swipe or just a tap
-                                            if (touchStartRef.current) {
-                                                const touch = e.changedTouches[0];
-                                                const deltaX = touch.clientX - touchStartRef.current.x;
-                                                const deltaY = touch.clientY - touchStartRef.current.y;
+                                initial={false}
+                                animate={{
+                                    scale: isCurrent ? 1 : 0.85,
+                                    x: isCurrent ? 0 : isPrev ? -180 : 180,
+                                    opacity: isCurrent ? 1 : 0.6,
+                                }}
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 300,
+                                    damping: 30,
+                                    mass: 1
+                                }}
+                                style={{
+                                    width: "min(280px, 72vw)",
+                                    height: "min(500px, 68vh)",
+                                    left: "50%",
+                                    top: "50%",
+                                    marginLeft: "calc(min(280px, 72vw) * -0.5)",
+                                    marginTop: "calc(min(500px, 68vh) * -0.5)",
+                                }}
+                                role="group"
+                                aria-roledescription="動画スライド"
+                                aria-label={`${video.title}${isCurrent ? '、現在表示中' : isPrev ? '、前の動画' : '、次の動画'}`}
+                                aria-hidden={!isCurrent && !isPrev && !isNext}
+                            >
+                                <div
+                                    className="w-full h-full bg-black relative touch-pan-y"
+                                    onMouseEnter={() => isCurrent && setShowOverlay(true)}
+                                    onMouseLeave={() => isCurrent && setShowOverlay(false)}
+                                    onTouchStart={handleTouchStart}
+                                    onTouchEnd={(e) => {
+                                        // Check if this was a swipe or just a tap
+                                        if (touchStartRef.current) {
+                                            const touch = e.changedTouches[0];
+                                            const deltaX = touch.clientX - touchStartRef.current.x;
+                                            const deltaY = touch.clientY - touchStartRef.current.y;
 
-                                                // If horizontal swipe detected, handle navigation
-                                                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
-                                                    if (deltaX > 0) {
-                                                        setCurrentIndex((prev) => (prev - 1 + videosData.length) % videosData.length);
-                                                    } else {
-                                                        setCurrentIndex((prev) => (prev + 1) % videosData.length);
-                                                    }
-                                                    touchStartRef.current = null;
-                                                    return;
+                                            // If horizontal swipe detected, handle navigation
+                                            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                                                if (deltaX > 0) {
+                                                    setCurrentIndex((prev) => (prev - 1 + videosData.length) % videosData.length);
+                                                } else {
+                                                    setCurrentIndex((prev) => (prev + 1) % videosData.length);
                                                 }
+                                                touchStartRef.current = null;
+                                                return;
                                             }
-                                            touchStartRef.current = null;
+                                        }
+                                        touchStartRef.current = null;
 
-                                            // If not a swipe, treat as tap
-                                            if (isCurrent) {
-                                                handleVideoTap();
-                                                if (isMuted) handleUnmute();
-                                            }
-                                        }}
-                                        onClick={(e) => {
-                                            // Only handle click on desktop (no touch)
-                                            if (e.detail > 0 && isCurrent) {
-                                                handleVideoTap();
-                                                if (isMuted) handleUnmute();
-                                            }
-                                        }}
-                                    >
-                                        <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} isMuted={isMuted} isVisible={isVisible} />
+                                        // If not a swipe, treat as tap
+                                        if (isCurrent) {
+                                            handleVideoTap();
+                                            if (isMuted) handleUnmute();
+                                        }
+                                    }}
+                                    onClick={(e) => {
+                                        // Only handle click on desktop (no touch)
+                                        if (e.detail > 0 && isCurrent) {
+                                            handleVideoTap();
+                                            if (isMuted) handleUnmute();
+                                        }
+                                    }}
+                                >
+                                    <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} isMuted={isMuted} isVisible={isVisible} />
 
-                                        {/* Navigation overlay for side videos */}
-                                        {!isCurrent && (
-                                            <div
-                                                className="absolute inset-0 z-40 cursor-pointer"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
+                                    {/* Navigation overlay for side videos */}
+                                    {!isCurrent && (
+                                        <div
+                                            className="absolute inset-0 z-40 cursor-pointer"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setCurrentIndex(index);
+                                            }}
+                                            role="button"
+                                            tabIndex={0}
+                                            aria-label={`${video.title} ${isPrev ? "(前の動画)" : "(次の動画)"}`}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter" || e.key === " ") {
                                                     setCurrentIndex(index);
-                                                }}
-                                                role="button"
-                                                tabIndex={0}
-                                                aria-label={`${video.title} ${isPrev ? "(前の動画)" : "(次の動画)"}`}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter" || e.key === " ") {
-                                                        setCurrentIndex(index);
-                                                    }
-                                                }}
-                                            />
-                                        )}
+                                                }
+                                            }}
+                                        />
+                                    )}
 
-                                        {isCurrent && (
-                                            <>
-                                                {/* Gradient overlay */}
-                                                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70 pointer-events-none z-10" aria-hidden="true" />
+                                    {isCurrent && (
+                                        <>
+                                            {/* Gradient overlay */}
+                                            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70 pointer-events-none z-10" aria-hidden="true" />
 
-                                                {/* Video info */}
-                                                <div className="absolute bottom-0 left-0 right-0 p-5 text-white z-20 pointer-events-none">
-                                                    <h3 className="font-bold text-lg mb-1 line-clamp-2" id={`video-title-${video.id}`}>
-                                                        {video.title}
-                                                    </h3>
-                                                </div>
+                                            {/* Video info */}
+                                            <div className="absolute bottom-0 left-0 right-0 p-5 text-white z-20 pointer-events-none">
+                                                <h3 className="font-bold text-lg mb-1 line-clamp-2" id={`video-title-${video.id}`}>
+                                                    {video.title}
+                                                </h3>
+                                            </div>
 
-                                                {/* Social links overlay - shown on hover or tap */}
-                                                <div
-                                                    className={`absolute inset-0 bg-black/60 flex items-center justify-center z-[50] transition-opacity duration-200 ${showOverlay ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                                                    role="dialog"
-                                                    aria-label={`${video.title}をSNSで見る`}
-                                                    aria-hidden={!showOverlay}
+                                            {/* Social links overlay - shown on hover or tap */}
+                                            <div
+                                                className={`absolute inset-0 bg-black/60 flex items-center justify-center z-[50] transition-opacity duration-200 ${showOverlay ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                                                role="dialog"
+                                                aria-label={`${video.title}をSNSで見る`}
+                                                aria-hidden={!showOverlay}
+                                            >
+                                                <nav
+                                                    className="flex gap-4"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    aria-label="この動画のSNSリンク"
                                                 >
-                                                    <nav
-                                                        className="flex gap-4"
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        aria-label="この動画のSNSリンク"
-                                                    >
-                                                        {Object.entries(video.socialLinks).map(([platform, url]) => (
-                                                            <SocialLink
-                                                                key={platform}
-                                                                platform={platform as "youtube" | "tiktok" | "instagram" | "x"}
-                                                                url={url}
-                                                                className="bg-white/30 backdrop-blur-sm p-3 rounded-full hover:bg-white/50 hover:scale-110 transition-all"
-                                                                iconSize={24}
-                                                                iconColor="#ffffff"
-                                                            />
-                                                        ))}
-                                                    </nav>
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
+                                                    {Object.entries(video.socialLinks).map(([platform, url]) => (
+                                                        <SocialLink
+                                                            key={platform}
+                                                            platform={platform as "youtube" | "tiktok" | "instagram" | "x"}
+                                                            url={url}
+                                                            className="bg-white/30 backdrop-blur-sm p-3 rounded-full hover:bg-white/50 hover:scale-110 transition-all"
+                                                            iconSize={24}
+                                                            iconColor="#ffffff"
+                                                        />
+                                                    ))}
+                                                </nav>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </motion.div>
+                        );
+                    })}
                 </div>
 
                 {/* Carousel indicators */}

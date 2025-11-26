@@ -89,6 +89,13 @@ export function HamburgerMenu({ isOpen, onClose, isStoryPage = false }: Hamburge
         aria-modal="true"
         aria-label="メニュー"
         className="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-[var(--bg-primary)] border-l border-[var(--border-color)] z-50 shadow-2xl slide-in-right overflow-y-auto"
+        style={theme === 'normal' ? {
+          '--bg-primary': '#ffffff',
+          '--text-primary': '#0b0c10',
+          '--text-secondary': '#666666',
+          '--bg-secondary': '#f5f5f5',
+          '--border-color': '#e0e0e0',
+        } as React.CSSProperties : undefined}
       >
         <div className="p-6">
           {/* Close Button */}
@@ -167,15 +174,13 @@ export function HamburgerMenu({ isOpen, onClose, isStoryPage = false }: Hamburge
                   role="switch"
                   aria-checked={audioEnabled}
                   onClick={handleAudioToggle}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    audioEnabled ? 'bg-[var(--accent)]' : 'bg-gray-300'
-                  }`}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${audioEnabled ? 'bg-[var(--accent)]' : 'bg-gray-300'
+                    }`}
                   aria-label={`音声読み上げを${audioEnabled ? 'オフ' : 'オン'}にする`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      audioEnabled ? 'translate-x-6' : 'translate-x-1'
-                    }`}
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${audioEnabled ? 'translate-x-6' : 'translate-x-1'
+                      }`}
                   />
                 </button>
               </div>
@@ -186,104 +191,101 @@ export function HamburgerMenu({ isOpen, onClose, isStoryPage = false }: Hamburge
 
             {/* Theme Switcher */}
             <div>
-                <div className="flex items-center gap-3 mb-3 px-4">
-                  <span className="text-xl" aria-hidden="true">🎨</span>
-                  <span className="font-medium">カラーテーマ</span>
-                </div>
-                <div
-                  role="radiogroup"
-                  aria-label="カラーテーマ"
-                  className="space-y-2"
-                >
-                  <button
-                    role="radio"
-                    aria-checked={theme === 'light'}
-                    onClick={() => handleThemeChange('light')}
-                    className={`w-full px-4 py-3 rounded-lg text-left transition-colors ${
-                      theme === 'light'
-                        ? 'bg-[var(--accent)] text-white'
-                        : 'bg-[var(--bg-secondary)] hover:bg-[var(--border-color)]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>ライトテーマ</span>
-                      {theme === 'light' && (
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          aria-hidden="true"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
-                    </div>
-                  </button>
-                  <button
-                    role="radio"
-                    aria-checked={theme === 'dark'}
-                    onClick={() => handleThemeChange('dark')}
-                    className={`w-full px-4 py-3 rounded-lg text-left transition-colors ${
-                      theme === 'dark'
-                        ? 'bg-[var(--accent)] text-white'
-                        : 'bg-[var(--bg-secondary)] hover:bg-[var(--border-color)]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>ダークテーマ</span>
-                      {theme === 'dark' && (
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          aria-hidden="true"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
-                    </div>
-                  </button>
-                  <button
-                    role="radio"
-                    aria-checked={theme === 'normal'}
-                    onClick={() => handleThemeChange('normal')}
-                    className={`w-full px-4 py-3 rounded-lg text-left transition-colors ${
-                      theme === 'normal'
-                        ? 'bg-[var(--accent)] text-white'
-                        : 'bg-[var(--bg-secondary)] hover:bg-[var(--border-color)]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>通常</span>
-                      {theme === 'normal' && (
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          aria-hidden="true"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
-                    </div>
-                  </button>
-                </div>
+              <div className="flex items-center gap-3 mb-3 px-4">
+                <span className="text-xl" aria-hidden="true">🎨</span>
+                <span className="font-medium">カラーテーマ</span>
               </div>
+              <div
+                role="radiogroup"
+                aria-label="カラーテーマ"
+                className="space-y-2"
+              >
+                <button
+                  role="radio"
+                  aria-checked={theme === 'light'}
+                  onClick={() => handleThemeChange('light')}
+                  className={`w-full px-4 py-3 rounded-lg text-left transition-colors ${theme === 'light'
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'bg-[var(--bg-secondary)] hover:bg-[var(--border-color)]'
+                    }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>ライトテーマ</span>
+                    {theme === 'light' && (
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                </button>
+                <button
+                  role="radio"
+                  aria-checked={theme === 'dark'}
+                  onClick={() => handleThemeChange('dark')}
+                  className={`w-full px-4 py-3 rounded-lg text-left transition-colors ${theme === 'dark'
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'bg-[var(--bg-secondary)] hover:bg-[var(--border-color)]'
+                    }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>ダークテーマ</span>
+                    {theme === 'dark' && (
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                </button>
+                <button
+                  role="radio"
+                  aria-checked={theme === 'normal'}
+                  onClick={() => handleThemeChange('normal')}
+                  className={`w-full px-4 py-3 rounded-lg text-left transition-colors ${theme === 'normal'
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'bg-[var(--bg-secondary)] hover:bg-[var(--border-color)]'
+                    }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>通常</span>
+                    {theme === 'normal' && (
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                </button>
+              </div>
+            </div>
 
             {isStoryPage && (
               <p className="text-sm text-[var(--text-secondary)] px-4 mt-4">
