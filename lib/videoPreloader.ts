@@ -28,7 +28,6 @@ export function preloadVideo(src: string): Promise<HTMLVideoElement> {
         video.setAttribute('playsinline', '');
         video.setAttribute('webkit-playsinline', '');
         video.setAttribute('muted', '');
-        video.crossOrigin = 'anonymous';
 
         // Use source element with type for iOS Safari compatibility
         const source = document.createElement('source');

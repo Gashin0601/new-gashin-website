@@ -248,7 +248,6 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
                 loop
                 playsInline
                 preload="auto"
-                crossOrigin="anonymous"
             >
                 <source src={src} type="video/mp4" />
             </video>
