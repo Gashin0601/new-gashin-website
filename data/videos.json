@@ -2,7 +2,7 @@
   {
     "id": "video-001",
     "title": "弱視慶應生、炎上しました。",
-    "videoSrc": "/videos/shorts/video-001-optimized.mp4",
+    "videoSrc": "https://a60dcbpglyohb0vf.public.blob.vercel-storage.com/videos/video-001-optimized.mp4",
     "duration": 30,
     "aspectRatio": "9:16",
     "date": "2025-XX-XX",
@@ -17,7 +17,7 @@
   {
     "id": "video-002",
     "title": "ついに登場！自分そっくりな動画を作れるAI「Sora2」って何？弱視の僕がわかりやすく解説",
-    "videoSrc": "/videos/shorts/video-002-optimized.mp4",
+    "videoSrc": "https://a60dcbpglyohb0vf.public.blob.vercel-storage.com/videos/video-002-optimized.mp4",
     "duration": 30,
     "aspectRatio": "9:16",
     "date": "2025-XX-XX",
@@ -32,7 +32,7 @@
   {
     "id": "video-003",
     "title": "【大阪万博】視覚障害でも超楽しいバーレーン館を紹介！",
-    "videoSrc": "/videos/shorts/video-003-optimized.mp4",
+    "videoSrc": "https://a60dcbpglyohb0vf.public.blob.vercel-storage.com/videos/video-003-optimized.mp4",
     "duration": 30,
     "aspectRatio": "9:16",
     "date": "2025-XX-XX",
