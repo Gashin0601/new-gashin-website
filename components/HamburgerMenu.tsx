@@ -83,18 +83,20 @@ export function HamburgerMenu({ isOpen, onClose, isStoryPage = false }: Hamburge
       />
 
       {/* Menu */}
+      {/* In normal mode: light background with black text (same as light mode) */}
+      {/* Only in dark mode: dark background with white text */}
       <div
         ref={menuRef}
         role="dialog"
         aria-modal="true"
         aria-label="メニュー"
         className="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-[var(--bg-primary)] border-l border-[var(--border-color)] z-50 shadow-2xl slide-in-right overflow-y-auto"
-        style={theme === 'normal' ? {
-          '--bg-primary': '#000000',
-          '--text-primary': '#ffffff',
-          '--text-secondary': '#a0a0a0',
-          '--bg-secondary': '#1a1b1f',
-          '--border-color': '#333333',
+        style={(theme === 'light' || theme === 'normal') ? {
+          '--bg-primary': '#ffffff',
+          '--text-primary': '#0b0c10',
+          '--text-secondary': '#666666',
+          '--bg-secondary': '#f5f5f5',
+          '--border-color': '#e0e0e0',
         } as React.CSSProperties : undefined}
       >
         <div className="p-6">
