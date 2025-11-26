@@ -34,6 +34,7 @@ function VideoPlayer({ src, isCurrent, isMuted, onUnmute }: { src: string; isCur
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [hasFirstFrame, setHasFirstFrame] = useState(false);
+    const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     // Preload this video
     useEffect(() => {
@@ -79,16 +80,60 @@ function VideoPlayer({ src, isCurrent, isMuted, onUnmute }: { src: string; isCur
         video.muted = isMuted;
     }, [isMuted]);
 
+    // Handle play/pause with audio fade
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
-        if (isCurrent) {
-            video.play().catch(() => {});
-        } else {
-            video.pause();
-            video.currentTime = 0;
+        // Clear any existing fade interval
+        if (fadeIntervalRef.current) {
+            clearInterval(fadeIntervalRef.current);
+            fadeIntervalRef.current = null;
         }
+
+        if (isCurrent) {
+            // Fade in
+            video.volume = 0;
+            video.play().catch(() => {});
+
+            let vol = 0;
+            fadeIntervalRef.current = setInterval(() => {
+                vol += 0.1;
+                if (vol >= 1) {
+                    vol = 1;
+                    if (fadeIntervalRef.current) {
+                        clearInterval(fadeIntervalRef.current);
+                        fadeIntervalRef.current = null;
+                    }
+                }
+                video.volume = vol;
+            }, 50);
+        } else {
+            // Fade out then pause
+            let vol = video.volume;
+            fadeIntervalRef.current = setInterval(() => {
+                vol -= 0.15;
+                if (vol <= 0) {
+                    vol = 0;
+                    video.volume = vol;
+                    video.pause();
+                    video.currentTime = 0;
+                    if (fadeIntervalRef.current) {
+                        clearInterval(fadeIntervalRef.current);
+                        fadeIntervalRef.current = null;
+                    }
+                } else {
+                    video.volume = vol;
+                }
+            }, 30);
+        }
+
+        return () => {
+            if (fadeIntervalRef.current) {
+                clearInterval(fadeIntervalRef.current);
+                fadeIntervalRef.current = null;
+            }
+        };
     }, [isCurrent, isLoaded]);
 
     const handleClick = () => {
