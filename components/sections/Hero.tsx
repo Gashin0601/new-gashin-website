@@ -56,7 +56,7 @@ export default function Hero() {
                     <div className="pt-2 sm:pt-4">
                         <Link
                             href="/story"
-                            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gray-900 text-white text-sm sm:text-base rounded-full hover:bg-gray-800 transition-all hover:gap-4 shadow-lg"
+                            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm sm:text-base rounded-full hover:opacity-80 transition-all hover:gap-4 shadow-lg"
                             aria-label="鈴木我信のストーリーを見る"
                         >
                             <span>ストーリーを見る</span>

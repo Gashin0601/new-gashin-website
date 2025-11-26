@@ -23,7 +23,7 @@ export default function StoryChapter({ data, index, totalChapters }: StoryChapte
             <div className="text-center">
                 <header className="mb-8">
                     <time
-                        className="text-sm font-mono text-gray-400 block mb-3 tracking-widest"
+                        className="text-sm font-mono text-[var(--text-secondary)] block mb-3 tracking-widest"
                         dateTime={data.year}
                     >
                         {data.year}
@@ -33,7 +33,7 @@ export default function StoryChapter({ data, index, totalChapters }: StoryChapte
                     </h3>
                 </header>
                 <div
-                    className="text-gray-300 leading-loose whitespace-pre-wrap text-base md:text-lg text-left font-light tracking-wide"
+                    className="text-[var(--text-secondary)] leading-loose whitespace-pre-wrap text-base md:text-lg text-left font-light tracking-wide"
                     role="paragraph"
                 >
                     {data.body}
@@ -44,7 +44,7 @@ export default function StoryChapter({ data, index, totalChapters }: StoryChapte
                         href={data.ctaButton.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block mt-8 bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition-colors"
+                        className="inline-block mt-8 bg-[var(--text-primary)] text-[var(--bg-primary)] px-8 py-3 rounded-full font-bold hover:opacity-80 transition-colors"
                         aria-label={`${data.ctaButton.label}（新しいタブで開きます）`}
                     >
                         {data.ctaButton.label}
