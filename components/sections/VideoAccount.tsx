@@ -250,8 +250,12 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
             />
             {/* Mute indicator */}
             {isCurrent && isMuted && hasFirstFrame && (
-                <div className="absolute top-4 right-4 z-[25] bg-black/50 rounded-full p-2 pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div
+                    className="absolute top-4 right-4 z-[25] bg-black/50 rounded-full p-2 pointer-events-none"
+                    role="status"
+                    aria-label="音声がミュート中です。タップまたはクリックでミュート解除"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                         <line x1="23" y1="9" x2="17" y2="15"></line>
                         <line x1="17" y1="9" x2="23" y2="15"></line>
@@ -409,31 +413,63 @@ export default function VideoAccount() {
         };
     }, []);
 
+    // Current video info for screen reader announcements
+    const currentVideo = videosData[currentIndex];
+
     return (
-        <section ref={sectionRef} className="py-24 bg-white overflow-hidden">
+        <section
+            ref={sectionRef}
+            className="py-24 bg-white overflow-hidden"
+            aria-label="Gashin / 弱視慶應生 - 動画アカウント"
+        >
             <div className="max-w-6xl mx-auto px-6">
                 {/* Account Header */}
-                <div className="text-center mb-16 space-y-6">
-                    <div className="relative w-24 h-24 mx-auto mb-6 rounded-full overflow-hidden shadow-xl border-2 border-white/10">
+                <header className="text-center mb-16 space-y-6">
+                    <div
+                        className="relative w-24 h-24 mx-auto mb-6 rounded-full overflow-hidden shadow-xl border-2 border-white/10"
+                        role="img"
+                        aria-label="Gashin / 弱視慶應生のプロフィール画像"
+                    >
                         <Image
                             src="/images/profile/gashin_lv.jpeg"
-                            alt="Gashin"
+                            alt=""
                             fill
                             className="object-cover"
+                            aria-hidden="true"
                         />
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Gashin / 弱視慶應生</h2>
-                    <p className="text-sm text-gray-400 font-mono -mt-4">@gashin_lv</p>
-                    <p className="text-[var(--text-secondary)] max-w-2xl mx-auto text-lg">
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900" id="video-account-title">
+                        Gashin / 弱視慶應生
+                    </h2>
+                    <p className="text-sm text-gray-400 font-mono -mt-4" aria-label="ユーザー名 アット gashin_lv">
+                        @gashin_lv
+                    </p>
+                    <p
+                        className="text-[var(--text-secondary)] max-w-2xl mx-auto text-lg"
+                        id="video-account-description"
+                    >
                         視覚障害について、日々の学び、そして慶應SFCでの挑戦を動画で発信しています。
                     </p>
 
-                    <div className="flex justify-center gap-6">
+                    <nav
+                        className="flex justify-center gap-6"
+                        aria-label="Gashinのソーシャルメディアリンク"
+                    >
                         <SocialLink platform="youtube" url="https://youtube.com/@gashin_lv" className="text-[var(--sns-youtube)] hover:scale-110" iconSize={32} />
                         <SocialLink platform="tiktok" url="https://www.tiktok.com/@gashin_lv" className="text-[var(--sns-tiktok)] hover:scale-110" iconSize={32} />
                         <SocialLink platform="instagram" url="https://instagram.com/gashin_lv" className="text-[var(--sns-instagram)] hover:scale-110" iconSize={32} />
                         <SocialLink platform="x" url="https://x.com/gashin_lv" className="hover:scale-110" iconSize={32} />
-                    </div>
+                    </nav>
+                </header>
+
+                {/* Screen reader live region for carousel updates */}
+                <div
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    className="sr-only"
+                >
+                    {`動画 ${currentIndex + 1} / ${videosData.length}: ${currentVideo.title}`}
                 </div>
 
                 {/* Carousel Container */}
@@ -443,6 +479,9 @@ export default function VideoAccount() {
                     onMouseLeave={() => setIsHovered(false)}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={handleTouchEnd}
+                    role="region"
+                    aria-roledescription="動画カルーセル"
+                    aria-label={`動画カルーセル、全${videosData.length}件、現在${currentIndex + 1}件目を表示中`}
                 >
                         {videosData.map((video, index) => {
                             // Calculate offset from current index
@@ -465,7 +504,7 @@ export default function VideoAccount() {
                                     initial={false}
                                     animate={{
                                         scale: isCurrent ? 1 : 0.85,
-                                        x: isCurrent ? 0 : isPrev ? "-55%" : "55%",
+                                        x: isCurrent ? 0 : isPrev ? "-85%" : "85%",
                                         opacity: isCurrent ? 1 : 0.5,
                                     }}
                                     transition={{
@@ -478,6 +517,10 @@ export default function VideoAccount() {
                                         width: isCurrent ? "min(300px, 75vw)" : "min(240px, 60vw)",
                                         height: isCurrent ? "min(530px, 70vh)" : "min(420px, 55vh)",
                                     }}
+                                    role="group"
+                                    aria-roledescription="動画スライド"
+                                    aria-label={`${video.title}${isCurrent ? '、現在表示中' : isPrev ? '、前の動画' : '、次の動画'}`}
+                                    aria-hidden={!isCurrent && !isPrev && !isNext}
                                 >
                                     <div
                                         className="w-full h-full bg-black relative touch-pan-y"
@@ -542,18 +585,27 @@ export default function VideoAccount() {
                                         {isCurrent && (
                                             <>
                                                 {/* Gradient overlay */}
-                                                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70 pointer-events-none z-10" />
+                                                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70 pointer-events-none z-10" aria-hidden="true" />
 
                                                 {/* Video info */}
                                                 <div className="absolute bottom-0 left-0 right-0 p-5 text-white z-20 pointer-events-none">
-                                                    <h3 className="font-bold text-lg mb-1 line-clamp-2">{video.title}</h3>
+                                                    <h3 className="font-bold text-lg mb-1 line-clamp-2" id={`video-title-${video.id}`}>
+                                                        {video.title}
+                                                    </h3>
                                                 </div>
 
                                                 {/* Social links overlay - shown on hover or tap */}
                                                 <div
                                                     className={`absolute inset-0 bg-black/60 flex items-center justify-center z-[50] transition-opacity duration-200 ${showOverlay ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                                                    role="dialog"
+                                                    aria-label={`${video.title}をSNSで見る`}
+                                                    aria-hidden={!showOverlay}
                                                 >
-                                                    <div className="flex gap-4" onClick={(e) => e.stopPropagation()}>
+                                                    <nav
+                                                        className="flex gap-4"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        aria-label="この動画のSNSリンク"
+                                                    >
                                                         {Object.entries(video.socialLinks).map(([platform, url]) => (
                                                             <SocialLink
                                                                 key={platform}
@@ -564,7 +616,7 @@ export default function VideoAccount() {
                                                                 iconColor="#ffffff"
                                                             />
                                                         ))}
-                                                    </div>
+                                                    </nav>
                                                 </div>
                                             </>
                                         )}

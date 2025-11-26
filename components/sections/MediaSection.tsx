@@ -22,19 +22,30 @@ export default function MediaSection() {
     }, []);
 
     return (
-        <section className="py-16 sm:py-20 md:py-24 bg-white">
+        <section
+            className="py-16 sm:py-20 md:py-24 bg-white"
+            aria-label="ニュース・メディア掲載"
+        >
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
                 <div className="flex items-center justify-between mb-8 sm:mb-10 md:mb-12">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">ニュース</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900" id="news-section-title">
+                        ニュース
+                    </h2>
                     <Link
                         href="/news"
                         className="flex items-center gap-1 sm:gap-2 text-sm sm:text-base text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
+                        aria-label="すべてのニュースを見る"
                     >
-                        すべて見る <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px]" />
+                        <span>すべて見る</span>
+                        <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px]" aria-hidden="true" />
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+                <div
+                    className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8"
+                    role="list"
+                    aria-labelledby="news-section-title"
+                >
                     {newsData
                         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                         .slice(0, 3)
@@ -46,23 +57,28 @@ export default function MediaSection() {
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.1 }}
                                 className="group cursor-pointer"
+                                role="listitem"
                             >
-                                <Link href={`/news/${news.slug}`}>
+                                <Link
+                                    href={`/news/${news.slug}`}
+                                    aria-label={`${news.title}の記事を読む - ${news.source}、${new Date(news.date).toLocaleDateString('ja-JP')}`}
+                                >
                                     <div className="aspect-video bg-gray-200 rounded-xl overflow-hidden mb-4 relative w-full">
                                         <Image
                                             src={news.image || "/images/news/placeholder.png"}
-                                            alt={news.title}
+                                            alt=""
                                             fill
                                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
                                             className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                            aria-hidden="true"
                                         />
                                     </div>
 
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
                                             <span>{news.source}</span>
-                                            <span>•</span>
-                                            <span>{news.date}</span>
+                                            <span aria-hidden="true">•</span>
+                                            <time dateTime={news.date}>{news.date}</time>
                                         </div>
                                         <h3 className="text-xl font-bold leading-snug text-gray-900 group-hover:text-[var(--accent)] transition-colors">
                                             {news.title}

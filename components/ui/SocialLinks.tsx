@@ -101,8 +101,19 @@ const icons = {
     ),
 };
 
+// Platform display names for accessibility
+const platformNames: Record<Platform, string> = {
+    youtube: "YouTube",
+    instagram: "Instagram",
+    tiktok: "TikTok",
+    x: "X（Twitter）",
+    facebook: "Facebook",
+    linkedin: "LinkedIn",
+};
+
 export default function SocialLink({ platform, url, className = "", iconSize = 24, iconColor }: SocialLinkProps) {
     const Icon = icons[platform];
+    const platformName = platformNames[platform];
 
     return (
         <Link
@@ -110,7 +121,7 @@ export default function SocialLink({ platform, url, className = "", iconSize = 2
             target="_blank"
             rel="noopener noreferrer"
             className={`inline-flex items-center justify-center transition-colors duration-200 hover:opacity-80 ${className}`}
-            aria-label={`Visit our ${platform} page`}
+            aria-label={`${platformName}で見る（新しいタブで開きます）`}
         >
             <Icon size={iconSize} color={iconColor} />
         </Link>

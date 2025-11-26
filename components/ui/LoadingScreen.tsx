@@ -87,17 +87,29 @@ export default function LoadingScreen() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
+          role="alert"
+          aria-live="polite"
+          aria-label={`ページを読み込み中、${loadingProgress}パーセント完了`}
         >
           <div className="flex flex-col items-center">
             {/* Logo Container */}
-            <div className="relative w-48 h-48 mb-8 flex items-center justify-center">
+            <div
+              className="relative w-48 h-48 mb-8 flex items-center justify-center"
+              role="img"
+              aria-label="鈴木我信のロゴ"
+            >
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 1 }}
               >
                 {/* Handwritten Logo */}
-                <img src="/logo-handwritten.png" alt="Gashin Logo" className="w-full h-full object-contain invert" />
+                <img
+                  src="/logo-handwritten.png"
+                  alt=""
+                  className="w-full h-full object-contain invert"
+                  aria-hidden="true"
+                />
               </motion.div>
             </div>
 
@@ -118,7 +130,14 @@ export default function LoadingScreen() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}
             >
-              <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-1 bg-gray-200 rounded-full overflow-hidden"
+                role="progressbar"
+                aria-valuenow={loadingProgress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="読み込み進捗"
+              >
                 <motion.div
                   className="h-full bg-black"
                   initial={{ width: 0 }}
@@ -126,7 +145,7 @@ export default function LoadingScreen() {
                   transition={{ duration: 0.3 }}
                 />
               </div>
-              <p className="text-xs text-gray-400 mt-2 text-center">
+              <p className="text-xs text-gray-400 mt-2 text-center" aria-hidden="true">
                 Loading... {loadingProgress}%
               </p>
             </motion.div>
@@ -138,6 +157,7 @@ export default function LoadingScreen() {
                 sessionStorage.setItem("hasLoaded", "true");
               }}
               className="mt-6 text-sm text-gray-500 hover:text-black underline focus:outline-none focus:ring-2 focus:ring-black rounded p-1"
+              aria-label="読み込みをスキップしてメインコンテンツへ移動"
             >
               Skip Loading
             </button>

@@ -1,0 +1,26 @@
+{
+  "name": "鈴木我信 | Gashin Suzuki",
+  "short_name": "鈴木我信",
+  "description": "慶應義塾大学SFCの学生・鈴木我信の公式サイト。視覚とテクノロジーで、学びと社会の垣根をゆるめる実験をしています。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a1a2e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "lang": "ja",
+  "categories": ["personal", "portfolio"]
+}
