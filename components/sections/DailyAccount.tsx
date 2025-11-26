@@ -21,7 +21,11 @@ export default function DailyAccount() {
     const [hasError, setHasError] = useState(false);
     const { resolvedTheme } = useTheme();
 
+    // Reload Twitter widget when theme changes
     useEffect(() => {
+        setIsLoading(true);
+        setHasError(false);
+
         const loadTwitterWidget = () => {
             // If twttr is already loaded, use it
             if (window.twttr?.widgets) {
@@ -62,7 +66,7 @@ export default function DailyAccount() {
         const timer = setTimeout(loadTwitterWidget, 100);
 
         return () => clearTimeout(timer);
-    }, []);
+    }, [resolvedTheme]); // Re-run when theme changes
 
     return (
         <section
@@ -114,7 +118,11 @@ export default function DailyAccount() {
                     role="region"
                     aria-label="鈴木我信の最新のX（Twitter）投稿"
                 >
-                    <div ref={tweetContainerRef} className="bg-[var(--bg-secondary)] rounded-xl overflow-hidden min-h-[200px]">
+                    <div
+                        key={resolvedTheme}
+                        ref={tweetContainerRef}
+                        className="bg-[var(--bg-secondary)] rounded-xl overflow-hidden min-h-[200px]"
+                    >
                         {isLoading && !hasError && (
                             <div
                                 className="flex items-center justify-center h-[200px]"

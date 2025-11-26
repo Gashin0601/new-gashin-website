@@ -55,7 +55,7 @@ export default function Header() {
                 {/* Hamburger Button */}
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="p-2 rounded-full bg-white/80 dark:bg-black/80 backdrop-blur-md shadow-lg hover:scale-105 transition-transform"
+                    className="p-2 rounded-full bg-[var(--bg-primary)]/80 backdrop-blur-md shadow-lg hover:scale-105 transition-transform"
                     aria-label="メニューを開く"
                     aria-expanded={isOpen}
                     aria-controls="main-menu"
@@ -73,7 +73,7 @@ export default function Header() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed inset-0 z-50 bg-white dark:bg-black flex flex-col"
+                        className="fixed inset-0 z-50 bg-[var(--bg-primary)] flex flex-col"
                         role="dialog"
                         aria-modal="true"
                         aria-label="メインメニュー"
@@ -82,7 +82,7 @@ export default function Header() {
                         <div className="absolute top-6 right-6">
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                className="p-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors"
                                 aria-label="メニューを閉じる"
                             >
                                 <X size={32} aria-hidden="true" />
@@ -112,19 +112,19 @@ export default function Header() {
 
                             {/* Settings */}
                             <div
-                                className="w-full max-w-xs space-y-8 pt-12 border-t border-gray-200 dark:border-gray-800"
+                                className="w-full max-w-xs space-y-8 pt-12 border-t border-[var(--border-color)]"
                                 role="group"
                                 aria-label="サイト設定"
                             >
                                 {/* Audio Toggle */}
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-500" id="audio-toggle-label">音声読み上げ</span>
+                                    <span className="text-sm text-[var(--text-secondary)]" id="audio-toggle-label">音声読み上げ</span>
                                     <button
                                         onClick={toggleAudio}
                                         aria-labelledby="audio-toggle-label"
                                         aria-pressed={audioEnabled}
                                         role="switch"
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${audioEnabled ? "bg-[var(--accent)] text-white" : "bg-gray-200 dark:bg-gray-800"
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${audioEnabled ? "bg-[var(--accent)] text-white" : "bg-[var(--bg-secondary)]"
                                             }`}
                                     >
                                         {audioEnabled ? <Volume2 size={18} aria-hidden="true" /> : <VolumeX size={18} aria-hidden="true" />}
@@ -134,9 +134,9 @@ export default function Header() {
 
                                 {/* Theme Toggle */}
                                 <div className="space-y-2">
-                                    <span className="text-sm text-gray-500 block mb-2" id="theme-group-label">カラーテーマ</span>
+                                    <span className="text-sm text-[var(--text-secondary)] block mb-2" id="theme-group-label">カラーテーマ</span>
                                     <div
-                                        className="flex bg-gray-100 dark:bg-gray-900 rounded-full p-1"
+                                        className="flex bg-[var(--bg-secondary)] rounded-full p-1"
                                         role="radiogroup"
                                         aria-labelledby="theme-group-label"
                                     >
@@ -145,7 +145,7 @@ export default function Header() {
                                             aria-label="ライトモードに切り替え"
                                             role="radio"
                                             aria-checked={theme === "light"}
-                                            className={`flex-1 flex justify-center py-2 rounded-full transition-colors ${theme === "light" ? "bg-white shadow-sm text-black" : "text-gray-400"
+                                            className={`flex-1 flex justify-center py-2 rounded-full transition-colors ${theme === "light" ? "bg-[var(--bg-primary)] shadow-sm text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
                                                 }`}
                                         >
                                             <Sun size={18} aria-hidden="true" />
@@ -155,7 +155,7 @@ export default function Header() {
                                             aria-label="通常モード"
                                             role="radio"
                                             aria-checked={theme === "normal"}
-                                            className={`flex-1 flex justify-center py-2 rounded-full transition-colors ${theme === "normal" ? "bg-white dark:bg-gray-800 shadow-sm text-black dark:text-white" : "text-gray-400"
+                                            className={`flex-1 flex justify-center py-2 rounded-full transition-colors ${theme === "normal" ? "bg-[var(--bg-primary)] shadow-sm text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
                                                 }`}
                                         >
                                             <Monitor size={18} aria-hidden="true" />
@@ -165,7 +165,7 @@ export default function Header() {
                                             aria-label="ダークモードに切り替え"
                                             role="radio"
                                             aria-checked={theme === "dark"}
-                                            className={`flex-1 flex justify-center py-2 rounded-full transition-colors ${theme === "dark" ? "bg-gray-800 shadow-sm text-white" : "text-gray-400"
+                                            className={`flex-1 flex justify-center py-2 rounded-full transition-colors ${theme === "dark" ? "bg-[var(--bg-primary)] shadow-sm text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
                                                 }`}
                                         >
                                             <Moon size={18} aria-hidden="true" />
