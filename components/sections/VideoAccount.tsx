@@ -2,54 +2,24 @@
 
 import Image from "next/image";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Hls from "hls.js";
 import SocialLink from "../ui/SocialLinks";
 import videosData from "@/data/videos.json";
 
-interface VideoData {
-    id: string;
-    title: string;
-    videoSrc: string;
-    socialLinks: {
-        youtube: string;
-        tiktok: string;
-        instagram: string;
-        x: string;
-    };
-}
-
-function VideoPlayer({ video, isCurrent, poster, isTransitioning, volume }: { video: VideoData; isCurrent: boolean; poster?: string; isTransitioning: boolean; volume: number }) {
+function VideoPlayer({ src, isCurrent, poster, fallbackUrl }: { src: string; isCurrent: boolean; poster?: string; fallbackUrl?: string }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const hlsRef = useRef<Hls | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [hasError, setHasError] = useState(false);
-    const [isMuted, setIsMuted] = useState(true);
-
-    // Audio sync
-    useEffect(() => {
-        const savedAudio = localStorage.getItem("audioEnabled");
-        setIsMuted(savedAudio !== "true");
-
-        const handleAudioChange = (e: CustomEvent<{ enabled: boolean }>) => {
-            setIsMuted(!e.detail.enabled);
-        };
-
-        window.addEventListener("audioStateChange", handleAudioChange as EventListener);
-        return () => {
-            window.removeEventListener("audioStateChange", handleAudioChange as EventListener);
-        };
-    }, []);
 
     useEffect(() => {
-        const videoElement = videoRef.current;
-        if (!videoElement) return;
+        const video = videoRef.current;
+        if (!video) return;
 
         // Reset state on src change
         setIsLoaded(false);
         setHasError(false);
-
-        const src = video.videoSrc;
 
         // Check if source is HLS (.m3u8)
         const isHLS = src.endsWith('.m3u8');
@@ -63,11 +33,11 @@ function VideoPlayer({ video, isCurrent, poster, isTransitioning, volume }: { vi
             });
             hlsRef.current = hls;
             hls.loadSource(src);
-            hls.attachMedia(videoElement);
+            hls.attachMedia(video);
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 setIsLoaded(true);
                 if (isCurrent) {
-                    videoElement.play().catch(() => { });
+                    video.play().catch(() => { });
                 }
             });
             hls.on(Hls.Events.ERROR, (event, data) => {
@@ -75,23 +45,23 @@ function VideoPlayer({ video, isCurrent, poster, isTransitioning, volume }: { vi
                     setHasError(true);
                 }
             });
-        } else if (isHLS && videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+        } else if (isHLS && video.canPlayType('application/vnd.apple.mpegurl')) {
             // Native HLS support (Safari)
-            videoElement.src = src;
-            videoElement.addEventListener('loadedmetadata', () => {
+            video.src = src;
+            video.addEventListener('loadedmetadata', () => {
                 setIsLoaded(true);
                 if (isCurrent) {
-                    videoElement.play().catch(() => { });
+                    video.play().catch(() => { });
                 }
             });
-            videoElement.addEventListener('error', () => setHasError(true));
+            video.addEventListener('error', () => setHasError(true));
         } else {
             // Standard MP4 - optimized loading
-            videoElement.src = src;
-            videoElement.addEventListener('loadeddata', () => {
+            video.src = src;
+            video.addEventListener('loadeddata', () => {
                 setIsLoaded(true);
             });
-            videoElement.addEventListener('error', () => setHasError(true));
+            video.addEventListener('error', () => setHasError(true));
         }
 
         return () => {
@@ -100,37 +70,21 @@ function VideoPlayer({ video, isCurrent, poster, isTransitioning, volume }: { vi
                 hlsRef.current = null;
             }
         };
-    }, [video.videoSrc]);
+    }, [src]);
 
     useEffect(() => {
-        const videoElement = videoRef.current;
-        if (!videoElement || !isLoaded || hasError) return;
+        const video = videoRef.current;
+        if (!video || !isLoaded || hasError) return;
 
         if (isCurrent) {
-            videoElement.play().catch(() => {
+            video.play().catch(() => {
                 // Handle autoplay restriction
             });
         } else {
-            videoElement.pause();
-            videoElement.currentTime = 0;
+            video.pause();
+            video.currentTime = 0;
         }
     }, [isCurrent, isLoaded, hasError]);
-
-    // Handle mute state changes
-    useEffect(() => {
-        const videoElement = videoRef.current;
-        if (videoElement) {
-            videoElement.muted = isMuted;
-        }
-    }, [isMuted]);
-
-    // Handle volume changes based on visibility
-    useEffect(() => {
-        const videoElement = videoRef.current;
-        if (videoElement && !isMuted) {
-            videoElement.volume = Math.max(0, Math.min(1, volume));
-        }
-    }, [volume, isMuted]);
 
     // Helper to extract YouTube ID
     const getYouTubeId = (url: string) => {
@@ -143,44 +97,18 @@ function VideoPlayer({ video, isCurrent, poster, isTransitioning, volume }: { vi
         return null;
     };
 
-    if (hasError && video.socialLinks.youtube) {
-        const videoId = getYouTubeId(video.socialLinks.youtube);
+    if (hasError && fallbackUrl) {
+        const videoId = getYouTubeId(fallbackUrl);
         if (videoId) {
             return (
                 <div className="w-full h-full relative bg-black pointer-events-none">
                     <iframe
-                        src={`https://www.youtube.com/embed/${videoId}?autoplay=${isCurrent ? 1 : 0}&loop=1&playlist=${videoId}&controls=0&mute=${isMuted ? 1 : 0}&playsinline=1&rel=0`}
-                        className="w-full h-full object-cover"
+                        src={`https://www.youtube.com/embed/${videoId}?autoplay=${isCurrent ? 1 : 0}&loop=1&playlist=${videoId}&controls=0&mute=1&playsinline=1&rel=0`}
+                        className="w-full h-full object-cover pointer-events-auto"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                         title="YouTube video player"
                     />
-                    {isCurrent && !isTransitioning && (
-                        <>
-                            {/* Gradient overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70 pointer-events-none" />
-
-                            {/* Video info */}
-                            <div className="absolute bottom-0 left-0 right-0 p-5 text-white z-20 pointer-events-none">
-                                <h3 className="font-bold text-lg mb-1 line-clamp-2">{video.title}</h3>
-                            </div>
-
-                            {/* Hover overlay with social links */}
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-30 pointer-events-auto">
-                                <div className="flex gap-3">
-                                    {Object.entries(video.socialLinks).map(([platform, url]) => (
-                                        <SocialLink
-                                            key={platform}
-                                            platform={platform as "youtube" | "tiktok" | "instagram" | "x"}
-                                            url={url}
-                                            className="text-white bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 hover:scale-110 transition-all"
-                                            iconSize={22}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        </>
-                    )}
                 </div>
             );
         }
@@ -195,41 +123,13 @@ function VideoPlayer({ video, isCurrent, poster, isTransitioning, volume }: { vi
             )}
             <video
                 ref={videoRef}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!isLoaded ? "opacity-0" : ""}`}
-                muted={isMuted}
+                className={`w-full h-full object-cover transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!isLoaded ? "opacity-0" : ""}`}
+                muted
                 loop
                 playsInline
-                webkit-playsinline="true"
-                preload="auto"
+                preload={isCurrent ? "auto" : "metadata"}
                 poster={poster}
             />
-
-            {isCurrent && isLoaded && !isTransitioning && (
-                <>
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70 pointer-events-none" />
-
-                    {/* Video info */}
-                    <div className="absolute bottom-0 left-0 right-0 p-5 text-white z-20 pointer-events-none">
-                        <h3 className="font-bold text-lg mb-1 line-clamp-2">{video.title}</h3>
-                    </div>
-
-                    {/* Hover overlay with social links */}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-30 pointer-events-auto">
-                        <div className="flex gap-3">
-                            {Object.entries(video.socialLinks).map(([platform, url]) => (
-                                <SocialLink
-                                    key={platform}
-                                    platform={platform as "youtube" | "tiktok" | "instagram" | "x"}
-                                    url={url}
-                                    className="text-white bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 hover:scale-110 transition-all"
-                                    iconSize={22}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </>
-            )}
         </div>
     );
 }
@@ -237,52 +137,7 @@ function VideoPlayer({ video, isCurrent, poster, isTransitioning, volume }: { vi
 export default function VideoAccount() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
-    const [isTransitioning, setIsTransitioning] = useState(false);
-    const [volume, setVolume] = useState(1);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const sectionRef = useRef<HTMLElement>(null);
-
-    // Track section visibility and adjust volume
-    useEffect(() => {
-        const section = sectionRef.current;
-        if (!section) return;
-
-        const handleScroll = () => {
-            const rect = section.getBoundingClientRect();
-            const windowHeight = window.innerHeight;
-
-            // Calculate how much of the section is visible
-            const sectionTop = rect.top;
-            const sectionBottom = rect.bottom;
-            const sectionHeight = rect.height;
-
-            // Calculate visibility ratio (0 to 1)
-            let visibleHeight = 0;
-            if (sectionTop < windowHeight && sectionBottom > 0) {
-                const visibleTop = Math.max(0, sectionTop);
-                const visibleBottom = Math.min(windowHeight, sectionBottom);
-                visibleHeight = visibleBottom - visibleTop;
-            }
-
-            const visibilityRatio = Math.max(0, Math.min(1, visibleHeight / sectionHeight));
-
-            // Apply easing for smoother fade (use squared for more dramatic fade at edges)
-            const easedVolume = Math.pow(visibilityRatio, 0.5);
-            setVolume(easedVolume);
-        };
-
-        // Initial check
-        handleScroll();
-
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        window.addEventListener('resize', handleScroll, { passive: true });
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-            window.removeEventListener('resize', handleScroll);
-        };
-    }, []);
 
     // Auto-advance carousel
     useEffect(() => {
@@ -299,20 +154,11 @@ export default function VideoAccount() {
         };
     }, [isHovered]);
 
-    const handleNavigation = (index: number) => {
-        setCurrentIndex(index);
-        setIsTransitioning(true);
-        if (transitionTimeoutRef.current) clearTimeout(transitionTimeoutRef.current);
-        transitionTimeoutRef.current = setTimeout(() => {
-            setIsTransitioning(false);
-        }, 500);
-    };
-
     const prevIndex = (currentIndex - 1 + videosData.length) % videosData.length;
     const nextIndex = (currentIndex + 1) % videosData.length;
 
     return (
-        <section ref={sectionRef} className="py-24 bg-white overflow-hidden">
+        <section className="py-24 bg-white overflow-hidden">
             <div className="max-w-6xl mx-auto px-6">
                 {/* Account Header */}
                 <div className="text-center mb-16 space-y-6">
@@ -369,7 +215,7 @@ export default function VideoAccount() {
                                 }}
                                 animate={{
                                     scale: isCurrent ? 1 : 0.85,
-                                    x: isCurrent ? 0 : isPrev ? "-85%" : "85%",
+                                    x: isCurrent ? 0 : isPrev ? "-70%" : "70%",
                                     opacity: isCurrent ? 1 : 0.5,
                                     zIndex: isCurrent ? 20 : 10,
                                 }}
@@ -385,13 +231,13 @@ export default function VideoAccount() {
                                 }}
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" || e.key === " ") {
-                                        if (isPrev) handleNavigation(prevIndex);
-                                        if (isNext) handleNavigation(nextIndex);
+                                        if (isPrev) setCurrentIndex(prevIndex);
+                                        if (isNext) setCurrentIndex(nextIndex);
                                     }
                                 }}
                             >
                                 <div className="w-full h-full bg-black relative group">
-                                    <VideoPlayer video={video} isCurrent={isCurrent} isTransitioning={isTransitioning} volume={volume} />
+                                    <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} fallbackUrl={video.socialLinks.youtube} />
 
                                     {/* Navigation Overlay for Side Videos */}
                                     {!isCurrent && (
@@ -399,10 +245,37 @@ export default function VideoAccount() {
                                             className="absolute inset-0 z-50 cursor-pointer pointer-events-auto"
                                             onClick={(e) => {
                                                 e.stopPropagation(); // Prevent bubbling
-                                                if (isPrev) handleNavigation(prevIndex);
-                                                if (isNext) handleNavigation(nextIndex);
+                                                if (isPrev) setCurrentIndex(prevIndex);
+                                                if (isNext) setCurrentIndex(nextIndex);
                                             }}
                                         />
+                                    )}
+
+                                    {isCurrent && (
+                                        <>
+                                            {/* Gradient overlay */}
+                                            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70 pointer-events-none" />
+
+                                            {/* Video info */}
+                                            <div className="absolute bottom-0 left-0 right-0 p-5 text-white z-20 pointer-events-none">
+                                                <h3 className="font-bold text-lg mb-1 line-clamp-2">{video.title}</h3>
+                                            </div>
+
+                                            {/* Hover overlay with social links */}
+                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-30">
+                                                <div className="flex gap-3">
+                                                    {Object.entries(video.socialLinks).map(([platform, url]) => (
+                                                        <SocialLink
+                                                            key={platform}
+                                                            platform={platform as "youtube" | "tiktok" | "instagram" | "x"}
+                                                            url={url}
+                                                            className="text-white bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 hover:scale-110 transition-all"
+                                                            iconSize={22}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
                             </motion.div>
@@ -415,7 +288,7 @@ export default function VideoAccount() {
                     {videosData.map((_, index) => (
                         <button
                             key={index}
-                            onClick={() => handleNavigation(index)}
+                            onClick={() => setCurrentIndex(index)}
                             className={`w-2 h-2 rounded-full transition-all ${index === currentIndex
                                 ? "bg-gray-900 w-6"
                                 : "bg-gray-300 hover:bg-gray-400"
