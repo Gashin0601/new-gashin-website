@@ -3,76 +3,54 @@
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
 import SocialLink from "../ui/SocialLinks";
 import videosData from "@/data/videos.json";
 
-// Dynamic import with no SSR to avoid hydration issues
-const ReactPlayer = dynamic(() => import("react-player"), {
-    ssr: false,
-    loading: () => (
-        <div className="w-full h-full flex items-center justify-center bg-black">
-            <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
-        </div>
-    )
-});
-
 function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
-    const [isReady, setIsReady] = useState(false);
-    const [isBuffering, setIsBuffering] = useState(false);
-    const playerRef = useRef<any>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        if (!isCurrent && playerRef.current) {
-            const internalPlayer = playerRef.current.getInternalPlayer();
-            if (internalPlayer) {
-                internalPlayer.currentTime = 0;
-            }
+        const video = videoRef.current;
+        if (!video) return;
+
+        const handleLoadedData = () => setIsLoaded(true);
+        video.addEventListener('loadeddata', handleLoadedData);
+
+        return () => {
+            video.removeEventListener('loadeddata', handleLoadedData);
+        };
+    }, []);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (isCurrent) {
+            video.play().catch(() => {});
+        } else {
+            video.pause();
+            video.currentTime = 0;
         }
-    }, [isCurrent]);
+    }, [isCurrent, isLoaded]);
 
     return (
         <div className="w-full h-full relative bg-black overflow-hidden">
-            {(!isReady || isBuffering) && (
+            {!isLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </div>
             )}
-            <div
-                className={`w-full h-full transition-opacity duration-300 ${!isReady ? "opacity-0" : ""} ${!isCurrent ? "opacity-60" : ""}`}
-                style={{ position: 'absolute', inset: 0 }}
-            >
-                <ReactPlayer
-                    ref={playerRef}
-                    url={src}
-                    playing={isCurrent}
-                    loop
-                    muted
-                    playsinline
-                    width="100%"
-                    height="100%"
-                    style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        minWidth: '100%',
-                        minHeight: '100%'
-                    }}
-                    onReady={() => setIsReady(true)}
-                    onBuffer={() => setIsBuffering(true)}
-                    onBufferEnd={() => setIsBuffering(false)}
-                    {...{
-                        config: {
-                            file: {
-                                attributes: {
-                                    style: { objectFit: 'cover', width: '100%', height: '100%' }
-                                }
-                            }
-                        }
-                    } as any}
-                />
-            </div>
+            <video
+                ref={videoRef}
+                src={src}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!isLoaded ? "opacity-0" : ""}`}
+                muted
+                loop
+                playsInline
+                preload="auto"
+                crossOrigin="anonymous"
+            />
         </div>
     );
 }
