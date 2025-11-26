@@ -6,10 +6,39 @@ import { motion } from "framer-motion";
 import SocialLink from "../ui/SocialLinks";
 import videosData from "@/data/videos.json";
 
-function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
+// Preload all videos on page load
+const preloadedVideos: { [key: string]: HTMLVideoElement } = {};
+
+function preloadVideo(src: string): Promise<HTMLVideoElement> {
+    return new Promise((resolve) => {
+        if (preloadedVideos[src]) {
+            resolve(preloadedVideos[src]);
+            return;
+        }
+        const video = document.createElement('video');
+        video.src = src;
+        video.preload = 'auto';
+        video.muted = true;
+        video.playsInline = true;
+        video.crossOrigin = 'anonymous';
+        video.oncanplaythrough = () => {
+            preloadedVideos[src] = video;
+            resolve(video);
+        };
+        video.onerror = () => resolve(video);
+        video.load();
+    });
+}
+
+function VideoPlayer({ src, isCurrent, isMuted, onUnmute }: { src: string; isCurrent: boolean; isMuted: boolean; onUnmute: () => void }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [hasFirstFrame, setHasFirstFrame] = useState(false);
+
+    // Preload this video
+    useEffect(() => {
+        preloadVideo(src);
+    }, [src]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -20,34 +49,56 @@ function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
             setHasFirstFrame(true);
         };
 
-        // loadedmetadata fires when first frame is available
         const handleLoadedMetadata = () => {
+            setHasFirstFrame(true);
+        };
+
+        const handleCanPlay = () => {
+            setIsLoaded(true);
             setHasFirstFrame(true);
         };
 
         video.addEventListener('loadeddata', handleLoadedData);
         video.addEventListener('loadedmetadata', handleLoadedMetadata);
+        video.addEventListener('canplay', handleCanPlay);
+
+        // Force load
+        video.load();
 
         return () => {
             video.removeEventListener('loadeddata', handleLoadedData);
             video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+            video.removeEventListener('canplay', handleCanPlay);
         };
-    }, []);
+    }, [src]);
 
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
-        if (isCurrent && isLoaded) {
+        video.muted = isMuted;
+    }, [isMuted]);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (isCurrent) {
             video.play().catch(() => {});
-        } else if (!isCurrent) {
+        } else {
             video.pause();
             video.currentTime = 0;
         }
     }, [isCurrent, isLoaded]);
 
+    const handleClick = () => {
+        if (isCurrent && isMuted) {
+            onUnmute();
+        }
+    };
+
     return (
-        <div className="w-full h-full relative bg-black overflow-hidden">
+        <div className="w-full h-full relative bg-black overflow-hidden" onClick={handleClick}>
             {!hasFirstFrame && (
                 <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -57,12 +108,22 @@ function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
                 ref={videoRef}
                 src={src}
                 className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!hasFirstFrame ? "opacity-0" : ""}`}
-                muted
+                muted={isMuted}
                 loop
                 playsInline
-                preload={isCurrent ? "auto" : "metadata"}
+                preload="auto"
                 crossOrigin="anonymous"
             />
+            {/* Mute indicator */}
+            {isCurrent && isMuted && hasFirstFrame && (
+                <div className="absolute top-4 right-4 z-20 bg-black/50 rounded-full p-2 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <line x1="23" y1="9" x2="17" y2="15"></line>
+                        <line x1="17" y1="9" x2="23" y2="15"></line>
+                    </svg>
+                </div>
+            )}
         </div>
     );
 }
@@ -70,7 +131,15 @@ function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
 export default function VideoAccount() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Preload all videos on mount
+    useEffect(() => {
+        videosData.forEach((video) => {
+            preloadVideo(video.videoSrc);
+        });
+    }, []);
 
     // Auto-advance carousel
     useEffect(() => {
@@ -86,6 +155,10 @@ export default function VideoAccount() {
             if (timeoutRef.current) clearInterval(timeoutRef.current);
         };
     }, [isHovered]);
+
+    const handleUnmute = () => {
+        setIsMuted(false);
+    };
 
     return (
         <section className="py-24 bg-white overflow-hidden">
@@ -156,7 +229,7 @@ export default function VideoAccount() {
                                     }}
                                 >
                                     <div className="w-full h-full bg-black relative group">
-                                        <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} />
+                                        <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} isMuted={isMuted} onUnmute={handleUnmute} />
 
                                         {/* Navigation overlay for side videos */}
                                         {!isCurrent && (
