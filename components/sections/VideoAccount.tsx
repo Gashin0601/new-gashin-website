@@ -121,6 +121,8 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
         // Variables for cleanup
         let canPlayHandler: (() => void) | null = null;
         let retryTimeout: NodeJS.Timeout | null = null;
+        let retryCount = 0;
+        const maxRetries = 10;
         let isCancelled = false;
 
         // Clear any existing fade interval
@@ -139,6 +141,14 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
 
             const attemptPlay = () => {
                 if (isCancelled) return;
+                if (retryCount >= maxRetries) return;
+
+                // Ensure video is ready before playing
+                if (video.readyState < 2) {
+                    retryCount++;
+                    retryTimeout = setTimeout(attemptPlay, 300);
+                    return;
+                }
 
                 video.play()
                     .then(() => {
@@ -165,23 +175,25 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
                     })
                     .catch(() => {
                         if (isCancelled) return;
-                        // Retry after a short delay if play fails (e.g., video not ready yet)
-                        retryTimeout = setTimeout(attemptPlay, 500);
+                        retryCount++;
+                        // Retry after a short delay if play fails
+                        if (retryCount < maxRetries) {
+                            retryTimeout = setTimeout(attemptPlay, 500);
+                        }
                     });
             };
 
-            // Try to play immediately, or wait for video to be ready
-            if (video.readyState >= 2) {
-                attemptPlay();
-            } else {
-                canPlayHandler = () => {
+            // Start attempting to play
+            attemptPlay();
+
+            // Also listen for canplay event as a backup
+            canPlayHandler = () => {
+                if (!isCancelled && video.paused && isCurrent && isVisible) {
                     attemptPlay();
-                    if (canPlayHandler) {
-                        video.removeEventListener('canplay', canPlayHandler);
-                    }
-                };
-                video.addEventListener('canplay', canPlayHandler);
-            }
+                }
+            };
+            video.addEventListener('canplay', canPlayHandler);
+            video.addEventListener('canplaythrough', canPlayHandler);
         } else {
             // Fade out then pause
             let vol = video.volume;
@@ -212,12 +224,13 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
             }
             if (canPlayHandler && video) {
                 video.removeEventListener('canplay', canPlayHandler);
+                video.removeEventListener('canplaythrough', canPlayHandler);
             }
             if (retryTimeout) {
                 clearTimeout(retryTimeout);
             }
         };
-    }, [isCurrent, isLoaded, isVisible, isMuted]);
+    }, [isCurrent, isVisible, isMuted]);
 
     return (
         <div className="w-full h-full relative bg-black overflow-hidden z-0">
@@ -289,6 +302,14 @@ export default function VideoAccount() {
         const section = sectionRef.current;
         if (!section) return;
 
+        const checkVisibility = () => {
+            const rect = section.getBoundingClientRect();
+            const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+            if (isInView) {
+                setIsVisible(true);
+            }
+        };
+
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
@@ -298,21 +319,30 @@ export default function VideoAccount() {
             },
             {
                 threshold: [0, 0.1, 0.5, 1],
-                rootMargin: '0px'
+                rootMargin: '50px'
             }
         );
 
         observer.observe(section);
 
         // Check initial visibility immediately
-        const rect = section.getBoundingClientRect();
-        const isInitiallyVisible = rect.top < window.innerHeight && rect.bottom > 0;
-        if (isInitiallyVisible) {
-            setIsVisible(true);
-        }
+        checkVisibility();
+
+        // Also check after loading screen might have finished (multiple delays)
+        const timers = [
+            setTimeout(checkVisibility, 500),
+            setTimeout(checkVisibility, 1000),
+            setTimeout(checkVisibility, 2000),
+            setTimeout(checkVisibility, 3000),
+        ];
+
+        // Listen for scroll to catch visibility changes
+        window.addEventListener('scroll', checkVisibility);
 
         return () => {
             observer.disconnect();
+            timers.forEach(t => clearTimeout(t));
+            window.removeEventListener('scroll', checkVisibility);
         };
     }, []);
 
@@ -498,13 +528,14 @@ export default function VideoAccount() {
                             return (
                                 <motion.div
                                     key={video.id}
-                                    className={`absolute rounded-3xl overflow-hidden
-                                        ${isCurrent ? "z-20 shadow-2xl ring-1 ring-black/10" : "z-10 opacity-50 cursor-pointer"}
+                                    className={`absolute rounded-3xl overflow-hidden left-1/2 top-1/2
+                                        ${isCurrent ? "z-20 shadow-2xl ring-1 ring-black/10" : "z-10 cursor-pointer"}
                                     `}
                                     initial={false}
                                     animate={{
-                                        scale: isCurrent ? 1 : 0.85,
-                                        x: isCurrent ? 0 : isPrev ? "-85%" : "85%",
+                                        scale: isCurrent ? 1 : 0.8,
+                                        x: isCurrent ? "-50%" : isPrev ? "-120%" : "20%",
+                                        y: "-50%",
                                         opacity: isCurrent ? 1 : 0.5,
                                     }}
                                     transition={{
@@ -514,8 +545,8 @@ export default function VideoAccount() {
                                         mass: 1
                                     }}
                                     style={{
-                                        width: isCurrent ? "min(300px, 75vw)" : "min(240px, 60vw)",
-                                        height: isCurrent ? "min(530px, 70vh)" : "min(420px, 55vh)",
+                                        width: isCurrent ? "min(280px, 70vw)" : "min(220px, 55vw)",
+                                        height: isCurrent ? "min(500px, 65vh)" : "min(400px, 52vh)",
                                     }}
                                     role="group"
                                     aria-roledescription="動画スライド"
