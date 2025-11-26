@@ -141,6 +141,30 @@ export default function VideoAccount() {
         });
     }, []);
 
+    // Try to unmute after any user interaction on the page
+    useEffect(() => {
+        const handleUserInteraction = () => {
+            setIsMuted(false);
+            // Remove listeners after first interaction
+            document.removeEventListener('click', handleUserInteraction);
+            document.removeEventListener('touchstart', handleUserInteraction);
+            document.removeEventListener('scroll', handleUserInteraction);
+            document.removeEventListener('keydown', handleUserInteraction);
+        };
+
+        document.addEventListener('click', handleUserInteraction);
+        document.addEventListener('touchstart', handleUserInteraction);
+        document.addEventListener('scroll', handleUserInteraction);
+        document.addEventListener('keydown', handleUserInteraction);
+
+        return () => {
+            document.removeEventListener('click', handleUserInteraction);
+            document.removeEventListener('touchstart', handleUserInteraction);
+            document.removeEventListener('scroll', handleUserInteraction);
+            document.removeEventListener('keydown', handleUserInteraction);
+        };
+    }, []);
+
     // Auto-advance carousel
     useEffect(() => {
         if (isHovered) return;
