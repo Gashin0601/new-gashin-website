@@ -567,15 +567,14 @@ export default function VideoAccount() {
                             return (
                                 <motion.div
                                     key={video.id}
-                                    className={`absolute rounded-3xl overflow-hidden left-1/2 top-1/2
+                                    className={`absolute rounded-3xl overflow-hidden
                                         ${isCurrent ? "z-20 shadow-2xl ring-1 ring-black/10" : "z-10 cursor-pointer"}
                                     `}
                                     initial={false}
                                     animate={{
-                                        scale: isCurrent ? 1 : 0.8,
-                                        x: isCurrent ? "-50%" : isPrev ? "-120%" : "20%",
-                                        y: "-50%",
-                                        opacity: isCurrent ? 1 : 0.5,
+                                        scale: isCurrent ? 1 : 0.85,
+                                        x: isCurrent ? 0 : isPrev ? -180 : 180,
+                                        opacity: isCurrent ? 1 : 0.6,
                                     }}
                                     transition={{
                                         type: "spring",
@@ -584,8 +583,12 @@ export default function VideoAccount() {
                                         mass: 1
                                     }}
                                     style={{
-                                        width: isCurrent ? "min(280px, 70vw)" : "min(220px, 55vw)",
-                                        height: isCurrent ? "min(500px, 65vh)" : "min(400px, 52vh)",
+                                        width: "min(280px, 72vw)",
+                                        height: "min(500px, 68vh)",
+                                        left: "50%",
+                                        top: "50%",
+                                        marginLeft: "min(-140px, -36vw)",
+                                        marginTop: "min(-250px, -34vh)",
                                     }}
                                     role="group"
                                     aria-roledescription="動画スライド"
