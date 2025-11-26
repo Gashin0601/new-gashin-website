@@ -3,118 +3,52 @@
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import Hls from "hls.js";
 import SocialLink from "../ui/SocialLinks";
 import videosData from "@/data/videos.json";
 
-function VideoPlayer({ src, isCurrent, poster, fallbackUrl }: { src: string; isCurrent: boolean; poster?: string; fallbackUrl?: string }) {
+function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const hlsRef = useRef<Hls | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
-    const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
-        // Reset state on src change
-        setIsLoaded(false);
-        setHasError(false);
+        const handleLoadedData = () => setIsLoaded(true);
+        const handleCanPlay = () => {
+            if (isCurrent) {
+                video.play().catch(() => {});
+            }
+        };
 
-        // Check if source is HLS (.m3u8)
-        const isHLS = src.endsWith('.m3u8');
+        video.addEventListener('loadeddata', handleLoadedData);
+        video.addEventListener('canplay', handleCanPlay);
 
-        if (isHLS && Hls.isSupported()) {
-            // Use HLS.js for adaptive streaming
-            const hls = new Hls({
-                enableWorker: true,
-                lowLatencyMode: true,
-                backBufferLength: 90,
-            });
-            hlsRef.current = hls;
-            hls.loadSource(src);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                setIsLoaded(true);
-                if (isCurrent) {
-                    video.play().catch(() => { });
-                }
-            });
-            hls.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) {
-                    setHasError(true);
-                }
-            });
-        } else if (isHLS && video.canPlayType('application/vnd.apple.mpegurl')) {
-            // Native HLS support (Safari)
-            video.src = src;
-            video.addEventListener('loadedmetadata', () => {
-                setIsLoaded(true);
-                if (isCurrent) {
-                    video.play().catch(() => { });
-                }
-            });
-            video.addEventListener('error', () => setHasError(true));
-        } else {
-            // Standard MP4 - optimized loading
-            video.src = src;
-            video.addEventListener('loadeddata', () => {
-                setIsLoaded(true);
-            });
-            video.addEventListener('error', () => setHasError(true));
-        }
+        // Set source
+        video.src = src;
+        video.load();
 
         return () => {
-            if (hlsRef.current) {
-                hlsRef.current.destroy();
-                hlsRef.current = null;
-            }
+            video.removeEventListener('loadeddata', handleLoadedData);
+            video.removeEventListener('canplay', handleCanPlay);
         };
     }, [src]);
 
     useEffect(() => {
         const video = videoRef.current;
-        if (!video || !isLoaded || hasError) return;
+        if (!video) return;
 
-        if (isCurrent) {
-            video.play().catch(() => {
-                // Handle autoplay restriction
-            });
+        if (isCurrent && isLoaded) {
+            video.play().catch(() => {});
         } else {
             video.pause();
             video.currentTime = 0;
         }
-    }, [isCurrent, isLoaded, hasError]);
-
-    // Helper to extract YouTube ID
-    const getYouTubeId = (url: string) => {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-        const match = url.match(regExp);
-        if (match && match[2].length === 11) return match[2];
-        // Handle shorts
-        const shortsMatch = url.match(/shorts\/([^#&?]*)/);
-        if (shortsMatch && shortsMatch[1]) return shortsMatch[1];
-        return null;
-    };
-
-    if (hasError && fallbackUrl) {
-        const videoId = getYouTubeId(fallbackUrl);
-        if (videoId) {
-            return (
-                <iframe
-                    src={`https://www.youtube.com/embed/${videoId}?autoplay=${isCurrent ? 1 : 0}&loop=1&playlist=${videoId}&controls=0&mute=1&playsinline=1&rel=0`}
-                    className="w-full h-full object-cover"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title="YouTube video player"
-                />
-            );
-        }
-    }
+    }, [isCurrent, isLoaded]);
 
     return (
         <div className="w-full h-full relative bg-black">
-            {!isLoaded && !hasError && (
+            {!isLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </div>
@@ -125,8 +59,7 @@ function VideoPlayer({ src, isCurrent, poster, fallbackUrl }: { src: string; isC
                 muted
                 loop
                 playsInline
-                preload={isCurrent ? "auto" : "metadata"}
-                poster={poster}
+                preload="auto"
             />
         </div>
     );
@@ -221,7 +154,7 @@ export default function VideoAccount() {
                                     }}
                                 >
                                     <div className="w-full h-full bg-black relative group">
-                                        <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} fallbackUrl={video.socialLinks.youtube} />
+                                        <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} />
 
                                         {/* Navigation overlay for side videos */}
                                         {!isCurrent && (
