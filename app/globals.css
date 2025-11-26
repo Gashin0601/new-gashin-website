@@ -174,3 +174,25 @@ body {
   opacity: 0;
   transition: opacity 300ms ease-in;
 }
+
+/* iOS Safari Video Fix */
+video {
+  /* Prevent iOS Safari from showing video controls */
+  -webkit-appearance: none;
+  /* Force hardware acceleration */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  /* Prevent iOS Safari rendering issues */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* iOS Safari specific video container fix */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari only */
+  video {
+    /* Force proper sizing on iOS */
+    max-width: none !important;
+    max-height: none !important;
+  }
+}

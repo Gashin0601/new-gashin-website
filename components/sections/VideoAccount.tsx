@@ -31,26 +31,6 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
         // iOS Safari requires setAttribute for playsinline to work properly
         video.setAttribute('playsinline', '');
         video.setAttribute('webkit-playsinline', '');
-
-        // iOS Safari object-fit: cover bug workaround
-        // Force a reflow after video loads to fix sizing
-        const forceReflow = () => {
-            if (video) {
-                // Toggle a style property to force Safari to recalculate
-                video.style.transform = 'translate(-50%, -50%) scale(1.02)';
-                requestAnimationFrame(() => {
-                    video.style.transform = 'translate(-50%, -50%) scale(1.01)';
-                });
-            }
-        };
-
-        video.addEventListener('loadeddata', forceReflow);
-        video.addEventListener('canplay', forceReflow);
-
-        return () => {
-            video.removeEventListener('loadeddata', forceReflow);
-            video.removeEventListener('canplay', forceReflow);
-        };
     }, []);
 
     useEffect(() => {
@@ -228,20 +208,15 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
                     <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </div>
             )}
-            {/* iOS Safari fix: Use min-width/min-height + scale transform for object-fit: cover bug */}
+            {/* iOS Safari compatible video styling */}
             <video
                 ref={videoRef}
-                className={`absolute z-[1] transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!hasFirstFrame ? "opacity-0" : ""}`}
+                className={`absolute inset-0 w-full h-full z-[1] transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!hasFirstFrame ? "opacity-0" : ""}`}
                 style={{
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%) scale(1.01)',
-                    minWidth: '100%',
-                    minHeight: '100%',
-                    width: 'auto',
-                    height: 'auto',
                     objectFit: 'cover',
                     objectPosition: 'center',
+                    WebkitTransform: 'translateZ(0)',
+                    transform: 'translateZ(0)',
                 }}
                 autoPlay
                 muted
