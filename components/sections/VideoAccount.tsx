@@ -8,7 +8,7 @@ import SocialLink from "../ui/SocialLinks";
 import videosData from "@/data/videos.json";
 
 // Dynamic import to avoid SSR issues
-const ReactPlayer = dynamic(() => import("react-player/file"), { ssr: false });
+const ReactPlayer = dynamic(() => import("react-player/lazy"), { ssr: false });
 
 function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
     const [isReady, setIsReady] = useState(false);
