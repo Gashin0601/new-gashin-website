@@ -2,9 +2,34 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import videosData from "@/data/videos.json";
+
+// Preload video function
+function preloadVideo(src: string): Promise<void> {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.src = src;
+    video.preload = 'auto';
+    video.muted = true;
+    video.playsInline = true;
+    video.crossOrigin = 'anonymous';
+
+    const handleReady = () => {
+      resolve();
+    };
+
+    video.oncanplaythrough = handleReady;
+    video.onerror = handleReady; // Resolve even on error to not block loading
+    video.load();
+
+    // Timeout fallback
+    setTimeout(handleReady, 5000);
+  });
+}
 
 export default function LoadingScreen() {
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
     // Check if we've already shown the loading screen in this session
@@ -15,13 +40,27 @@ export default function LoadingScreen() {
       return;
     }
 
-    // Simulate loading time (e.g., 3.5 seconds)
-    const timer = setTimeout(() => {
+    // Preload all videos
+    const preloadAllVideos = async () => {
+      const totalVideos = videosData.length;
+      let loadedCount = 0;
+
+      const promises = videosData.map(async (video) => {
+        await preloadVideo(video.videoSrc);
+        loadedCount++;
+        setLoadingProgress(Math.round((loadedCount / totalVideos) * 100));
+      });
+
+      await Promise.all(promises);
+
+      // Minimum display time of 2 seconds
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       setIsLoading(false);
       sessionStorage.setItem("hasLoaded", "true");
-    }, 3500);
+    };
 
-    return () => clearTimeout(timer);
+    preloadAllVideos();
   }, []);
 
   return (
@@ -56,13 +95,33 @@ export default function LoadingScreen() {
               SUZUKI GASHIN
             </motion.h1>
 
+            {/* Loading Progress */}
+            <motion.div
+              className="mt-6 w-48"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+            >
+              <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-black"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${loadingProgress}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-2 text-center">
+                Loading... {loadingProgress}%
+              </p>
+            </motion.div>
+
             {/* Skip Button (Accessibility) */}
             <button
               onClick={() => {
                 setIsLoading(false);
                 sessionStorage.setItem("hasLoaded", "true");
               }}
-              className="mt-8 text-sm text-gray-500 hover:text-black underline focus:outline-none focus:ring-2 focus:ring-black rounded p-1"
+              className="mt-6 text-sm text-gray-500 hover:text-black underline focus:outline-none focus:ring-2 focus:ring-black rounded p-1"
             >
               Skip Loading
             </button>

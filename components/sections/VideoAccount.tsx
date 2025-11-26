@@ -30,7 +30,7 @@ function preloadVideo(src: string): Promise<HTMLVideoElement> {
     });
 }
 
-function VideoPlayer({ src, isCurrent, isMuted, onUnmute }: { src: string; isCurrent: boolean; isMuted: boolean; onUnmute: () => void }) {
+function VideoPlayer({ src, isCurrent, isMuted, onUnmute, isVisible }: { src: string; isCurrent: boolean; isMuted: boolean; onUnmute: () => void; isVisible: boolean }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [hasFirstFrame, setHasFirstFrame] = useState(false);
@@ -80,7 +80,7 @@ function VideoPlayer({ src, isCurrent, isMuted, onUnmute }: { src: string; isCur
         video.muted = isMuted;
     }, [isMuted]);
 
-    // Handle play/pause with audio fade
+    // Handle play/pause with audio fade based on visibility and current state
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
@@ -91,7 +91,9 @@ function VideoPlayer({ src, isCurrent, isMuted, onUnmute }: { src: string; isCur
             fadeIntervalRef.current = null;
         }
 
-        if (isCurrent) {
+        const shouldPlay = isCurrent && isVisible;
+
+        if (shouldPlay) {
             // Fade in
             video.volume = 0;
             video.play().catch(() => {});
@@ -112,12 +114,14 @@ function VideoPlayer({ src, isCurrent, isMuted, onUnmute }: { src: string; isCur
             // Fade out then pause
             let vol = video.volume;
             fadeIntervalRef.current = setInterval(() => {
-                vol -= 0.15;
+                vol -= 0.1;
                 if (vol <= 0) {
                     vol = 0;
                     video.volume = vol;
                     video.pause();
-                    video.currentTime = 0;
+                    if (!isCurrent) {
+                        video.currentTime = 0;
+                    }
                     if (fadeIntervalRef.current) {
                         clearInterval(fadeIntervalRef.current);
                         fadeIntervalRef.current = null;
@@ -134,7 +138,7 @@ function VideoPlayer({ src, isCurrent, isMuted, onUnmute }: { src: string; isCur
                 fadeIntervalRef.current = null;
             }
         };
-    }, [isCurrent, isLoaded]);
+    }, [isCurrent, isLoaded, isVisible]);
 
     const handleClick = () => {
         if (isCurrent && isMuted) {
@@ -177,13 +181,39 @@ export default function VideoAccount() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const [isMuted, setIsMuted] = useState(true);
+    const [isVisible, setIsVisible] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const sectionRef = useRef<HTMLElement>(null);
 
     // Preload all videos on mount
     useEffect(() => {
         videosData.forEach((video) => {
             preloadVideo(video.videoSrc);
         });
+    }, []);
+
+    // Intersection Observer to detect section visibility
+    useEffect(() => {
+        const section = sectionRef.current;
+        if (!section) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    setIsVisible(entry.isIntersecting && entry.intersectionRatio > 0.3);
+                });
+            },
+            {
+                threshold: [0, 0.3, 0.5, 0.7, 1],
+                rootMargin: '-10% 0px -10% 0px'
+            }
+        );
+
+        observer.observe(section);
+
+        return () => {
+            observer.disconnect();
+        };
     }, []);
 
     // Try to unmute after any user interaction on the page
@@ -210,9 +240,9 @@ export default function VideoAccount() {
         };
     }, []);
 
-    // Auto-advance carousel
+    // Auto-advance carousel (only when visible)
     useEffect(() => {
-        if (isHovered) return;
+        if (isHovered || !isVisible) return;
 
         const nextSlide = () => {
             setCurrentIndex((prev) => (prev + 1) % videosData.length);
@@ -223,14 +253,14 @@ export default function VideoAccount() {
         return () => {
             if (timeoutRef.current) clearInterval(timeoutRef.current);
         };
-    }, [isHovered]);
+    }, [isHovered, isVisible]);
 
     const handleUnmute = () => {
         setIsMuted(false);
     };
 
     return (
-        <section className="py-24 bg-white overflow-hidden">
+        <section ref={sectionRef} className="py-24 bg-white overflow-hidden">
             <div className="max-w-6xl mx-auto px-6">
                 {/* Account Header */}
                 <div className="text-center mb-16 space-y-6">
@@ -298,7 +328,7 @@ export default function VideoAccount() {
                                     }}
                                 >
                                     <div className="w-full h-full bg-black relative group">
-                                        <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} isMuted={isMuted} onUnmute={handleUnmute} />
+                                        <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} isMuted={isMuted} onUnmute={handleUnmute} isVisible={isVisible} />
 
                                         {/* Navigation overlay for side videos */}
                                         {!isCurrent && (
