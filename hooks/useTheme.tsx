@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 export type ThemeMode = "light" | "dark" | "normal";
 
@@ -16,6 +17,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const [theme, setThemeState] = useState<ThemeMode>("normal");
     const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
     const [mounted, setMounted] = useState(false);
+    const pathname = usePathname();
 
     // Initialize theme from localStorage on mount
     useEffect(() => {
@@ -30,38 +32,26 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         setMounted(true);
     }, []);
 
-    // Apply theme to document
+    // Apply theme to document - re-run when theme or pathname changes
     useEffect(() => {
         if (!mounted) return;
 
-        const applyTheme = () => {
-            const root = document.documentElement;
-            const isStoryPage = window.location.pathname === "/story";
+        const root = document.documentElement;
+        const isStoryPage = pathname === "/story";
 
-            let effectiveTheme: "light" | "dark";
+        let effectiveTheme: "light" | "dark";
 
-            if (theme === "normal") {
-                // Normal mode: Story page is dark, everything else is light
-                effectiveTheme = isStoryPage ? "dark" : "light";
-            } else {
-                // Light or dark mode: apply the selected theme to all pages
-                effectiveTheme = theme;
-            }
+        if (theme === "normal") {
+            // Normal mode: Story page is dark, everything else is light
+            effectiveTheme = isStoryPage ? "dark" : "light";
+        } else {
+            // Light or dark mode: apply the selected theme to all pages
+            effectiveTheme = theme;
+        }
 
-            root.setAttribute("data-theme", effectiveTheme);
-            setResolvedTheme(effectiveTheme);
-        };
-
-        applyTheme();
-
-        // Listen for route changes to re-apply theme
-        const handleRouteChange = () => {
-            applyTheme();
-        };
-
-        window.addEventListener("popstate", handleRouteChange);
-        return () => window.removeEventListener("popstate", handleRouteChange);
-    }, [theme, mounted]);
+        root.setAttribute("data-theme", effectiveTheme);
+        setResolvedTheme(effectiveTheme);
+    }, [theme, mounted, pathname]);
 
     const setTheme = (newTheme: ThemeMode) => {
         setThemeState(newTheme);
