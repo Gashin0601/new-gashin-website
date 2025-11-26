@@ -30,7 +30,7 @@ function preloadVideo(src: string): Promise<HTMLVideoElement> {
     });
 }
 
-function VideoPlayer({ src, isCurrent, isMuted, onUnmute, isVisible }: { src: string; isCurrent: boolean; isMuted: boolean; onUnmute: () => void; isVisible: boolean }) {
+function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCurrent: boolean; isMuted: boolean; isVisible: boolean }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [hasFirstFrame, setHasFirstFrame] = useState(false);
@@ -140,23 +140,17 @@ function VideoPlayer({ src, isCurrent, isMuted, onUnmute, isVisible }: { src: st
         };
     }, [isCurrent, isLoaded, isVisible]);
 
-    const handleClick = () => {
-        if (isCurrent && isMuted) {
-            onUnmute();
-        }
-    };
-
     return (
-        <div className="w-full h-full relative bg-black overflow-hidden" onClick={handleClick}>
+        <div className="w-full h-full relative bg-black overflow-hidden z-0">
             {!hasFirstFrame && (
-                <div className="absolute inset-0 flex items-center justify-center z-10">
+                <div className="absolute inset-0 flex items-center justify-center z-[5]">
                     <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </div>
             )}
             <video
                 ref={videoRef}
                 src={src}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!hasFirstFrame ? "opacity-0" : ""}`}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 z-[1] ${!isCurrent ? "opacity-60" : ""} ${!hasFirstFrame ? "opacity-0" : ""}`}
                 muted={isMuted}
                 loop
                 playsInline
@@ -165,7 +159,7 @@ function VideoPlayer({ src, isCurrent, isMuted, onUnmute, isVisible }: { src: st
             />
             {/* Mute indicator */}
             {isCurrent && isMuted && hasFirstFrame && (
-                <div className="absolute top-4 right-4 z-20 bg-black/50 rounded-full p-2 pointer-events-none">
+                <div className="absolute top-4 right-4 z-[25] bg-black/50 rounded-full p-2 pointer-events-none">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                         <line x1="23" y1="9" x2="17" y2="15"></line>
@@ -182,8 +176,11 @@ export default function VideoAccount() {
     const [isHovered, setIsHovered] = useState(false);
     const [isMuted, setIsMuted] = useState(true);
     const [isVisible, setIsVisible] = useState(false);
+    const [showOverlay, setShowOverlay] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const sectionRef = useRef<HTMLElement>(null);
+    const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+    const overlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Preload all videos on mount
     useEffect(() => {
@@ -259,6 +256,60 @@ export default function VideoAccount() {
         setIsMuted(false);
     };
 
+    // Handle overlay toggle for mobile tap
+    const handleVideoTap = () => {
+        // Clear any existing timeout
+        if (overlayTimeoutRef.current) {
+            clearTimeout(overlayTimeoutRef.current);
+        }
+
+        setShowOverlay(prev => !prev);
+
+        // Auto-hide overlay after 3 seconds
+        if (!showOverlay) {
+            overlayTimeoutRef.current = setTimeout(() => {
+                setShowOverlay(false);
+            }, 3000);
+        }
+    };
+
+    // Touch handlers for swipe gestures
+    const handleTouchStart = (e: React.TouchEvent) => {
+        const touch = e.touches[0];
+        touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (!touchStartRef.current) return;
+
+        const touch = e.changedTouches[0];
+        const deltaX = touch.clientX - touchStartRef.current.x;
+        const deltaY = touch.clientY - touchStartRef.current.y;
+
+        // Only trigger swipe if horizontal movement is greater than vertical
+        // and the swipe distance is significant (at least 50px)
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+            if (deltaX > 0) {
+                // Swipe right - go to previous
+                setCurrentIndex((prev) => (prev - 1 + videosData.length) % videosData.length);
+            } else {
+                // Swipe left - go to next
+                setCurrentIndex((prev) => (prev + 1) % videosData.length);
+            }
+        }
+
+        touchStartRef.current = null;
+    };
+
+    // Clean up overlay timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (overlayTimeoutRef.current) {
+                clearTimeout(overlayTimeoutRef.current);
+            }
+        };
+    }, []);
+
     return (
         <section ref={sectionRef} className="py-24 bg-white overflow-hidden">
             <div className="max-w-6xl mx-auto px-6">
@@ -291,6 +342,8 @@ export default function VideoAccount() {
                     className="relative h-[500px] sm:h-[550px] md:h-[600px] flex items-center justify-center"
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
                 >
                         {videosData.map((video, index) => {
                             // Calculate offset from current index
@@ -327,14 +380,55 @@ export default function VideoAccount() {
                                         height: isCurrent ? "min(530px, 70vh)" : "min(420px, 55vh)",
                                     }}
                                 >
-                                    <div className="w-full h-full bg-black relative group">
-                                        <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} isMuted={isMuted} onUnmute={handleUnmute} isVisible={isVisible} />
+                                    <div
+                                        className="w-full h-full bg-black relative touch-pan-y"
+                                        onMouseEnter={() => isCurrent && setShowOverlay(true)}
+                                        onMouseLeave={() => isCurrent && setShowOverlay(false)}
+                                        onTouchStart={handleTouchStart}
+                                        onTouchEnd={(e) => {
+                                            // Check if this was a swipe or just a tap
+                                            if (touchStartRef.current) {
+                                                const touch = e.changedTouches[0];
+                                                const deltaX = touch.clientX - touchStartRef.current.x;
+                                                const deltaY = touch.clientY - touchStartRef.current.y;
+
+                                                // If horizontal swipe detected, handle navigation
+                                                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                                                    if (deltaX > 0) {
+                                                        setCurrentIndex((prev) => (prev - 1 + videosData.length) % videosData.length);
+                                                    } else {
+                                                        setCurrentIndex((prev) => (prev + 1) % videosData.length);
+                                                    }
+                                                    touchStartRef.current = null;
+                                                    return;
+                                                }
+                                            }
+                                            touchStartRef.current = null;
+
+                                            // If not a swipe, treat as tap
+                                            if (isCurrent) {
+                                                handleVideoTap();
+                                                if (isMuted) handleUnmute();
+                                            }
+                                        }}
+                                        onClick={(e) => {
+                                            // Only handle click on desktop (no touch)
+                                            if (e.detail > 0 && isCurrent) {
+                                                handleVideoTap();
+                                                if (isMuted) handleUnmute();
+                                            }
+                                        }}
+                                    >
+                                        <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} isMuted={isMuted} isVisible={isVisible} />
 
                                         {/* Navigation overlay for side videos */}
                                         {!isCurrent && (
                                             <div
                                                 className="absolute inset-0 z-40 cursor-pointer"
-                                                onClick={() => setCurrentIndex(index)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setCurrentIndex(index);
+                                                }}
                                                 role="button"
                                                 tabIndex={0}
                                                 aria-label={`${video.title} ${isPrev ? "(前の動画)" : "(次の動画)"}`}
@@ -356,16 +450,19 @@ export default function VideoAccount() {
                                                     <h3 className="font-bold text-lg mb-1 line-clamp-2">{video.title}</h3>
                                                 </div>
 
-                                                {/* Hover overlay with social links */}
-                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-30 pointer-events-auto">
-                                                    <div className="flex gap-3">
+                                                {/* Social links overlay - shown on hover or tap */}
+                                                <div
+                                                    className={`absolute inset-0 bg-black/60 flex items-center justify-center z-[50] transition-opacity duration-200 ${showOverlay ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                                                >
+                                                    <div className="flex gap-4" onClick={(e) => e.stopPropagation()}>
                                                         {Object.entries(video.socialLinks).map(([platform, url]) => (
                                                             <SocialLink
                                                                 key={platform}
                                                                 platform={platform as "youtube" | "tiktok" | "instagram" | "x"}
                                                                 url={url}
-                                                                className="text-white bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 hover:scale-110 transition-all"
-                                                                iconSize={22}
+                                                                className="bg-white/30 backdrop-blur-sm p-3 rounded-full hover:bg-white/50 hover:scale-110 transition-all"
+                                                                iconSize={24}
+                                                                iconColor="#ffffff"
                                                             />
                                                         ))}
                                                     </div>
@@ -379,14 +476,14 @@ export default function VideoAccount() {
                 </div>
 
                 {/* Carousel indicators */}
-                <div className="flex justify-center gap-2 mt-8">
+                <div className="flex justify-center gap-3 mt-8">
                     {videosData.map((_, index) => (
                         <button
                             key={index}
                             onClick={() => setCurrentIndex(index)}
-                            className={`w-2 h-2 rounded-full transition-all ${index === currentIndex
-                                ? "bg-gray-900 w-6"
-                                : "bg-gray-300 hover:bg-gray-400"
+                            className={`h-3 rounded-full transition-all cursor-pointer ${index === currentIndex
+                                ? "bg-gray-900 w-8"
+                                : "bg-gray-300 hover:bg-gray-500 w-3"
                                 }`}
                             aria-label={`動画 ${index + 1} に移動`}
                         />

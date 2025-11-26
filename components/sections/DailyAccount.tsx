@@ -1,16 +1,73 @@
 "use client";
 
 import Image from "next/image";
-import Script from "next/script";
+import { useEffect, useRef, useState } from "react";
 import SocialLink from "../ui/SocialLinks";
 
+declare global {
+    interface Window {
+        twttr?: {
+            widgets: {
+                load: (element?: HTMLElement) => Promise<void>;
+            };
+        };
+    }
+}
+
 export default function DailyAccount() {
+    const tweetContainerRef = useRef<HTMLDivElement>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
+    useEffect(() => {
+        const loadTwitterWidget = () => {
+            // If twttr is already loaded, use it
+            if (window.twttr?.widgets) {
+                window.twttr.widgets.load(tweetContainerRef.current || undefined)
+                    .then(() => setIsLoading(false))
+                    .catch(() => setHasError(true));
+                return;
+            }
+
+            // Load the Twitter widget script
+            const script = document.createElement('script');
+            script.src = 'https://platform.twitter.com/widgets.js';
+            script.async = true;
+            script.charset = 'utf-8';
+
+            script.onload = () => {
+                // Wait a bit for twttr to initialize
+                setTimeout(() => {
+                    if (window.twttr?.widgets) {
+                        window.twttr.widgets.load(tweetContainerRef.current || undefined)
+                            .then(() => setIsLoading(false))
+                            .catch(() => setHasError(true));
+                    } else {
+                        setHasError(true);
+                    }
+                }, 100);
+            };
+
+            script.onerror = () => {
+                setHasError(true);
+                setIsLoading(false);
+            };
+
+            document.body.appendChild(script);
+        };
+
+        // Small delay to ensure DOM is ready
+        const timer = setTimeout(loadTwitterWidget, 100);
+
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
-        <section className="py-16 sm:py-20 md:py-24 bg-white">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <section className="py-24 bg-white">
+            <div className="max-w-6xl mx-auto px-6">
                 {/* Account Header */}
-                <div className="text-center mb-12 sm:mb-14 md:mb-16 space-y-4 sm:space-y-6">
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-full overflow-hidden shadow-xl border-2 border-white/10">
+                <div className="text-center mb-16 space-y-6">
+                    <div className="relative w-24 h-24 mx-auto mb-6 rounded-full overflow-hidden shadow-xl border-2 border-white/10">
                         <Image
                             src="/images/profile/suzuki_gashin.jpeg"
                             alt="鈴木我信"
@@ -18,29 +75,51 @@ export default function DailyAccount() {
                             className="object-cover"
                         />
                     </div>
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">鈴木我信</h2>
-                    <p className="text-xs sm:text-sm text-gray-400 font-mono -mt-2 sm:-mt-4">@suzuki_gashin</p>
-                    <p className="text-base sm:text-lg text-[var(--text-secondary)]">
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900">鈴木我信</h2>
+                    <p className="text-sm text-gray-400 font-mono -mt-4">@suzuki_gashin</p>
+                    <p className="text-[var(--text-secondary)] max-w-2xl mx-auto text-lg">
                         日々の気づきや活動をXで発信しています。
                     </p>
 
-                    <div className="flex justify-center gap-4 sm:gap-6">
-                        <SocialLink platform="x" url="https://x.com/suzuki_gashin" className="text-[var(--sns-x)] hover:scale-110" iconSize={24} />
-                        <SocialLink platform="instagram" url="https://instagram.com/suzuki_gashin" className="text-[var(--sns-instagram)] hover:scale-110" iconSize={24} />
-                        <SocialLink platform="facebook" url="https://facebook.com/suzuki.gashin" className="text-[var(--sns-facebook)] hover:scale-110" iconSize={24} />
+                    <div className="flex justify-center gap-6">
+                        <SocialLink platform="x" url="https://x.com/suzuki_gashin" className="text-[var(--sns-x)] hover:scale-110" iconSize={32} />
+                        <SocialLink platform="instagram" url="https://instagram.com/suzuki_gashin" className="text-[var(--sns-instagram)] hover:scale-110" iconSize={32} />
+                        <SocialLink platform="facebook" url="https://facebook.com/suzuki.gashin" className="text-[var(--sns-facebook)] hover:scale-110" iconSize={32} />
                     </div>
                 </div>
 
                 {/* X (Twitter) Embed */}
-                <div className="max-w-md mx-auto bg-white rounded-xl overflow-hidden">
-                    <blockquote className="twitter-tweet">
-                        <p lang="ja" dir="ltr">
-                            <a href="https://twitter.com/suzuki_gashin/status/1968874968055214136?ref_src=twsrc%5Etfw"></a>
-                        </p>
-                    </blockquote>
+                <div className="max-w-md mx-auto">
+                    <div ref={tweetContainerRef} className="bg-white rounded-xl overflow-hidden min-h-[200px]">
+                        {isLoading && !hasError && (
+                            <div className="flex items-center justify-center h-[200px]">
+                                <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-600 rounded-full animate-spin"></div>
+                            </div>
+                        )}
+                        {hasError && (
+                            <div className="flex flex-col items-center justify-center h-[200px] text-gray-500">
+                                <p className="mb-2">投稿を読み込めませんでした</p>
+                                <a
+                                    href="https://x.com/suzuki_gashin"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 hover:underline"
+                                >
+                                    Xで見る →
+                                </a>
+                            </div>
+                        )}
+                        <blockquote
+                            className="twitter-tweet"
+                            data-lang="ja"
+                            data-dnt="true"
+                            data-theme="light"
+                        >
+                            <a href="https://twitter.com/suzuki_gashin/status/1968874968055214136"></a>
+                        </blockquote>
+                    </div>
                 </div>
             </div>
-            <Script src="https://platform.twitter.com/widgets.js" strategy="lazyOnload" />
         </section>
     );
 }
