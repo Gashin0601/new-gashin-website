@@ -42,7 +42,6 @@ function VideoPlayer({ src, isCurrent }: { src: string; isCurrent: boolean }) {
                 className={`w-full h-full transition-opacity duration-300 ${!isReady ? "opacity-0" : ""} ${!isCurrent ? "opacity-60" : ""}`}
                 style={{ position: 'absolute', inset: 0 }}
             >
-                {/* @ts-expect-error - ReactPlayer types are not fully compatible with dynamic import */}
                 <ReactPlayer
                     ref={playerRef}
                     url={src}
