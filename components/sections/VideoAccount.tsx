@@ -215,7 +215,7 @@ export default function VideoAccount() {
                                 }}
                                 animate={{
                                     scale: isCurrent ? 1 : 0.85,
-                                    x: isCurrent ? 0 : isPrev ? "-70%" : "70%",
+                                    x: isCurrent ? 0 : isPrev ? "-55%" : "55%",
                                     opacity: isCurrent ? 1 : 0.5,
                                     zIndex: isCurrent ? 20 : 10,
                                 }}
