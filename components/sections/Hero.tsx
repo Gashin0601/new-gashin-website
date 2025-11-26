@@ -12,7 +12,7 @@ export default function Hero() {
             aria-label="鈴木我信の紹介"
         >
             {/* Content Container */}
-            <div className="relative z-10 max-w-6xl w-full px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center pt-32 sm:pt-36 md:pt-0">
+            <div className="relative z-10 max-w-6xl w-full px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 items-center pt-24 sm:pt-36 md:pt-0">
                 {/* Text Content */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -25,7 +25,7 @@ export default function Hero() {
                         The visual <br> is hidden from screen readers with aria-hidden
                     */}
                     <h1
-                        className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-tight tracking-tight text-[var(--text-primary)]"
+                        className="text-4xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-tight tracking-tight text-[var(--text-primary)]"
                         aria-label="我を信じて突き進む。"
                     >
                         <span aria-hidden="true">
