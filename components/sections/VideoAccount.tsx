@@ -101,21 +101,19 @@ function VideoPlayer({ src, isCurrent, poster, fallbackUrl }: { src: string; isC
         const videoId = getYouTubeId(fallbackUrl);
         if (videoId) {
             return (
-                <div className="w-full h-full relative bg-black pointer-events-none">
-                    <iframe
-                        src={`https://www.youtube.com/embed/${videoId}?autoplay=${isCurrent ? 1 : 0}&loop=1&playlist=${videoId}&controls=0&mute=1&playsinline=1&rel=0`}
-                        className="w-full h-full object-cover pointer-events-auto"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        title="YouTube video player"
-                    />
-                </div>
+                <iframe
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=${isCurrent ? 1 : 0}&loop=1&playlist=${videoId}&controls=0&mute=1&playsinline=1&rel=0`}
+                    className="w-full h-full object-cover"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="YouTube video player"
+                />
             );
         }
     }
 
     return (
-        <div className="w-full h-full relative bg-black pointer-events-none">
+        <div className="w-full h-full relative bg-black">
             {!isLoaded && !hasError && (
                 <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -190,97 +188,95 @@ export default function VideoAccount() {
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                 >
-                    {videosData.map((video, index) => {
-                        // Calculate offset from current index
-                        let offset = (index - currentIndex + videosData.length) % videosData.length;
-                        if (offset > videosData.length / 2) offset -= videosData.length;
+                    <AnimatePresence initial={false} mode="popLayout">
+                        {videosData.map((video, index) => {
+                            // Calculate offset from current index
+                            let offset = (index - currentIndex + videosData.length) % videosData.length;
+                            if (offset > videosData.length / 2) offset -= videosData.length;
 
-                        // Only render if it's current, prev, or next
-                        if (Math.abs(offset) > 1) return null;
+                            // Only render if it's current, prev, or next
+                            if (Math.abs(offset) > 1) return null;
 
-                        const isCurrent = offset === 0;
-                        const isPrev = offset === -1;
-                        const isNext = offset === 1;
+                            const isCurrent = offset === 0;
+                            const isPrev = offset === -1;
+                            const isNext = offset === 1;
 
-                        return (
-                            <motion.div
-                                key={video.id}
-                                className={`absolute rounded-3xl overflow-hidden transition-all duration-500 ease-in-out
-                                    ${isCurrent ? "z-20 shadow-2xl ring-1 ring-black/10" : "z-10 opacity-50 cursor-pointer"}
-                                `}
-                                initial={{
-                                    scale: 0.85,
-                                    x: offset * 100 + "%",
-                                    opacity: 0
-                                }}
-                                animate={{
-                                    scale: isCurrent ? 1 : 0.85,
-                                    x: isCurrent ? 0 : isPrev ? "-55%" : "55%",
-                                    opacity: isCurrent ? 1 : 0.5,
-                                    zIndex: isCurrent ? 20 : 10,
-                                }}
-                                transition={{
-                                    type: "spring",
-                                    stiffness: 300,
-                                    damping: 30,
-                                    mass: 1
-                                }}
-                                style={{
-                                    width: isCurrent ? "min(300px, 75vw)" : "min(240px, 60vw)",
-                                    height: isCurrent ? "min(530px, 70vh)" : "min(420px, 55vh)",
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" || e.key === " ") {
+                            return (
+                                <motion.div
+                                    key={video.id}
+                                    layout
+                                    className={`absolute rounded-3xl overflow-hidden transition-all duration-500 ease-in-out
+                                        ${isCurrent ? "z-20 shadow-2xl ring-1 ring-black/10" : "z-10 opacity-50 cursor-pointer"}
+                                    `}
+                                    initial={{
+                                        scale: 0.85,
+                                        x: offset * 100 + "%",
+                                        opacity: 0
+                                    }}
+                                    animate={{
+                                        scale: isCurrent ? 1 : 0.85,
+                                        x: isCurrent ? 0 : isPrev ? "-55%" : "55%",
+                                        opacity: isCurrent ? 1 : 0.5,
+                                        zIndex: isCurrent ? 20 : 10,
+                                    }}
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 300,
+                                        damping: 30,
+                                        mass: 1
+                                    }}
+                                    style={{
+                                        width: isCurrent ? "min(300px, 75vw)" : "min(240px, 60vw)",
+                                        height: isCurrent ? "min(530px, 70vh)" : "min(420px, 55vh)",
+                                    }}
+                                    onClick={() => {
                                         if (isPrev) setCurrentIndex(prevIndex);
                                         if (isNext) setCurrentIndex(nextIndex);
-                                    }
-                                }}
-                            >
-                                <div className="w-full h-full bg-black relative group">
-                                    <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} fallbackUrl={video.socialLinks.youtube} />
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-label={`${video.title} ${isCurrent ? "(再生中)" : isPrev ? "(前の動画)" : "(次の動画)"}`}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter" || e.key === " ") {
+                                            if (isPrev) setCurrentIndex(prevIndex);
+                                            if (isNext) setCurrentIndex(nextIndex);
+                                        }
+                                    }}
+                                >
+                                    <div className="w-full h-full bg-black relative group">
+                                        <VideoPlayer src={video.videoSrc} isCurrent={isCurrent} fallbackUrl={video.socialLinks.youtube} />
 
-                                    {/* Navigation Overlay for Side Videos */}
-                                    {!isCurrent && (
-                                        <div
-                                            className="absolute inset-0 z-50 cursor-pointer pointer-events-auto"
-                                            onClick={(e) => {
-                                                e.stopPropagation(); // Prevent bubbling
-                                                if (isPrev) setCurrentIndex(prevIndex);
-                                                if (isNext) setCurrentIndex(nextIndex);
-                                            }}
-                                        />
-                                    )}
+                                        {isCurrent && (
+                                            <>
+                                                {/* Gradient overlay */}
+                                                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70 pointer-events-none" />
 
-                                    {isCurrent && (
-                                        <>
-                                            {/* Gradient overlay */}
-                                            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70 pointer-events-none" />
-
-                                            {/* Video info */}
-                                            <div className="absolute bottom-0 left-0 right-0 p-5 text-white z-20 pointer-events-none">
-                                                <h3 className="font-bold text-lg mb-1 line-clamp-2">{video.title}</h3>
-                                            </div>
-
-                                            {/* Hover overlay with social links */}
-                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-30">
-                                                <div className="flex gap-3">
-                                                    {Object.entries(video.socialLinks).map(([platform, url]) => (
-                                                        <SocialLink
-                                                            key={platform}
-                                                            platform={platform as "youtube" | "tiktok" | "instagram" | "x"}
-                                                            url={url}
-                                                            className="text-white bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 hover:scale-110 transition-all"
-                                                            iconSize={22}
-                                                        />
-                                                    ))}
+                                                {/* Video info */}
+                                                <div className="absolute bottom-0 left-0 right-0 p-5 text-white z-20 pointer-events-none">
+                                                    <h3 className="font-bold text-lg mb-1 line-clamp-2">{video.title}</h3>
                                                 </div>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            </motion.div>
-                        );
-                    })}
+
+                                                {/* Hover overlay with social links */}
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-30">
+                                                    <div className="flex gap-3">
+                                                        {Object.entries(video.socialLinks).map(([platform, url]) => (
+                                                            <SocialLink
+                                                                key={platform}
+                                                                platform={platform as "youtube" | "tiktok" | "instagram" | "x"}
+                                                                url={url}
+                                                                className="text-white bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 hover:scale-110 transition-all"
+                                                                iconSize={22}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
+                    </AnimatePresence>
                 </div>
 
                 {/* Carousel indicators */}
