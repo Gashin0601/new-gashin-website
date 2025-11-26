@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import videosData from "@/data/videos.json";
-import { preloadAllVideos } from "@/lib/videoPreloader";
+import { preloadAllVideos, isVideoPreloaded } from "@/lib/videoPreloader";
 
 export default function LoadingScreen() {
   const [isLoading, setIsLoading] = useState(true);
@@ -13,12 +13,24 @@ export default function LoadingScreen() {
     // Check if we've already shown the loading screen in this session
     const hasLoaded = sessionStorage.getItem("hasLoaded");
 
+    // Always preload videos (in background if already loaded before)
+    const preloadInBackground = () => {
+      // Check if videos are already preloaded
+      const allPreloaded = videosData.every(v => isVideoPreloaded(v.videoSrc));
+      if (!allPreloaded) {
+        // Preload without blocking - no progress callback needed
+        preloadAllVideos(videosData);
+      }
+    };
+
     if (hasLoaded) {
+      // Skip loading screen but still preload videos in background
       setIsLoading(false);
+      preloadInBackground();
       return;
     }
 
-    // Preload all videos using shared preloader
+    // First visit: show loading screen with progress
     const loadVideos = async () => {
       await preloadAllVideos(videosData, (loaded, total) => {
         setLoadingProgress(Math.round((loaded / total) * 100));

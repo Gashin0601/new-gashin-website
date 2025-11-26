@@ -5,81 +5,111 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import SocialLink from "../ui/SocialLinks";
 import videosData from "@/data/videos.json";
-import { preloadVideo, isVideoPreloaded } from "@/lib/videoPreloader";
+import { preloadVideo, isVideoPreloaded, takePreloadedVideo, returnPreloadedVideo, isVideoReady } from "@/lib/videoPreloader";
 
 function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCurrent: boolean; isMuted: boolean; isVisible: boolean }) {
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const [isLoaded, setIsLoaded] = useState(() => isVideoPreloaded(src));
-    const [hasFirstFrame, setHasFirstFrame] = useState(() => isVideoPreloaded(src));
+    const containerRef = useRef<HTMLDivElement>(null);
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const srcRef = useRef<string>(src);
+    const [hasFirstFrame, setHasFirstFrame] = useState(() => isVideoReady(src));
     const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Ensure video is preloaded (may already be done by LoadingScreen)
+    // Use preloaded video element or create a new one
     useEffect(() => {
-        if (!isVideoPreloaded(src)) {
-            preloadVideo(src).then(() => {
-                setIsLoaded(true);
-                setHasFirstFrame(true);
-            });
+        const container = containerRef.current;
+        if (!container) return;
+
+        // Check if we already have a video element for this src
+        if (videoRef.current && srcRef.current === src) {
+            return;
         }
-    }, [src]);
 
-    // Set iOS Safari specific attributes via JavaScript
-    useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
+        // Return previous video to cache if switching src
+        if (videoRef.current && srcRef.current !== src) {
+            returnPreloadedVideo(srcRef.current, videoRef.current);
+            videoRef.current = null;
+        }
 
-        // iOS Safari requires setAttribute for playsinline to work properly
-        video.setAttribute('playsinline', '');
-        video.setAttribute('webkit-playsinline', '');
-    }, []);
+        srcRef.current = src;
 
-    useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
+        // Try to take the preloaded video element from cache
+        let video = takePreloadedVideo(src);
+        let isFromCache = !!video;
 
-        const handleLoadedData = () => {
-            setIsLoaded(true);
-            setHasFirstFrame(true);
-        };
+        if (!video) {
+            // Create new video if not preloaded
+            video = document.createElement('video');
+            video.preload = 'auto';
+            video.loop = true;
+            video.playsInline = true;
+            video.muted = true; // Start muted for autoplay
+            video.src = src;
 
-        const handleLoadedMetadata = () => {
-            setHasFirstFrame(true);
-        };
+            // iOS Safari requires setAttribute for playsinline
+            video.setAttribute('playsinline', '');
+            video.setAttribute('webkit-playsinline', '');
+            // Don't set muted attribute - control via JS property only
 
+            // Start preloading for future use (will store in cache after load)
+            preloadVideo(src);
+        }
+
+        // Apply styles
+        video.className = `z-[1] transition-opacity duration-300`;
+        video.style.cssText = 'width: auto; height: 100%; min-width: 100%; min-height: 100%; object-fit: cover;';
+
+        // Event listeners
+        const handleLoadedData = () => setHasFirstFrame(true);
         const handleCanPlay = () => {
-            setIsLoaded(true);
             setHasFirstFrame(true);
-            // Try to play immediately when ready (iOS Safari)
             if (isCurrent && isVisible) {
-                video.play().catch(() => {});
+                video!.play().catch(() => {});
             }
         };
-
-        const handlePlaying = () => {
-            setHasFirstFrame(true);
-        };
+        const handlePlaying = () => setHasFirstFrame(true);
 
         video.addEventListener('loadeddata', handleLoadedData);
-        video.addEventListener('loadedmetadata', handleLoadedMetadata);
         video.addEventListener('canplay', handleCanPlay);
         video.addEventListener('playing', handlePlaying);
 
-        // Force load
-        video.load();
+        // Clear container and add video
+        container.innerHTML = '';
+        container.appendChild(video);
+        videoRef.current = video;
+
+        // Check if already ready (from cache)
+        if (isFromCache && video.readyState >= 2) {
+            setHasFirstFrame(true);
+        } else if (video.readyState < 2) {
+            video.load();
+        }
 
         return () => {
-            video.removeEventListener('loadeddata', handleLoadedData);
-            video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-            video.removeEventListener('canplay', handleCanPlay);
-            video.removeEventListener('playing', handlePlaying);
+            video!.removeEventListener('loadeddata', handleLoadedData);
+            video!.removeEventListener('canplay', handleCanPlay);
+            video!.removeEventListener('playing', handlePlaying);
         };
-    }, [src, isCurrent, isVisible]);
+    }, [src]);
 
+    // Return video to cache on unmount
+    useEffect(() => {
+        return () => {
+            if (videoRef.current) {
+                returnPreloadedVideo(srcRef.current, videoRef.current);
+                videoRef.current = null;
+            }
+        };
+    }, []);
+
+    // Handle mute/unmute separately from play/pause
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
-        video.muted = isMuted;
+        // Only change mute if video is already playing (user toggled mute)
+        if (!video.paused) {
+            video.muted = isMuted;
+        }
     }, [isMuted]);
 
     // Handle play/pause with audio fade based on visibility and current state
@@ -103,11 +133,6 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
         const shouldPlay = isCurrent && isVisible;
 
         if (shouldPlay) {
-            // iOS Safari: Always start playback muted, then unmute after play succeeds
-            // This prevents iOS from triggering fullscreen mode
-            video.muted = true;
-            video.volume = 0;
-
             const attemptPlay = () => {
                 if (isCancelled) return;
                 if (retryCount >= maxRetries) return;
@@ -119,28 +144,37 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
                     return;
                 }
 
+                // iOS Safari: Start muted for autoplay, then unmute
+                // Only set muted=true if not already playing with sound
+                if (video.paused) {
+                    video.muted = true;
+                    video.volume = 0;
+                }
+
                 video.play()
                     .then(() => {
                         if (isCancelled) return;
 
-                        // After play succeeds, restore muted state if user had unmuted
-                        if (!isMuted) {
-                            video.muted = false;
-                        }
+                        // After play succeeds, restore muted state based on user preference
+                        video.muted = isMuted;
 
-                        // Fade in volume
-                        let vol = 0;
-                        fadeIntervalRef.current = setInterval(() => {
-                            vol += 0.1;
-                            if (vol >= 1) {
-                                vol = 1;
-                                if (fadeIntervalRef.current) {
-                                    clearInterval(fadeIntervalRef.current);
-                                    fadeIntervalRef.current = null;
+                        // Fade in volume if not muted
+                        if (!isMuted) {
+                            let vol = video.volume;
+                            fadeIntervalRef.current = setInterval(() => {
+                                vol += 0.1;
+                                if (vol >= 1) {
+                                    vol = 1;
+                                    if (fadeIntervalRef.current) {
+                                        clearInterval(fadeIntervalRef.current);
+                                        fadeIntervalRef.current = null;
+                                    }
                                 }
-                            }
-                            video.volume = vol;
-                        }, 50);
+                                video.volume = vol;
+                            }, 50);
+                        } else {
+                            video.volume = 1;
+                        }
                     })
                     .catch(() => {
                         if (isCancelled) return;
@@ -201,6 +235,14 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
         };
     }, [isCurrent, isVisible, isMuted]);
 
+    // Update video opacity when isCurrent or hasFirstFrame changes
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        video.style.opacity = hasFirstFrame ? (isCurrent ? '1' : '0.6') : '0';
+    }, [isCurrent, hasFirstFrame]);
+
     return (
         <div className="w-full h-full relative bg-black overflow-hidden z-0">
             {!hasFirstFrame && (
@@ -208,30 +250,12 @@ function VideoPlayer({ src, isCurrent, isMuted, isVisible }: { src: string; isCu
                     <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </div>
             )}
-            {/* iOS Safari fix: wrapper div handles the cover behavior */}
+            {/* iOS Safari fix: wrapper div handles the cover behavior - video added dynamically */}
             <div
+                ref={containerRef}
                 className="absolute inset-0 flex items-center justify-center"
                 style={{ overflow: 'hidden' }}
-            >
-                <video
-                    ref={videoRef}
-                    className={`z-[1] transition-opacity duration-300 ${!isCurrent ? "opacity-60" : ""} ${!hasFirstFrame ? "opacity-0" : ""}`}
-                    style={{
-                        width: 'auto',
-                        height: '100%',
-                        minWidth: '100%',
-                        minHeight: '100%',
-                        objectFit: 'cover',
-                    }}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                >
-                    <source src={src} type="video/mp4" />
-                </video>
-            </div>
+            />
             {/* Mute indicator */}
             {isCurrent && isMuted && hasFirstFrame && (
                 <div
@@ -317,7 +341,8 @@ export default function VideoAccount() {
         };
     }, []);
 
-    // Try to unmute and play after any user interaction on the page (required for iOS Safari)
+    // Unlock audio on first user interaction (required for iOS Safari)
+    // iOS Safari requires unmuting to happen WITHIN the user gesture handler
     useEffect(() => {
         let hasInteracted = false;
 
@@ -325,16 +350,21 @@ export default function VideoAccount() {
             if (hasInteracted) return;
             hasInteracted = true;
 
-            setIsMuted(false);
-
-            // Try to play all videos on first interaction (iOS Safari requirement)
+            // IMPORTANT: Must unmute directly within the gesture handler for iOS Safari
+            // React state updates are async and lose the gesture context
             const videos = document.querySelectorAll('video');
             videos.forEach(video => {
+                // Unmute and ensure volume is up
+                video.muted = false;
+                video.volume = 1;
+                // Try to play if paused (within gesture context)
                 if (video.paused) {
-                    video.muted = true; // Must be muted for autoplay
                     video.play().catch(() => {});
                 }
             });
+
+            // Also set React state for proper tracking
+            setIsMuted(false);
 
             // Remove listeners after first interaction
             document.removeEventListener('click', handleUserInteraction);
