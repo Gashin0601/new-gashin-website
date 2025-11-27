@@ -112,7 +112,6 @@ export default function StoryChapter({ data, index, totalChapters }: StoryChapte
                 <VisionSimulator
                     isOpen={isSimulatorOpen}
                     onClose={() => setIsSimulatorOpen(false)}
-                    sampleImage={data.interactiveExperience?.features?.panorama?.sampleImage}
                 />
             )}
         </>
