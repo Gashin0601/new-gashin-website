@@ -12,7 +12,7 @@ export default function Hero() {
             aria-label="鈴木我信の紹介"
         >
             {/* Content Container */}
-            <div className="relative z-10 max-w-6xl w-full px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 items-center pt-24 sm:pt-36 md:pt-0">
+            <div className="relative z-10 max-w-6xl w-full px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 items-center pt-24 sm:pt-36 md:pt-24">
                 {/* Text Content */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
