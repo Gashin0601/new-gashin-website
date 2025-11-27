@@ -1,10 +1,19 @@
 import type { Metadata, Viewport } from "next";
+import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import SkipLink from "@/components/ui/SkipLink";
 import JsonLd from "@/components/seo/JsonLd";
 import { ThemeProvider } from "@/hooks/useTheme";
+
+const notoSansJP = Noto_Sans_JP({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  preload: false,
+  variable: "--font-noto-sans-jp",
+  display: "swap",
+});
 
 const baseUrl = "https://gashinsuzuki.com";
 
@@ -112,7 +121,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" suppressHydrationWarning>
+    <html lang="ja" className={notoSansJP.variable} suppressHydrationWarning>
       <head>
         <JsonLd />
       </head>

@@ -7,7 +7,20 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: [
+          "var(--font-noto-sans-jp)",
+          "Hiragino Sans",
+          "Hiragino Kaku Gothic ProN",
+          "Yu Gothic",
+          "Meiryo",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "sans-serif",
+        ],
+      },
+    },
   },
   plugins: [],
 };
