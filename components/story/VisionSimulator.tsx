@@ -21,6 +21,7 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
     const [gyroData, setGyroData] = useState({ alpha: 0, beta: 0, gamma: 0 });
     const [initialGamma, setInitialGamma] = useState<number | null>(null);
     const [progress, setProgress] = useState(0);
+    const [debugLog, setDebugLog] = useState<string[]>([]);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -57,24 +58,40 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
         return () => { document.body.style.overflow = ""; };
     }, [isOpen]);
 
+    // Add debug log
+    const addLog = (msg: string) => {
+        console.log(msg);
+        setDebugLog(prev => [...prev.slice(-10), `${new Date().toLocaleTimeString()}: ${msg}`]);
+    };
+
     // Request all permissions and start camera
     const requestPermissions = async () => {
         setError(null);
+        addLog("開始: requestPermissions");
 
         // 1. Request gyroscope permission (iOS 13+)
-        if (isIOS && typeof (DeviceOrientationEvent as any).requestPermission === "function") {
+        addLog(`iOS検出: ${isIOS}`);
+        addLog(`requestPermission存在: ${typeof (DeviceOrientationEvent as any).requestPermission === "function"}`);
+
+        if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
             try {
+                addLog("ジャイロ許可リクエスト中...");
                 const permission = await (DeviceOrientationEvent as any).requestPermission();
+                addLog(`ジャイロ許可結果: ${permission}`);
                 if (permission !== "granted") {
-                    setError("ジャイロセンサーの許可が必要です。ブラウザの設定を確認してください。");
+                    setError("ジャイロセンサーの許可が必要です。");
                     return;
                 }
-            } catch (e) {
-                console.error("Gyro permission error:", e);
+            } catch (e: any) {
+                addLog(`ジャイロエラー: ${e.message || e}`);
+                // Continue without gyroscope
             }
+        } else {
+            addLog("ジャイロ許可不要（非iOS or 古いバージョン）");
         }
 
         // 2. Start camera
+        addLog("カメラ開始中...");
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
@@ -84,25 +101,43 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
                 },
                 audio: false,
             });
+            addLog("カメラストリーム取得成功");
 
             streamRef.current = stream;
 
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                // Critical for iOS Safari
-                videoRef.current.setAttribute("playsinline", "true");
-                videoRef.current.setAttribute("webkit-playsinline", "true");
-                videoRef.current.muted = true;
+            // Move to capturing step first
+            setStep("capturing");
+            addLog("ステップ変更: capturing");
 
-                videoRef.current.onloadedmetadata = () => {
-                    videoRef.current?.play().then(() => {
-                        setCameraReady(true);
-                        setStep("capturing");
-                    }).catch(console.error);
-                };
-            }
+            // Then set up video
+            setTimeout(() => {
+                if (videoRef.current) {
+                    addLog("video要素にストリーム設定中...");
+                    videoRef.current.srcObject = stream;
+                    videoRef.current.setAttribute("playsinline", "true");
+                    videoRef.current.setAttribute("webkit-playsinline", "true");
+                    videoRef.current.muted = true;
+
+                    videoRef.current.onloadedmetadata = () => {
+                        addLog("メタデータ読み込み完了");
+                        videoRef.current?.play().then(() => {
+                            addLog("ビデオ再生開始成功");
+                            setCameraReady(true);
+                        }).catch((e) => {
+                            addLog(`再生エラー: ${e.message}`);
+                        });
+                    };
+
+                    videoRef.current.onerror = (e) => {
+                        addLog(`video要素エラー: ${e}`);
+                    };
+                } else {
+                    addLog("ERROR: videoRef.current is null");
+                }
+            }, 100);
+
         } catch (e: any) {
-            console.error("Camera error:", e);
+            addLog(`カメラエラー: ${e.name} - ${e.message}`);
             if (e.name === "NotAllowedError") {
                 setError("カメラの許可が必要です。ブラウザの設定を確認してください。");
             } else {
@@ -295,6 +330,14 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
                         {error && (
                             <p className="mt-4 text-red-400 text-center text-sm max-w-sm">{error}</p>
                         )}
+                        {/* Debug log */}
+                        {debugLog.length > 0 && (
+                            <div className="mt-6 w-full max-w-sm bg-black/50 rounded-lg p-3 text-xs font-mono text-green-400 max-h-40 overflow-y-auto">
+                                {debugLog.map((log, i) => (
+                                    <div key={i}>{log}</div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -314,9 +357,17 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
                         {/* Loading indicator */}
                         {!cameraReady && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
-                                <div className="text-center text-white">
+                                <div className="text-center text-white px-6">
                                     <div className="animate-spin w-10 h-10 border-2 border-white/30 border-t-white rounded-full mx-auto mb-4" />
-                                    <p>カメラを起動中...</p>
+                                    <p className="mb-4">カメラを起動中...</p>
+                                    {/* Debug log while loading */}
+                                    {debugLog.length > 0 && (
+                                        <div className="bg-black/50 rounded-lg p-3 text-xs font-mono text-green-400 max-h-48 overflow-y-auto text-left">
+                                            {debugLog.map((log, i) => (
+                                                <div key={i}>{log}</div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -324,12 +375,18 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
                         {/* UI Overlay */}
                         {cameraReady && (
                             <>
-                                {/* Gyroscope info */}
+                                {/* Gyroscope info + Debug log */}
                                 <div className="absolute top-16 left-4 right-4 z-20">
-                                    <div className="bg-black/60 rounded-lg p-3 text-white text-sm font-mono">
+                                    <div className="bg-black/80 rounded-lg p-3 text-white text-sm font-mono">
                                         <div>γ: {gyroData.gamma.toFixed(1)}° | 進捗: {progress}%</div>
                                         <div className="text-xs text-white/60 mt-1">
                                             撮影済み: {photos.length}/6枚
+                                        </div>
+                                        {/* Debug log */}
+                                        <div className="mt-2 pt-2 border-t border-white/20 text-xs text-green-400 max-h-24 overflow-y-auto">
+                                            {debugLog.slice(-5).map((log, i) => (
+                                                <div key={i}>{log}</div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
