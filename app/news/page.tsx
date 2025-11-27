@@ -37,15 +37,15 @@ export default function NewsPage() {
                 className="block bg-[var(--bg-secondary)] rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
                 aria-label={`${item.title}の記事を読む - ${item.source}、${new Date(item.date).toLocaleDateString('ja-JP')}`}
               >
-                <div className="flex gap-4 p-6">
+                <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-6">
                   {/* Image */}
                   {item.image && (
-                    <div className="flex-shrink-0 w-32 h-32 bg-[var(--border-color)] rounded-lg overflow-hidden">
+                    <div className="flex-shrink-0 w-full sm:w-48 md:w-56 aspect-video bg-[var(--border-color)] rounded-lg overflow-hidden">
                       <Image
                         src={item.image}
                         alt=""
-                        width={128}
-                        height={128}
+                        width={224}
+                        height={126}
                         className="w-full h-full object-cover"
                         aria-hidden="true"
                       />
