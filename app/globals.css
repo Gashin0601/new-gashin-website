@@ -41,12 +41,42 @@
   --border-color: #333333;
 }
 
+/* Fix for iOS Safari 100vh issue */
+html {
+  height: -webkit-fill-available;
+}
+
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
   line-height: 1.7;
   transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+}
+
+/* Loading screen overlay - must cover entire viewport on all devices */
+.loading-screen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  width: 100dvw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: -webkit-fill-available;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  color: #000000;
+  /* Ensure it covers everything */
+  overflow: hidden;
 }
 
 /* Custom Utilities */
