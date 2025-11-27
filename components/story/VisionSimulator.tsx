@@ -155,40 +155,107 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
         }
     };
 
-    // Gyroscope event handler - only for display, no auto-capture
+    // Refs for auto-capture
+    const initialGammaRef = useRef<number | null>(null);
+    const lastCaptureProgressRef = useRef<number>(-1);
+    const isCapturingRef = useRef<boolean>(false);
+
+    // Gyroscope event handler with auto-capture
     useEffect(() => {
         if (step !== "capturing" || !cameraReady) return;
 
-        addLog("ジャイロリスナー開始");
+        // Reset refs when starting
+        initialGammaRef.current = null;
+        lastCaptureProgressRef.current = -1;
+        isCapturingRef.current = false;
+
+        addLog("ジャイロリスナー開始 (自動撮影ON)");
 
         const handleOrientation = (e: DeviceOrientationEvent) => {
             if (e.gamma === null) return;
 
+            const gamma = e.gamma;
+
             setGyroData({
                 alpha: e.alpha || 0,
                 beta: e.beta || 0,
-                gamma: e.gamma,
+                gamma: gamma,
             });
 
-            // Initialize starting position
-            if (initialGamma === null) {
-                setInitialGamma(e.gamma);
-                addLog(`初期gamma設定: ${e.gamma.toFixed(1)}°`);
+            // Initialize starting position (wait 500ms after camera ready)
+            if (initialGammaRef.current === null) {
+                initialGammaRef.current = gamma;
+                setInitialGamma(gamma);
+                addLog(`初期位置設定: ${gamma.toFixed(1)}°`);
                 return;
             }
 
-            // Calculate progress based on gamma (left-right tilt)
-            // gamma ranges from -90 to 90
-            const rotation = Math.abs(e.gamma - initialGamma);
-            const newProgress = Math.min(100, Math.round((rotation / 60) * 100)); // 60度で100%
+            // Calculate rotation from start
+            const rotation = gamma - initialGammaRef.current;
+            const absRotation = Math.abs(rotation);
+
+            // Progress: 0-100% based on 60 degree rotation
+            const newProgress = Math.min(100, Math.round((absRotation / 60) * 100));
             setProgress(newProgress);
+
+            // Auto-capture every 20% progress (at 0, 20, 40, 60, 80%)
+            // Only capture if we've moved past a threshold
+            const captureInterval = 20;
+            const currentThreshold = Math.floor(newProgress / captureInterval) * captureInterval;
+
+            if (currentThreshold > lastCaptureProgressRef.current &&
+                currentThreshold <= 80 &&
+                !isCapturingRef.current) {
+
+                // Prevent rapid captures
+                isCapturingRef.current = true;
+                lastCaptureProgressRef.current = currentThreshold;
+
+                addLog(`自動撮影: ${currentThreshold}% (γ=${gamma.toFixed(1)}°, 回転=${absRotation.toFixed(1)}°)`);
+
+                // Capture photo
+                if (videoRef.current && canvasRef.current) {
+                    const video = videoRef.current;
+                    const canvas = canvasRef.current;
+                    const ctx = canvas.getContext("2d");
+
+                    if (ctx && video.videoWidth > 0) {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        ctx.drawImage(video, 0, 0);
+
+                        const photo = canvas.toDataURL("image/jpeg", 0.8);
+                        setPhotos(prev => {
+                            if (prev.length >= 5) return prev;
+                            addLog(`撮影完了: ${prev.length + 1}枚目`);
+                            return [...prev, photo];
+                        });
+
+                        // Shutter sound
+                        if (shutterAudioRef.current) {
+                            shutterAudioRef.current.currentTime = 0;
+                            shutterAudioRef.current.play().catch(() => {});
+                        }
+
+                        // Vibration
+                        if (navigator.vibrate) {
+                            navigator.vibrate(50);
+                        }
+                    }
+                }
+
+                // Allow next capture after delay
+                setTimeout(() => {
+                    isCapturingRef.current = false;
+                }, 300);
+            }
         };
 
         window.addEventListener("deviceorientation", handleOrientation, true);
         return () => {
             window.removeEventListener("deviceorientation", handleOrientation, true);
         };
-    }, [step, cameraReady, initialGamma, addLog]);
+    }, [step, cameraReady, addLog]);
 
     // Capture a photo from video
     const capturePhoto = useCallback(() => {
@@ -443,7 +510,11 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
                                         />
                                     </div>
                                     <p className="text-center text-white text-sm mt-2">
-                                        スマホを右にゆっくり回してください
+                                        {photos.length === 0
+                                            ? "スマホを右にゆっくり回してください"
+                                            : photos.length < 5
+                                            ? `撮影中... あと${5 - photos.length}枚`
+                                            : "撮影完了！「完了」を押してください"}
                                     </p>
                                 </div>
 
@@ -451,11 +522,11 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
                                 <div className="absolute bottom-8 left-4 right-4 z-20 flex gap-3">
                                     <button
                                         onClick={handleManualCapture}
-                                        disabled={photos.length >= 6}
+                                        disabled={photos.length >= 5}
                                         className="flex-1 py-4 bg-white text-black rounded-full font-bold disabled:opacity-50 flex items-center justify-center gap-2"
                                     >
                                         <Camera size={20} />
-                                        撮影 ({photos.length}/6)
+                                        手動撮影 ({photos.length}/5)
                                     </button>
                                     {photos.length >= 3 && (
                                         <button
