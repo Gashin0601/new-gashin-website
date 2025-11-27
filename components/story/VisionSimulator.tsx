@@ -26,6 +26,15 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
+    const shutterAudioRef = useRef<HTMLAudioElement | null>(null);
+
+    // Initialize shutter sound
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            shutterAudioRef.current = new Audio("/sounds/shutter.mp3");
+            shutterAudioRef.current.volume = 0.5;
+        }
+    }, []);
 
     // iOS detection
     const isIOS = typeof navigator !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent);
@@ -215,6 +224,12 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
             addLog(`撮影成功: ${prev.length + 1}枚目`);
             return [...prev, photo];
         });
+
+        // Shutter sound
+        if (shutterAudioRef.current) {
+            shutterAudioRef.current.currentTime = 0;
+            shutterAudioRef.current.play().catch(() => {});
+        }
 
         // Vibration feedback
         if (navigator.vibrate) {
