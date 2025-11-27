@@ -114,7 +114,7 @@
             "enabled": true,
             "cameraCapture": true,
             "fieldOfView": 180,
-            "sampleImage": "/images/story/sample-panorama-180.jpg"
+            "sampleImage": "/images/story/sample-panorama.jpg"
           },
           "viewer": {
             "mode": "180-panorama",
