@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Noto_Sans_JP } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import LoadingScreen from "@/components/ui/LoadingScreen";
@@ -7,11 +7,10 @@ import SkipLink from "@/components/ui/SkipLink";
 import JsonLd from "@/components/seo/JsonLd";
 import { ThemeProvider } from "@/hooks/useTheme";
 
-const notoSansJP = Noto_Sans_JP({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  preload: false,
-  variable: "--font-noto-sans-jp",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -121,7 +120,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className={notoSansJP.variable} suppressHydrationWarning>
+    <html lang="ja" className={inter.variable} suppressHydrationWarning>
       <head>
         <JsonLd />
       </head>

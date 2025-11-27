@@ -10,13 +10,13 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
-          "var(--font-noto-sans-jp)",
+          "var(--font-inter)",
+          "-apple-system",
+          "BlinkMacSystemFont",
           "Hiragino Sans",
           "Hiragino Kaku Gothic ProN",
           "Yu Gothic",
           "Meiryo",
-          "-apple-system",
-          "BlinkMacSystemFont",
           "sans-serif",
         ],
       },
