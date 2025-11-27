@@ -9,8 +9,8 @@
   --border-color: #e0e0e0;
 
   /* Accent Colors */
-  --accent: #667EEA;
-  --accent-hover: #5568D3;
+  --accent: #475569;
+  --accent-hover: #334155;
 
   /* SNS Brand Colors */
   --sns-youtube: #FF0000;
@@ -28,8 +28,8 @@
   --bg-secondary: #1a1b1f;
   --border-color: #2a2b2f;
 
-  --accent: #667EEA;
-  --accent-hover: #7B8FF5;
+  --accent: #64748B;
+  --accent-hover: #94A3B8;
 
   --sns-x: #ffffff;
 }

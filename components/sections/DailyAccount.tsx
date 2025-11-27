@@ -99,7 +99,7 @@ export default function DailyAccount() {
                         className="text-[var(--text-secondary)] max-w-2xl mx-auto text-lg"
                         id="daily-account-description"
                     >
-                        日々の気づきや活動をXで発信しています。
+                        日々の気づきや活動を発信しています。
                     </p>
 
                     <nav

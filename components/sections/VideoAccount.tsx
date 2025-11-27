@@ -322,22 +322,26 @@ export default function VideoAccount() {
 
         const checkVisibility = () => {
             const rect = section.getBoundingClientRect();
-            const isInView = rect.top < window.innerHeight && rect.bottom > 0;
-            if (isInView) {
-                setIsVisible(true);
-            }
+            const sectionHeight = rect.height;
+            const visibleTop = Math.max(0, rect.top);
+            const visibleBottom = Math.min(window.innerHeight, rect.bottom);
+            const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+            const visibilityRatio = visibleHeight / sectionHeight;
+
+            // Only set visible if 30% of section is in view
+            setIsVisible(visibilityRatio >= 0.3);
         };
 
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
-                    // Play when even slightly visible (any intersection)
-                    setIsVisible(entry.isIntersecting);
+                    // Play when section is 30% visible
+                    setIsVisible(entry.intersectionRatio >= 0.3);
                 });
             },
             {
-                threshold: [0, 0.1, 0.5, 1],
-                rootMargin: '50px'
+                threshold: [0, 0.3, 0.5, 1],
+                rootMargin: '0px'
             }
         );
 
