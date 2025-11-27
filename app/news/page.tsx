@@ -11,11 +11,11 @@ export default function NewsPage() {
   return (
     <main
       className="min-h-screen px-6 py-20 pt-24 bg-[var(--bg-primary)]"
-      aria-label="メディア掲載一覧ページ"
+      aria-label="ニュース一覧ページ"
     >
       <div className="max-w-4xl mx-auto">
         <header>
-          <h1 className="text-4xl font-bold mb-4 text-[var(--text-primary)]">メディア掲載</h1>
+          <h1 className="text-4xl font-bold mb-4 text-[var(--text-primary)]">ニュース</h1>
           <p className="text-[var(--text-secondary)] mb-12">
             {newsData.length}件の掲載記事
           </p>
@@ -24,7 +24,7 @@ export default function NewsPage() {
         <div
           className="space-y-6"
           role="list"
-          aria-label="メディア掲載記事一覧"
+          aria-label="ニュース記事一覧"
         >
           {sortedNews.map((item, index) => (
             <article
