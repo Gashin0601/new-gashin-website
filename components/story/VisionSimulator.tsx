@@ -543,100 +543,98 @@ export default function VisionSimulator({
 
                 {/* Step: Capturing (iOS-like sweep) */}
                 {step === "capturing" && (
-                    <div className="w-full h-full flex flex-col bg-black">
-                        {/* Camera view */}
-                        <div className="flex-1 relative overflow-hidden">
-                            {cameraStream ? (
-                                <video
-                                    ref={videoRef}
-                                    autoPlay
-                                    playsInline
-                                    muted
-                                    className="w-full h-full object-cover"
+                    <div className="w-full h-full relative bg-black">
+                        {/* Camera view - fullscreen */}
+                        {cameraStream ? (
+                            <video
+                                ref={videoRef}
+                                autoPlay
+                                playsInline
+                                muted
+                                className="absolute inset-0 w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black">
+                                <p className="text-white/50">カメラを起動中...</p>
+                            </div>
+                        )}
+
+                        {/* Center guide line */}
+                        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1 bg-yellow-400/80 z-10" />
+
+                        {/* Guide arrow (moves with device tilt) */}
+                        <motion.div
+                            className="absolute top-1/2 -translate-y-1/2 z-10"
+                            animate={{
+                                left: `${50 + guideArrowOffset * 20}%`,
+                                x: "-50%",
+                            }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        >
+                            <div className="flex items-center justify-center">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                    speedStatus === "ok"
+                                        ? "bg-yellow-400"
+                                        : speedStatus === "too_fast"
+                                        ? "bg-red-500"
+                                        : "bg-white/50"
+                                }`}>
+                                    <ChevronRight size={24} className="text-black" />
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Progress bar */}
+                        <div className="absolute bottom-32 left-4 right-4 z-10">
+                            <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+                                <motion.div
+                                    className="h-full bg-yellow-400"
+                                    animate={{ width: `${sweepProgress * 100}%` }}
+                                    transition={{ type: "spring", stiffness: 100 }}
                                 />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-black">
-                                    <p className="text-white/50">カメラを起動中...</p>
-                                </div>
-                            )}
-
-                            {/* Center guide line */}
-                            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1 bg-yellow-400/80" />
-
-                            {/* Guide arrow (moves with device tilt) */}
-                            <motion.div
-                                className="absolute top-1/2 -translate-y-1/2"
-                                animate={{
-                                    left: `${50 + guideArrowOffset * 20}%`,
-                                    x: "-50%",
-                                }}
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            >
-                                <div className="flex items-center justify-center">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                        speedStatus === "ok"
-                                            ? "bg-yellow-400"
-                                            : speedStatus === "too_fast"
-                                            ? "bg-red-500"
-                                            : "bg-white/50"
-                                    }`}>
-                                        <ChevronRight size={24} className="text-black" />
-                                    </div>
-                                </div>
-                            </motion.div>
-
-                            {/* Progress bar */}
-                            <div className="absolute bottom-32 left-4 right-4">
-                                <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-                                    <motion.div
-                                        className="h-full bg-yellow-400"
-                                        animate={{ width: `${sweepProgress * 100}%` }}
-                                        transition={{ type: "spring", stiffness: 100 }}
-                                    />
-                                </div>
-                                <p className="text-center text-white/80 text-sm mt-2">
-                                    {Math.round(sweepProgress * 100)}%
-                                </p>
                             </div>
-
-                            {/* Speed warning */}
-                            <AnimatePresence>
-                                {speedStatus === "too_fast" && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0 }}
-                                        className="absolute top-24 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full flex items-center gap-2"
-                                    >
-                                        <AlertCircle size={18} />
-                                        <span className="font-bold">ゆっくり動かしてください</span>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-
-                            {/* Preview strip */}
-                            {capturedStrips.length > 0 && (
-                                <div className="absolute top-20 left-4 right-4 h-16 bg-black/50 rounded-lg overflow-hidden flex">
-                                    {capturedStrips.slice(-10).map((strip, i) => (
-                                        <div key={i} className="h-full flex-shrink-0" style={{ width: 20 }}>
-                                            <img src={strip} alt="" className="h-full w-full object-cover opacity-80" />
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Instruction */}
-                            <div className="absolute bottom-48 left-1/2 -translate-x-1/2 text-center">
-                                <p className="text-white text-lg font-medium drop-shadow-lg">
-                                    {isCapturing
-                                        ? "ゆっくり右へ回転してください"
-                                        : "準備中..."}
-                                </p>
-                            </div>
+                            <p className="text-center text-white/80 text-sm mt-2">
+                                {Math.round(sweepProgress * 100)}%
+                            </p>
                         </div>
 
-                        {/* Manual controls (fallback) */}
-                        <div className="p-4 bg-black/90 space-y-3">
+                        {/* Speed warning */}
+                        <AnimatePresence>
+                            {speedStatus === "too_fast" && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute top-24 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full flex items-center gap-2 z-10"
+                                >
+                                    <AlertCircle size={18} />
+                                    <span className="font-bold">ゆっくり動かしてください</span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Preview strip */}
+                        {capturedStrips.length > 0 && (
+                            <div className="absolute top-20 left-4 right-4 h-16 bg-black/50 rounded-lg overflow-hidden flex z-10">
+                                {capturedStrips.slice(-10).map((strip, i) => (
+                                    <div key={i} className="h-full flex-shrink-0" style={{ width: 20 }}>
+                                        <img src={strip} alt="" className="h-full w-full object-cover opacity-80" />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Instruction */}
+                        <div className="absolute bottom-48 left-1/2 -translate-x-1/2 text-center z-10">
+                            <p className="text-white text-lg font-medium drop-shadow-lg">
+                                {isCapturing
+                                    ? "ゆっくり右へ回転してください"
+                                    : "準備中..."}
+                            </p>
+                        </div>
+
+                        {/* Manual controls (fallback) - positioned at bottom */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4 pb-8 bg-gradient-to-t from-black/90 via-black/60 to-transparent z-10 space-y-3">
                             <div className="flex gap-2">
                                 <button
                                     onClick={captureManualFrame}
