@@ -1,8 +1,53 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Component, ErrorInfo, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Eye, EyeOff, Camera, RotateCcw, Play } from "lucide-react";
+import { X, Eye, EyeOff, Camera, RotateCcw, Play, AlertTriangle } from "lucide-react";
+
+// Error Boundary to catch crashes
+interface ErrorBoundaryState {
+    hasError: boolean;
+    error: Error | null;
+}
+
+class ErrorBoundary extends Component<{ children: ReactNode; onReset: () => void }, ErrorBoundaryState> {
+    constructor(props: { children: ReactNode; onReset: () => void }) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+
+    static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+        console.error("VisionSimulator Error:", error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center p-6">
+                    <div className="text-center text-white">
+                        <AlertTriangle size={48} className="mx-auto mb-4 text-red-500" />
+                        <h2 className="text-xl font-bold mb-2">エラーが発生しました</h2>
+                        <p className="text-white/70 mb-4 text-sm">{this.state.error?.message}</p>
+                        <button
+                            onClick={() => {
+                                this.setState({ hasError: false, error: null });
+                                this.props.onReset();
+                            }}
+                            className="px-6 py-3 bg-white text-black rounded-full font-bold"
+                        >
+                            やり直す
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
 
 interface VisionSimulatorProps {
     isOpen: boolean;
@@ -172,82 +217,100 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
         addLog("ジャイロリスナー開始 (自動撮影ON)");
 
         const handleOrientation = (e: DeviceOrientationEvent) => {
-            if (e.gamma === null) return;
+            try {
+                if (e.gamma === null) return;
 
-            const gamma = e.gamma;
+                const gamma = e.gamma;
 
-            setGyroData({
-                alpha: e.alpha || 0,
-                beta: e.beta || 0,
-                gamma: gamma,
-            });
+                setGyroData({
+                    alpha: e.alpha || 0,
+                    beta: e.beta || 0,
+                    gamma: gamma,
+                });
 
-            // Initialize starting position (wait 500ms after camera ready)
-            if (initialGammaRef.current === null) {
-                initialGammaRef.current = gamma;
-                setInitialGamma(gamma);
-                addLog(`初期位置設定: ${gamma.toFixed(1)}°`);
-                return;
-            }
-
-            // Calculate rotation from start
-            const rotation = gamma - initialGammaRef.current;
-            const absRotation = Math.abs(rotation);
-
-            // Progress: 0-100% based on 60 degree rotation
-            const newProgress = Math.min(100, Math.round((absRotation / 60) * 100));
-            setProgress(newProgress);
-
-            // Auto-capture every 20% progress (at 0, 20, 40, 60, 80%)
-            // Only capture if we've moved past a threshold
-            const captureInterval = 20;
-            const currentThreshold = Math.floor(newProgress / captureInterval) * captureInterval;
-
-            if (currentThreshold > lastCaptureProgressRef.current &&
-                currentThreshold <= 80 &&
-                !isCapturingRef.current) {
-
-                // Prevent rapid captures
-                isCapturingRef.current = true;
-                lastCaptureProgressRef.current = currentThreshold;
-
-                addLog(`自動撮影: ${currentThreshold}% (γ=${gamma.toFixed(1)}°, 回転=${absRotation.toFixed(1)}°)`);
-
-                // Capture photo
-                if (videoRef.current && canvasRef.current) {
-                    const video = videoRef.current;
-                    const canvas = canvasRef.current;
-                    const ctx = canvas.getContext("2d");
-
-                    if (ctx && video.videoWidth > 0) {
-                        canvas.width = video.videoWidth;
-                        canvas.height = video.videoHeight;
-                        ctx.drawImage(video, 0, 0);
-
-                        const photo = canvas.toDataURL("image/jpeg", 0.8);
-                        setPhotos(prev => {
-                            if (prev.length >= 5) return prev;
-                            addLog(`撮影完了: ${prev.length + 1}枚目`);
-                            return [...prev, photo];
-                        });
-
-                        // Shutter sound
-                        if (shutterAudioRef.current) {
-                            shutterAudioRef.current.currentTime = 0;
-                            shutterAudioRef.current.play().catch(() => {});
-                        }
-
-                        // Vibration
-                        if (navigator.vibrate) {
-                            navigator.vibrate(50);
-                        }
-                    }
+                // Initialize starting position
+                if (initialGammaRef.current === null) {
+                    initialGammaRef.current = gamma;
+                    setInitialGamma(gamma);
+                    addLog(`初期位置設定: ${gamma.toFixed(1)}°`);
+                    return;
                 }
 
-                // Allow next capture after delay
-                setTimeout(() => {
-                    isCapturingRef.current = false;
-                }, 300);
+                // Calculate rotation from start
+                const rotation = gamma - initialGammaRef.current;
+                const absRotation = Math.abs(rotation);
+
+                // Progress: 0-100% based on 60 degree rotation
+                const newProgress = Math.min(100, Math.round((absRotation / 60) * 100));
+                setProgress(newProgress);
+
+                // Auto-capture every 20% progress (at 20, 40, 60, 80%)
+                // Only capture if we've moved past a threshold
+                const captureInterval = 20;
+                const currentThreshold = Math.floor(newProgress / captureInterval) * captureInterval;
+
+                if (currentThreshold > lastCaptureProgressRef.current &&
+                    currentThreshold >= 20 &&
+                    currentThreshold <= 80 &&
+                    !isCapturingRef.current) {
+
+                    // Prevent rapid captures
+                    isCapturingRef.current = true;
+                    lastCaptureProgressRef.current = currentThreshold;
+
+                    addLog(`自動撮影開始: ${currentThreshold}%`);
+
+                    // Capture photo safely
+                    try {
+                        if (videoRef.current && canvasRef.current) {
+                            const video = videoRef.current;
+                            const canvas = canvasRef.current;
+                            const ctx = canvas.getContext("2d");
+
+                            if (ctx && video.videoWidth > 0 && video.videoHeight > 0) {
+                                canvas.width = video.videoWidth;
+                                canvas.height = video.videoHeight;
+                                ctx.drawImage(video, 0, 0);
+
+                                const photo = canvas.toDataURL("image/jpeg", 0.8);
+                                setPhotos(prev => {
+                                    if (prev.length >= 5) return prev;
+                                    return [...prev, photo];
+                                });
+
+                                addLog(`撮影完了: ${currentThreshold}%`);
+
+                                // Shutter sound
+                                try {
+                                    if (shutterAudioRef.current) {
+                                        shutterAudioRef.current.currentTime = 0;
+                                        shutterAudioRef.current.play().catch(() => {});
+                                    }
+                                } catch (soundErr) {
+                                    // Ignore sound errors
+                                }
+
+                                // Vibration
+                                try {
+                                    if (navigator.vibrate) {
+                                        navigator.vibrate(50);
+                                    }
+                                } catch (vibrateErr) {
+                                    // Ignore vibration errors
+                                }
+                            }
+                        }
+                    } catch (captureErr: any) {
+                        addLog(`撮影エラー: ${captureErr.message}`);
+                    }
+
+                    // Allow next capture after delay
+                    setTimeout(() => {
+                        isCapturingRef.current = false;
+                    }, 500);
+                }
+            } catch (err: any) {
+                addLog(`ジャイロエラー: ${err.message}`);
             }
         };
 
@@ -386,23 +449,24 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
     if (!isOpen) return null;
 
     return (
-        <AnimatePresence>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[100] bg-black"
-            >
-                {/* Hidden canvas for capture */}
-                <canvas ref={canvasRef} className="hidden" />
-
-                {/* Close button */}
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 z-50 p-3 bg-black/50 rounded-full text-white"
+        <ErrorBoundary onReset={handleReset}>
+            <AnimatePresence>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[100] bg-black"
                 >
-                    <X size={24} />
-                </button>
+                    {/* Hidden canvas for capture */}
+                    <canvas ref={canvasRef} className="hidden" />
+
+                    {/* Close button */}
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 z-50 p-3 bg-black/50 rounded-full text-white"
+                    >
+                        <X size={24} />
+                    </button>
 
                 {/* Step 1: Permission request */}
                 {step === "permission" && (
@@ -605,7 +669,8 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
                         </div>
                     </div>
                 )}
-            </motion.div>
-        </AnimatePresence>
+                </motion.div>
+            </AnimatePresence>
+        </ErrorBoundary>
     );
 }
