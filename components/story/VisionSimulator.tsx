@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Eye, EyeOff, Camera, RotateCcw, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { X, Eye, EyeOff, Camera, RotateCcw, ChevronRight, AlertCircle } from "lucide-react";
 
 interface VisionSimulatorProps {
     isOpen: boolean;
@@ -10,37 +10,52 @@ interface VisionSimulatorProps {
 }
 
 type CaptureStep = "intro" | "capturing" | "viewing";
-type CapturePosition = "left" | "center" | "right";
+type SpeedStatus = "ok" | "too_fast" | "too_slow" | "idle";
 
-const CAPTURE_POSITIONS: CapturePosition[] = ["left", "center", "right"];
-const POSITION_LABELS: Record<CapturePosition, string> = {
-    left: "左",
-    center: "中央",
-    right: "右",
+// Panorama configuration
+const PANORAMA_CONFIG = {
+    totalAngle: 120, // Total sweep angle (degrees)
+    captureInterval: 10, // Capture every N degrees
+    stripWidth: 80, // Width of each captured strip (pixels)
+    minSpeed: 5, // Minimum rotation speed (deg/sec)
+    maxSpeed: 60, // Maximum rotation speed (deg/sec)
 };
 
 export default function VisionSimulator({
     isOpen,
     onClose,
 }: VisionSimulatorProps) {
-    // State
+    // Core state
     const [step, setStep] = useState<CaptureStep>("intro");
     const [isImpaired, setIsImpaired] = useState(false);
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
     const [cameraError, setCameraError] = useState<string | null>(null);
-    const [currentPosition, setCurrentPosition] = useState<number>(0);
-    const [capturedImages, setCapturedImages] = useState<(string | null)[]>([null, null, null]);
+
+    // Panorama capture state
+    const [isCapturing, setIsCapturing] = useState(false);
+    const [capturedStrips, setCapturedStrips] = useState<string[]>([]);
     const [panoramaImage, setPanoramaImage] = useState<string | null>(null);
+    const [sweepProgress, setSweepProgress] = useState(0); // 0 to 1
+    const [speedStatus, setSpeedStatus] = useState<SpeedStatus>("idle");
+    const [guideArrowOffset, setGuideArrowOffset] = useState(0); // -1 to 1
+
+    // Panorama viewing state
     const [viewOffset, setViewOffset] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
     const [gyroscopeEnabled, setGyroscopeEnabled] = useState(false);
-    const [deviceGamma, setDeviceGamma] = useState(0);
 
     // Refs
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const panoramaCanvasRef = useRef<HTMLCanvasElement>(null);
     const dragStartRef = useRef({ x: 0, offset: 0 });
+
+    // Gyroscope tracking refs
+    const initialGammaRef = useRef<number | null>(null);
+    const lastGammaRef = useRef<number>(0);
+    const lastCaptureAngleRef = useRef<number>(0);
+    const lastTimestampRef = useRef<number>(Date.now());
+    const capturedAnglesRef = useRef<Set<number>>(new Set());
 
     // Start camera
     const startCamera = useCallback(async () => {
@@ -82,22 +97,304 @@ export default function VisionSimulator({
         }
     }, [cameraStream]);
 
+    // Request gyroscope permission (iOS 13+)
+    const requestGyroscopePermission = useCallback(async (): Promise<boolean> => {
+        if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
+            try {
+                const permission = await (DeviceOrientationEvent as any).requestPermission();
+                return permission === "granted";
+            } catch (error) {
+                console.error("Gyroscope permission error:", error);
+                return false;
+            }
+        }
+        return true; // Non-iOS devices
+    }, []);
+
+    // Capture a strip from the video
+    const captureStrip = useCallback(() => {
+        if (!videoRef.current || !canvasRef.current) return null;
+
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return null;
+
+        // Capture center strip of video
+        const stripWidth = PANORAMA_CONFIG.stripWidth;
+        const videoWidth = video.videoWidth;
+        const videoHeight = video.videoHeight;
+        const sourceX = (videoWidth - stripWidth) / 2;
+
+        canvas.width = stripWidth;
+        canvas.height = videoHeight;
+
+        ctx.drawImage(
+            video,
+            sourceX, 0, stripWidth, videoHeight,
+            0, 0, stripWidth, videoHeight
+        );
+
+        return canvas.toDataURL("image/jpeg", 0.85);
+    }, []);
+
+    // Gyroscope handler for panorama capture
+    useEffect(() => {
+        if (!isCapturing || step !== "capturing") return;
+
+        const handleOrientation = (event: DeviceOrientationEvent) => {
+            if (event.gamma === null) return;
+
+            const gamma = event.gamma;
+            const now = Date.now();
+            const deltaTime = (now - lastTimestampRef.current) / 1000; // seconds
+
+            // Initialize starting position
+            if (initialGammaRef.current === null) {
+                initialGammaRef.current = gamma;
+                lastGammaRef.current = gamma;
+                lastTimestampRef.current = now;
+                return;
+            }
+
+            // Calculate rotation from start
+            const rotationFromStart = gamma - initialGammaRef.current;
+            const absRotation = Math.abs(rotationFromStart);
+
+            // Calculate speed
+            const deltaGamma = Math.abs(gamma - lastGammaRef.current);
+            const speed = deltaTime > 0 ? deltaGamma / deltaTime : 0;
+
+            // Update speed status
+            if (speed < PANORAMA_CONFIG.minSpeed) {
+                setSpeedStatus(deltaTime > 0.5 ? "too_slow" : "idle");
+            } else if (speed > PANORAMA_CONFIG.maxSpeed) {
+                setSpeedStatus("too_fast");
+            } else {
+                setSpeedStatus("ok");
+            }
+
+            // Update guide arrow position (-1 to 1 based on gamma tilt)
+            const normalizedArrow = Math.max(-1, Math.min(1, (gamma - initialGammaRef.current) / 30));
+            setGuideArrowOffset(normalizedArrow);
+
+            // Update progress
+            const progress = Math.min(1, absRotation / PANORAMA_CONFIG.totalAngle);
+            setSweepProgress(progress);
+
+            // Capture at intervals
+            const captureAngle = Math.floor(absRotation / PANORAMA_CONFIG.captureInterval) * PANORAMA_CONFIG.captureInterval;
+
+            if (
+                captureAngle > 0 &&
+                !capturedAnglesRef.current.has(captureAngle) &&
+                speed >= PANORAMA_CONFIG.minSpeed &&
+                speed <= PANORAMA_CONFIG.maxSpeed
+            ) {
+                capturedAnglesRef.current.add(captureAngle);
+                const strip = captureStrip();
+                if (strip) {
+                    setCapturedStrips(prev => [...prev, strip]);
+                    // Vibration feedback
+                    if (navigator.vibrate) {
+                        navigator.vibrate(20);
+                    }
+                }
+            }
+
+            // Check if panorama is complete
+            if (absRotation >= PANORAMA_CONFIG.totalAngle) {
+                finishCapture();
+            }
+
+            lastGammaRef.current = gamma;
+            lastTimestampRef.current = now;
+        };
+
+        window.addEventListener("deviceorientation", handleOrientation);
+        return () => window.removeEventListener("deviceorientation", handleOrientation);
+    }, [isCapturing, step, captureStrip]);
+
+    // Finish capture and create panorama
+    const finishCapture = useCallback(() => {
+        setIsCapturing(false);
+
+        // Create panorama from strips
+        if (capturedStrips.length > 0) {
+            createPanoramaFromStrips(capturedStrips);
+        }
+    }, [capturedStrips]);
+
+    // Create panorama from captured strips
+    const createPanoramaFromStrips = useCallback((strips: string[]) => {
+        if (!panoramaCanvasRef.current || strips.length === 0) return;
+
+        const canvas = panoramaCanvasRef.current;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        // Load all strip images
+        const images: HTMLImageElement[] = [];
+        let loadedCount = 0;
+
+        strips.forEach((src, index) => {
+            const img = new Image();
+            img.onload = () => {
+                images[index] = img;
+                loadedCount++;
+
+                if (loadedCount === strips.length) {
+                    // All images loaded, compose panorama
+                    const stripHeight = images[0].height;
+                    const stripWidth = images[0].width;
+                    const overlap = Math.floor(stripWidth * 0.3);
+                    const effectiveWidth = stripWidth - overlap;
+                    const totalWidth = stripWidth + effectiveWidth * (images.length - 1);
+
+                    canvas.width = totalWidth;
+                    canvas.height = stripHeight;
+
+                    // Draw strips with blending
+                    images.forEach((img, i) => {
+                        const x = i * effectiveWidth;
+
+                        if (i === 0) {
+                            ctx.drawImage(img, 0, 0);
+                        } else {
+                            // Create gradient blend
+                            const gradient = ctx.createLinearGradient(x, 0, x + overlap, 0);
+                            gradient.addColorStop(0, "rgba(255,255,255,0)");
+                            gradient.addColorStop(1, "rgba(255,255,255,1)");
+
+                            // Draw non-overlapping part
+                            ctx.drawImage(
+                                img,
+                                overlap, 0, stripWidth - overlap, stripHeight,
+                                x + overlap, 0, stripWidth - overlap, stripHeight
+                            );
+
+                            // Blend overlapping part
+                            const tempCanvas = document.createElement("canvas");
+                            tempCanvas.width = overlap;
+                            tempCanvas.height = stripHeight;
+                            const tempCtx = tempCanvas.getContext("2d");
+
+                            if (tempCtx) {
+                                tempCtx.drawImage(img, 0, 0, overlap, stripHeight, 0, 0, overlap, stripHeight);
+                                tempCtx.globalCompositeOperation = "destination-in";
+                                tempCtx.fillStyle = gradient;
+                                tempCtx.fillRect(0, 0, overlap, stripHeight);
+                                ctx.drawImage(tempCanvas, x, 0);
+                            }
+                        }
+                    });
+
+                    const panoramaDataUrl = canvas.toDataURL("image/jpeg", 0.9);
+                    setPanoramaImage(panoramaDataUrl);
+                    setStep("viewing");
+                    stopCamera();
+                    setViewOffset(-totalWidth / 2 + window.innerWidth / 2);
+                }
+            };
+            img.src = src;
+        });
+    }, [stopCamera]);
+
+    // Start panorama capture
+    const startPanoramaCapture = async () => {
+        const hasPermission = await requestGyroscopePermission();
+        if (!hasPermission) {
+            setCameraError("ジャイロスコープの許可が必要です。");
+            return;
+        }
+
+        await startCamera();
+        setStep("capturing");
+
+        // Reset capture state
+        initialGammaRef.current = null;
+        lastGammaRef.current = 0;
+        lastCaptureAngleRef.current = 0;
+        capturedAnglesRef.current.clear();
+        setCapturedStrips([]);
+        setSweepProgress(0);
+        setSpeedStatus("idle");
+
+        // Start capture after brief delay for camera to initialize
+        setTimeout(() => {
+            setIsCapturing(true);
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+        }, 500);
+    };
+
+    // Manual capture for devices without gyroscope
+    const captureManualFrame = () => {
+        const strip = captureStrip();
+        if (strip) {
+            const newStrips = [...capturedStrips, strip];
+            setCapturedStrips(newStrips);
+
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+
+            // Update progress
+            const progress = newStrips.length / 12; // Expect about 12 strips
+            setSweepProgress(Math.min(1, progress));
+
+            // Auto-complete after enough strips
+            if (newStrips.length >= 12) {
+                createPanoramaFromStrips(newStrips);
+            }
+        }
+    };
+
+    // Complete panorama manually
+    const completeManualCapture = () => {
+        if (capturedStrips.length >= 3) {
+            createPanoramaFromStrips(capturedStrips);
+        }
+    };
+
+    // Reset capture
+    const resetCapture = () => {
+        setCapturedStrips([]);
+        setPanoramaImage(null);
+        setSweepProgress(0);
+        setSpeedStatus("idle");
+        setIsCapturing(false);
+        initialGammaRef.current = null;
+        capturedAnglesRef.current.clear();
+        setStep("capturing");
+        startCamera();
+
+        setTimeout(() => {
+            setIsCapturing(true);
+        }, 500);
+    };
+
     // Cleanup on close
     useEffect(() => {
         if (!isOpen) {
             stopCamera();
             setStep("intro");
             setIsImpaired(false);
-            setCurrentPosition(0);
-            setCapturedImages([null, null, null]);
+            setIsCapturing(false);
+            setCapturedStrips([]);
             setPanoramaImage(null);
+            setSweepProgress(0);
+            setSpeedStatus("idle");
             setViewOffset(0);
             setGyroscopeEnabled(false);
             setCameraError(null);
+            initialGammaRef.current = null;
+            capturedAnglesRef.current.clear();
         }
     }, [isOpen, stopCamera]);
 
-    // Prevent body scroll when open
+    // Prevent body scroll
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = "hidden";
@@ -109,7 +406,7 @@ export default function VisionSimulator({
         };
     }, [isOpen]);
 
-    // Handle escape key
+    // Escape key handler
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape" && isOpen) {
@@ -120,193 +417,7 @@ export default function VisionSimulator({
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [isOpen, onClose]);
 
-    // Gyroscope handler
-    useEffect(() => {
-        if (!gyroscopeEnabled || step !== "viewing") return;
-
-        const handleOrientation = (event: DeviceOrientationEvent) => {
-            if (event.gamma !== null) {
-                // Map gamma (-90 to 90) to viewOffset
-                const normalizedGamma = Math.max(-45, Math.min(45, event.gamma));
-                setDeviceGamma(normalizedGamma);
-                // Calculate offset based on gamma
-                const maxOffset = getMaxOffset();
-                const newOffset = (normalizedGamma / 45) * (maxOffset / 2);
-                setViewOffset(Math.max(-maxOffset, Math.min(0, -maxOffset / 2 + newOffset)));
-            }
-        };
-
-        window.addEventListener("deviceorientation", handleOrientation);
-        return () => window.removeEventListener("deviceorientation", handleOrientation);
-    }, [gyroscopeEnabled, step, panoramaImage]);
-
-    // Request gyroscope permission (iOS)
-    const requestGyroscopePermission = async () => {
-        if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
-            try {
-                const permission = await (DeviceOrientationEvent as any).requestPermission();
-                if (permission === "granted") {
-                    setGyroscopeEnabled(true);
-                }
-            } catch (error) {
-                console.error("Gyroscope permission error:", error);
-            }
-        } else {
-            setGyroscopeEnabled(true);
-        }
-    };
-
-    // Capture current frame
-    const captureFrame = useCallback(() => {
-        if (!videoRef.current || !canvasRef.current) return;
-
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-
-        // Set canvas size to video size
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-
-        // Draw video frame to canvas
-        ctx.drawImage(video, 0, 0);
-
-        // Get image data URL
-        const imageData = canvas.toDataURL("image/jpeg", 0.9);
-
-        // Update captured images
-        const newCapturedImages = [...capturedImages];
-        newCapturedImages[currentPosition] = imageData;
-        setCapturedImages(newCapturedImages);
-
-        // Vibrate feedback
-        if (navigator.vibrate) {
-            navigator.vibrate(100);
-        }
-
-        // Move to next position or finish
-        if (currentPosition < CAPTURE_POSITIONS.length - 1) {
-            setCurrentPosition(currentPosition + 1);
-        } else {
-            // All photos captured, create panorama
-            createPanorama(newCapturedImages);
-        }
-    }, [currentPosition, capturedImages]);
-
-    // Create panorama from captured images
-    const createPanorama = useCallback((images: (string | null)[]) => {
-        if (!panoramaCanvasRef.current) return;
-
-        const canvas = panoramaCanvasRef.current;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-
-        // Load all images
-        const imageElements: HTMLImageElement[] = [];
-        let loadedCount = 0;
-
-        images.forEach((src, index) => {
-            if (!src) return;
-
-            const img = new Image();
-            img.onload = () => {
-                imageElements[index] = img;
-                loadedCount++;
-
-                // When all images loaded, compose panorama
-                if (loadedCount === images.filter(Boolean).length) {
-                    composePanorama(ctx, canvas, imageElements);
-                }
-            };
-            img.src = src;
-        });
-    }, []);
-
-    // Compose panorama on canvas with blending
-    const composePanorama = (
-        ctx: CanvasRenderingContext2D,
-        canvas: HTMLCanvasElement,
-        images: HTMLImageElement[]
-    ) => {
-        if (images.length === 0) return;
-
-        const imgHeight = images[0].height;
-        const imgWidth = images[0].width;
-
-        // Calculate overlap and total width
-        const overlapPercent = 0.3; // 30% overlap
-        const overlapWidth = Math.floor(imgWidth * overlapPercent);
-        const effectiveWidth = imgWidth - overlapWidth;
-        const totalWidth = imgWidth + effectiveWidth * (images.length - 1);
-
-        canvas.width = totalWidth;
-        canvas.height = imgHeight;
-
-        // Draw images with gradient blending
-        images.forEach((img, index) => {
-            const x = index * effectiveWidth;
-
-            if (index === 0) {
-                // First image: draw fully
-                ctx.drawImage(img, 0, 0);
-            } else {
-                // Create gradient for blending
-                const gradient = ctx.createLinearGradient(x, 0, x + overlapWidth, 0);
-                gradient.addColorStop(0, "rgba(255,255,255,0)");
-                gradient.addColorStop(1, "rgba(255,255,255,1)");
-
-                // Draw the image
-                ctx.save();
-
-                // First, draw the non-overlapping part
-                ctx.drawImage(
-                    img,
-                    overlapWidth, 0, imgWidth - overlapWidth, imgHeight,
-                    x + overlapWidth, 0, imgWidth - overlapWidth, imgHeight
-                );
-
-                // Then blend the overlapping part
-                // Create a temporary canvas for the blend
-                const tempCanvas = document.createElement("canvas");
-                tempCanvas.width = overlapWidth;
-                tempCanvas.height = imgHeight;
-                const tempCtx = tempCanvas.getContext("2d");
-
-                if (tempCtx) {
-                    // Draw the overlapping part of the new image
-                    tempCtx.drawImage(img, 0, 0, overlapWidth, imgHeight, 0, 0, overlapWidth, imgHeight);
-
-                    // Apply gradient mask
-                    tempCtx.globalCompositeOperation = "destination-in";
-                    tempCtx.fillStyle = gradient;
-                    tempCtx.fillRect(0, 0, overlapWidth, imgHeight);
-
-                    // Draw blended overlap onto main canvas
-                    ctx.drawImage(tempCanvas, x, 0);
-                }
-
-                ctx.restore();
-            }
-        });
-
-        // Get panorama image
-        const panoramaDataUrl = canvas.toDataURL("image/jpeg", 0.9);
-        setPanoramaImage(panoramaDataUrl);
-        setStep("viewing");
-        stopCamera();
-
-        // Center the view
-        setViewOffset(-totalWidth / 2 + window.innerWidth / 2);
-    };
-
-    // Get max offset for panorama viewing
-    const getMaxOffset = () => {
-        if (!panoramaImage || !panoramaCanvasRef.current) return 0;
-        return Math.max(0, panoramaCanvasRef.current.width - window.innerWidth);
-    };
-
-    // Drag handlers for panorama viewing
+    // Panorama viewing - drag handlers
     const handleDragStart = (clientX: number) => {
         if (gyroscopeEnabled) return;
         setIsDragging(true);
@@ -316,13 +427,32 @@ export default function VisionSimulator({
     const handleDragMove = (clientX: number) => {
         if (!isDragging || gyroscopeEnabled) return;
         const delta = clientX - dragStartRef.current.x;
-        const maxOffset = getMaxOffset();
+        const maxOffset = panoramaCanvasRef.current
+            ? Math.max(0, panoramaCanvasRef.current.width - window.innerWidth)
+            : 0;
         setViewOffset(Math.max(-maxOffset, Math.min(0, dragStartRef.current.offset + delta)));
     };
 
     const handleDragEnd = () => {
         setIsDragging(false);
     };
+
+    // Gyroscope for panorama viewing
+    useEffect(() => {
+        if (!gyroscopeEnabled || step !== "viewing") return;
+
+        const handleOrientation = (event: DeviceOrientationEvent) => {
+            if (event.gamma !== null && panoramaCanvasRef.current) {
+                const gamma = Math.max(-45, Math.min(45, event.gamma));
+                const maxOffset = Math.max(0, panoramaCanvasRef.current.width - window.innerWidth);
+                const newOffset = (gamma / 45) * (maxOffset / 2);
+                setViewOffset(Math.max(-maxOffset, Math.min(0, -maxOffset / 2 + newOffset)));
+            }
+        };
+
+        window.addEventListener("deviceorientation", handleOrientation);
+        return () => window.removeEventListener("deviceorientation", handleOrientation);
+    }, [gyroscopeEnabled, step]);
 
     // Toggle vision mode
     const toggleVisionMode = () => {
@@ -332,19 +462,12 @@ export default function VisionSimulator({
         setIsImpaired(!isImpaired);
     };
 
-    // Start capturing
-    const startCapturing = async () => {
-        await startCamera();
-        setStep("capturing");
-    };
-
-    // Reset and recapture
-    const resetCapture = () => {
-        setCapturedImages([null, null, null]);
-        setCurrentPosition(0);
-        setPanoramaImage(null);
-        setStep("capturing");
-        startCamera();
+    // Request gyroscope for viewing
+    const enableGyroscopeViewing = async () => {
+        const hasPermission = await requestGyroscopePermission();
+        if (hasPermission) {
+            setGyroscopeEnabled(true);
+        }
     };
 
     if (!isOpen) return null;
@@ -360,7 +483,7 @@ export default function VisionSimulator({
                 aria-modal="true"
                 aria-label="視覚体験シミュレーター"
             >
-                {/* Hidden canvases for image processing */}
+                {/* Hidden canvases */}
                 <canvas ref={canvasRef} className="hidden" />
                 <canvas ref={panoramaCanvasRef} className="hidden" />
 
@@ -381,19 +504,32 @@ export default function VisionSimulator({
                             animate={{ opacity: 1, y: 0 }}
                             className="text-center max-w-md"
                         >
-                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center">
-                                <Camera size={40} className="text-[var(--text-secondary)]" />
+                            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center">
+                                <Camera size={48} className="text-[var(--text-secondary)]" />
                             </div>
                             <h2 className="text-2xl font-bold mb-4 text-[var(--text-primary)]">
                                 パノラマ撮影で体験
                             </h2>
-                            <p className="text-[var(--text-secondary)] mb-8 leading-relaxed">
-                                カメラで周囲を撮影して、<br />
-                                私の視点で世界を見てみましょう。<br />
-                                <span className="text-sm">左・中央・右の3枚を撮影します。</span>
+                            <p className="text-[var(--text-secondary)] mb-2 leading-relaxed">
+                                iPhoneのパノラマカメラのように、<br />
+                                スマホをゆっくり横に動かして撮影します。
                             </p>
+                            <div className="bg-[var(--bg-secondary)] rounded-xl p-4 mb-8 text-left">
+                                <p className="text-sm text-[var(--text-secondary)] mb-2 flex items-center gap-2">
+                                    <ChevronRight size={16} className="text-[var(--accent)]" />
+                                    撮影ボタンを押してスタート
+                                </p>
+                                <p className="text-sm text-[var(--text-secondary)] mb-2 flex items-center gap-2">
+                                    <ChevronRight size={16} className="text-[var(--accent)]" />
+                                    矢印に合わせてゆっくり右へ回転
+                                </p>
+                                <p className="text-sm text-[var(--text-secondary)] flex items-center gap-2">
+                                    <ChevronRight size={16} className="text-[var(--accent)]" />
+                                    完了後、私の見え方を体験
+                                </p>
+                            </div>
                             <button
-                                onClick={startCapturing}
+                                onClick={startPanoramaCapture}
                                 className="w-full py-4 px-6 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-full font-bold text-lg hover:opacity-80 transition-opacity"
                             >
                                 撮影を開始
@@ -405,11 +541,11 @@ export default function VisionSimulator({
                     </div>
                 )}
 
-                {/* Step: Capturing */}
+                {/* Step: Capturing (iOS-like sweep) */}
                 {step === "capturing" && (
-                    <div className="w-full h-full flex flex-col">
+                    <div className="w-full h-full flex flex-col bg-black">
                         {/* Camera view */}
-                        <div className="flex-1 relative overflow-hidden bg-black">
+                        <div className="flex-1 relative overflow-hidden">
                             {cameraStream ? (
                                 <video
                                     ref={videoRef}
@@ -419,82 +555,108 @@ export default function VisionSimulator({
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center">
+                                <div className="w-full h-full flex items-center justify-center bg-black">
                                     <p className="text-white/50">カメラを起動中...</p>
                                 </div>
                             )}
 
-                            {/* Direction guide overlay */}
-                            <div className="absolute inset-0 pointer-events-none">
-                                {/* Guide arrows */}
-                                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4">
-                                    <div className={`transition-opacity ${currentPosition === 0 ? "opacity-100" : "opacity-30"}`}>
-                                        <ChevronLeft size={48} className="text-white drop-shadow-lg" />
-                                    </div>
-                                    <div className={`transition-opacity ${currentPosition === 2 ? "opacity-100" : "opacity-30"}`}>
-                                        <ChevronRight size={48} className="text-white drop-shadow-lg" />
-                                    </div>
-                                </div>
+                            {/* Center guide line */}
+                            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1 bg-yellow-400/80" />
 
-                                {/* Center crosshair */}
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-16 h-16 border-2 border-white/50 rounded-lg" />
+                            {/* Guide arrow (moves with device tilt) */}
+                            <motion.div
+                                className="absolute top-1/2 -translate-y-1/2"
+                                animate={{
+                                    left: `${50 + guideArrowOffset * 20}%`,
+                                    x: "-50%",
+                                }}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            >
+                                <div className="flex items-center justify-center">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                        speedStatus === "ok"
+                                            ? "bg-yellow-400"
+                                            : speedStatus === "too_fast"
+                                            ? "bg-red-500"
+                                            : "bg-white/50"
+                                    }`}>
+                                        <ChevronRight size={24} className="text-black" />
+                                    </div>
                                 </div>
+                            </motion.div>
 
-                                {/* Position indicator */}
-                                <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-sm rounded-full px-6 py-2">
-                                    <p className="text-white font-bold">
-                                        {POSITION_LABELS[CAPTURE_POSITIONS[currentPosition]]}を撮影
-                                    </p>
+                            {/* Progress bar */}
+                            <div className="absolute bottom-32 left-4 right-4">
+                                <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+                                    <motion.div
+                                        className="h-full bg-yellow-400"
+                                        animate={{ width: `${sweepProgress * 100}%` }}
+                                        transition={{ type: "spring", stiffness: 100 }}
+                                    />
                                 </div>
+                                <p className="text-center text-white/80 text-sm mt-2">
+                                    {Math.round(sweepProgress * 100)}%
+                                </p>
                             </div>
 
-                            {/* Captured thumbnails */}
-                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                                {capturedImages.map((img, index) => (
-                                    <div
-                                        key={index}
-                                        className={`w-16 h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                                            index === currentPosition
-                                                ? "border-white scale-110"
-                                                : img
-                                                ? "border-green-500"
-                                                : "border-white/30"
-                                        }`}
+                            {/* Speed warning */}
+                            <AnimatePresence>
+                                {speedStatus === "too_fast" && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0 }}
+                                        className="absolute top-24 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full flex items-center gap-2"
                                     >
-                                        {img ? (
-                                            <img src={img} alt="" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full bg-black/50 flex items-center justify-center">
-                                                <span className="text-white/50 text-xs">
-                                                    {POSITION_LABELS[CAPTURE_POSITIONS[index]]}
-                                                </span>
-                                            </div>
-                                        )}
-                                        {img && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-green-500/20">
-                                                <Check size={16} className="text-green-500" />
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                                        <AlertCircle size={18} />
+                                        <span className="font-bold">ゆっくり動かしてください</span>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Preview strip */}
+                            {capturedStrips.length > 0 && (
+                                <div className="absolute top-20 left-4 right-4 h-16 bg-black/50 rounded-lg overflow-hidden flex">
+                                    {capturedStrips.slice(-10).map((strip, i) => (
+                                        <div key={i} className="h-full flex-shrink-0" style={{ width: 20 }}>
+                                            <img src={strip} alt="" className="h-full w-full object-cover opacity-80" />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Instruction */}
+                            <div className="absolute bottom-48 left-1/2 -translate-x-1/2 text-center">
+                                <p className="text-white text-lg font-medium drop-shadow-lg">
+                                    {isCapturing
+                                        ? "ゆっくり右へ回転してください"
+                                        : "準備中..."}
+                                </p>
                             </div>
                         </div>
 
-                        {/* Capture button */}
-                        <div className="p-6 bg-[var(--bg-primary)]">
-                            <button
-                                onClick={captureFrame}
-                                disabled={!cameraStream}
-                                className="w-full py-4 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-full font-bold text-lg hover:opacity-80 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-                            >
-                                <Camera size={24} />
-                                <span>撮影 ({currentPosition + 1}/3)</span>
-                            </button>
-                            <p className="text-center text-[var(--text-secondary)] text-sm mt-2">
-                                {currentPosition === 0 && "左側を向いて撮影してください"}
-                                {currentPosition === 1 && "正面を向いて撮影してください"}
-                                {currentPosition === 2 && "右側を向いて撮影してください"}
+                        {/* Manual controls (fallback) */}
+                        <div className="p-4 bg-black/90 space-y-3">
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={captureManualFrame}
+                                    disabled={!cameraStream}
+                                    className="flex-1 py-3 bg-white text-black rounded-full font-bold hover:bg-white/90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    <Camera size={20} />
+                                    <span>手動撮影</span>
+                                </button>
+                                {capturedStrips.length >= 3 && (
+                                    <button
+                                        onClick={completeManualCapture}
+                                        className="flex-1 py-3 bg-yellow-400 text-black rounded-full font-bold hover:bg-yellow-300 transition-opacity flex items-center justify-center gap-2"
+                                    >
+                                        <span>完了 ({capturedStrips.length}枚)</span>
+                                    </button>
+                                )}
+                            </div>
+                            <p className="text-center text-white/50 text-xs">
+                                ジャイロが動作しない場合は手動で撮影できます
                             </p>
                         </div>
                     </div>
@@ -539,7 +701,6 @@ export default function VisionSimulator({
                                         exit={{ opacity: 0 }}
                                         transition={{ duration: 0.5 }}
                                         className="absolute inset-0 pointer-events-none"
-                                        aria-hidden="true"
                                     >
                                         {/* Left eye blind */}
                                         <div
@@ -636,7 +797,7 @@ export default function VisionSimulator({
                                 </button>
                                 {"DeviceOrientationEvent" in window && (
                                     <button
-                                        onClick={gyroscopeEnabled ? () => setGyroscopeEnabled(false) : requestGyroscopePermission}
+                                        onClick={gyroscopeEnabled ? () => setGyroscopeEnabled(false) : enableGyroscopeViewing}
                                         className={`flex-1 py-3 px-4 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-2 ${
                                             gyroscopeEnabled
                                                 ? "bg-[var(--accent)] text-white"
