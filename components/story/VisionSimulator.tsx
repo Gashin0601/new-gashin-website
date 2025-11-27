@@ -146,54 +146,61 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
         }
     };
 
-    // Gyroscope event handler
+    // Gyroscope event handler - only for display, no auto-capture
     useEffect(() => {
         if (step !== "capturing" || !cameraReady) return;
 
+        addLog("ジャイロリスナー開始");
+
         const handleOrientation = (e: DeviceOrientationEvent) => {
-            if (e.gamma === null || e.beta === null || e.alpha === null) return;
+            if (e.gamma === null) return;
 
             setGyroData({
-                alpha: e.alpha,
-                beta: e.beta,
+                alpha: e.alpha || 0,
+                beta: e.beta || 0,
                 gamma: e.gamma,
             });
 
             // Initialize starting position
             if (initialGamma === null) {
                 setInitialGamma(e.gamma);
+                addLog(`初期gamma設定: ${e.gamma.toFixed(1)}°`);
                 return;
             }
 
             // Calculate progress based on gamma (left-right tilt)
+            // gamma ranges from -90 to 90
             const rotation = Math.abs(e.gamma - initialGamma);
-            const newProgress = Math.min(100, Math.round((rotation / 90) * 100));
+            const newProgress = Math.min(100, Math.round((rotation / 60) * 100)); // 60度で100%
             setProgress(newProgress);
-
-            // Auto-capture at intervals
-            const capturePoints = [0, 20, 40, 60, 80, 100];
-            const currentPoint = capturePoints.find(p =>
-                newProgress >= p && newProgress < p + 10 &&
-                !photos.some((_, i) => capturePoints[i] === p)
-            );
-
-            if (currentPoint !== undefined && photos.length < 6) {
-                capturePhoto();
-            }
         };
 
         window.addEventListener("deviceorientation", handleOrientation, true);
-        return () => window.removeEventListener("deviceorientation", handleOrientation, true);
-    }, [step, cameraReady, initialGamma, photos.length]);
+        return () => {
+            window.removeEventListener("deviceorientation", handleOrientation, true);
+        };
+    }, [step, cameraReady, initialGamma, addLog]);
 
     // Capture a photo from video
     const capturePhoto = useCallback(() => {
-        if (!videoRef.current || !canvasRef.current) return;
+        if (!videoRef.current || !canvasRef.current) {
+            addLog("撮影失敗: video/canvasがnull");
+            return;
+        }
 
         const video = videoRef.current;
         const canvas = canvasRef.current;
         const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+        if (!ctx) {
+            addLog("撮影失敗: contextがnull");
+            return;
+        }
+
+        // Check if video is actually playing
+        if (video.videoWidth === 0 || video.videoHeight === 0) {
+            addLog("撮影失敗: videoサイズが0");
+            return;
+        }
 
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
@@ -201,7 +208,11 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
 
         const photo = canvas.toDataURL("image/jpeg", 0.8);
         setPhotos(prev => {
-            if (prev.length >= 6) return prev;
+            if (prev.length >= 6) {
+                addLog("撮影スキップ: 既に6枚");
+                return prev;
+            }
+            addLog(`撮影成功: ${prev.length + 1}枚目`);
             return [...prev, photo];
         });
 
@@ -209,7 +220,7 @@ export default function VisionSimulator({ isOpen, onClose }: VisionSimulatorProp
         if (navigator.vibrate) {
             navigator.vibrate(50);
         }
-    }, []);
+    }, [addLog]);
 
     // Manual capture button
     const handleManualCapture = () => {
