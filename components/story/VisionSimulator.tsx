@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Eye, EyeOff, Camera, RotateCcw, ChevronRight, AlertCircle } from "lucide-react";
+import { X, Eye, EyeOff, Camera, RotateCcw, ChevronRight, AlertCircle, Smartphone } from "lucide-react";
 
 interface VisionSimulatorProps {
     isOpen: boolean;
@@ -15,10 +15,10 @@ type SpeedStatus = "ok" | "too_fast" | "too_slow" | "idle";
 // Panorama configuration
 const PANORAMA_CONFIG = {
     totalAngle: 120, // Total sweep angle (degrees)
-    captureInterval: 10, // Capture every N degrees
-    stripWidth: 80, // Width of each captured strip (pixels)
-    minSpeed: 5, // Minimum rotation speed (deg/sec)
-    maxSpeed: 60, // Maximum rotation speed (deg/sec)
+    captureInterval: 8, // Capture every N degrees (smaller for smoother)
+    stripWidth: 100, // Width of each captured strip (pixels)
+    minSpeed: 3, // Minimum rotation speed (deg/sec) - lowered for easier capture
+    maxSpeed: 80, // Maximum rotation speed (deg/sec) - increased tolerance
 };
 
 export default function VisionSimulator({
@@ -43,6 +43,8 @@ export default function VisionSimulator({
     const [viewOffset, setViewOffset] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
     const [gyroscopeEnabled, setGyroscopeEnabled] = useState(false);
+    const [gyroscopeAvailable, setGyroscopeAvailable] = useState(false);
+    const [debugInfo, setDebugInfo] = useState<string>("");
 
     // Refs
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -99,16 +101,58 @@ export default function VisionSimulator({
 
     // Request gyroscope permission (iOS 13+)
     const requestGyroscopePermission = useCallback(async (): Promise<boolean> => {
+        // Check if DeviceOrientationEvent exists
+        if (typeof window === "undefined" || !("DeviceOrientationEvent" in window)) {
+            console.log("DeviceOrientationEvent not supported");
+            setDebugInfo("ジャイロセンサー非対応");
+            return false;
+        }
+
+        // iOS 13+ requires permission request
         if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
             try {
+                console.log("Requesting iOS gyroscope permission...");
                 const permission = await (DeviceOrientationEvent as any).requestPermission();
-                return permission === "granted";
+                console.log("Permission result:", permission);
+                if (permission === "granted") {
+                    setGyroscopeAvailable(true);
+                    setDebugInfo("ジャイロ許可済み");
+                    return true;
+                } else {
+                    setDebugInfo("ジャイロ許可拒否");
+                    return false;
+                }
             } catch (error) {
                 console.error("Gyroscope permission error:", error);
+                setDebugInfo(`ジャイロエラー: ${error}`);
                 return false;
             }
         }
-        return true; // Non-iOS devices
+
+        // Non-iOS devices - test if gyroscope actually works
+        return new Promise((resolve) => {
+            let resolved = false;
+            const testHandler = (event: DeviceOrientationEvent) => {
+                if (!resolved && (event.alpha !== null || event.beta !== null || event.gamma !== null)) {
+                    resolved = true;
+                    window.removeEventListener("deviceorientation", testHandler);
+                    setGyroscopeAvailable(true);
+                    setDebugInfo(`ジャイロ検出: α=${event.alpha?.toFixed(1)} β=${event.beta?.toFixed(1)} γ=${event.gamma?.toFixed(1)}`);
+                    resolve(true);
+                }
+            };
+            window.addEventListener("deviceorientation", testHandler);
+
+            // Timeout after 1 second
+            setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    window.removeEventListener("deviceorientation", testHandler);
+                    setDebugInfo("ジャイロ未検出（タイムアウト）");
+                    resolve(false);
+                }
+            }, 1000);
+        });
     }, []);
 
     // Capture a strip from the video
@@ -142,55 +186,79 @@ export default function VisionSimulator({
     useEffect(() => {
         if (!isCapturing || step !== "capturing") return;
 
-        const handleOrientation = (event: DeviceOrientationEvent) => {
-            if (event.gamma === null) return;
+        console.log("Setting up gyroscope handler for capture");
 
-            const gamma = event.gamma;
+        const handleOrientation = (event: DeviceOrientationEvent) => {
+            // Use alpha (compass) for horizontal rotation, or gamma as fallback
+            // alpha: 0-360 compass direction
+            // gamma: -90 to 90 tilt left/right
+            // beta: -180 to 180 tilt front/back
+
+            const rotationValue = event.gamma ?? event.alpha ?? null;
+            if (rotationValue === null) {
+                setDebugInfo("ジャイロデータなし");
+                return;
+            }
+
             const now = Date.now();
             const deltaTime = (now - lastTimestampRef.current) / 1000; // seconds
 
             // Initialize starting position
             if (initialGammaRef.current === null) {
-                initialGammaRef.current = gamma;
-                lastGammaRef.current = gamma;
+                initialGammaRef.current = rotationValue;
+                lastGammaRef.current = rotationValue;
                 lastTimestampRef.current = now;
+                setDebugInfo(`初期位置: ${rotationValue.toFixed(1)}°`);
                 return;
             }
 
-            // Calculate rotation from start
-            const rotationFromStart = gamma - initialGammaRef.current;
+            // Calculate rotation from start (handle wrap-around for alpha)
+            let rotationFromStart = rotationValue - initialGammaRef.current;
+
+            // Normalize rotation for alpha (compass) which wraps at 360
+            if (event.alpha !== null && event.gamma === null) {
+                if (rotationFromStart > 180) rotationFromStart -= 360;
+                if (rotationFromStart < -180) rotationFromStart += 360;
+            }
+
             const absRotation = Math.abs(rotationFromStart);
 
             // Calculate speed
-            const deltaGamma = Math.abs(gamma - lastGammaRef.current);
-            const speed = deltaTime > 0 ? deltaGamma / deltaTime : 0;
+            let deltaAngle = rotationValue - lastGammaRef.current;
+            if (event.alpha !== null && event.gamma === null) {
+                if (deltaAngle > 180) deltaAngle -= 360;
+                if (deltaAngle < -180) deltaAngle += 360;
+            }
+            const speed = deltaTime > 0 ? Math.abs(deltaAngle) / deltaTime : 0;
+
+            // Update debug info
+            setDebugInfo(`γ=${rotationValue.toFixed(1)}° 回転=${absRotation.toFixed(1)}° 速度=${speed.toFixed(1)}°/s`);
 
             // Update speed status
-            if (speed < PANORAMA_CONFIG.minSpeed) {
-                setSpeedStatus(deltaTime > 0.5 ? "too_slow" : "idle");
+            if (speed < PANORAMA_CONFIG.minSpeed && deltaTime > 0.3) {
+                setSpeedStatus("too_slow");
             } else if (speed > PANORAMA_CONFIG.maxSpeed) {
                 setSpeedStatus("too_fast");
-            } else {
+            } else if (speed >= PANORAMA_CONFIG.minSpeed) {
                 setSpeedStatus("ok");
             }
 
-            // Update guide arrow position (-1 to 1 based on gamma tilt)
-            const normalizedArrow = Math.max(-1, Math.min(1, (gamma - initialGammaRef.current) / 30));
+            // Update guide arrow position (-1 to 1 based on rotation)
+            const normalizedArrow = Math.max(-1, Math.min(1, rotationFromStart / 40));
             setGuideArrowOffset(normalizedArrow);
 
             // Update progress
             const progress = Math.min(1, absRotation / PANORAMA_CONFIG.totalAngle);
             setSweepProgress(progress);
 
-            // Capture at intervals
+            // Capture at intervals - relaxed speed requirements
             const captureAngle = Math.floor(absRotation / PANORAMA_CONFIG.captureInterval) * PANORAMA_CONFIG.captureInterval;
 
             if (
                 captureAngle > 0 &&
-                !capturedAnglesRef.current.has(captureAngle) &&
-                speed >= PANORAMA_CONFIG.minSpeed &&
-                speed <= PANORAMA_CONFIG.maxSpeed
+                !capturedAnglesRef.current.has(captureAngle)
             ) {
+                // Capture regardless of speed for better results
                 capturedAnglesRef.current.add(captureAngle);
                 const strip = captureStrip();
                 if (strip) {
@@ -207,12 +275,12 @@ export default function VisionSimulator({
                 finishCapture();
             }
 
-            lastGammaRef.current = gamma;
+            lastGammaRef.current = rotationValue;
             lastTimestampRef.current = now;
         };
 
-        window.addEventListener("deviceorientation", handleOrientation);
-        return () => window.removeEventListener("deviceorientation", handleOrientation);
+        window.addEventListener("deviceorientation", handleOrientation, true);
+        return () => window.removeEventListener("deviceorientation", handleOrientation, true);
     }, [isCapturing, step, captureStrip]);
 
     // Finish capture and create panorama
@@ -302,12 +370,10 @@ export default function VisionSimulator({
 
     // Start panorama capture
     const startPanoramaCapture = async () => {
+        // Request gyroscope permission first (must be from user interaction)
         const hasPermission = await requestGyroscopePermission();
-        if (!hasPermission) {
-            setCameraError("ジャイロスコープの許可が必要です。");
-            return;
-        }
 
+        // Start camera regardless of gyroscope availability
         await startCamera();
         setStep("capturing");
 
@@ -319,6 +385,10 @@ export default function VisionSimulator({
         setCapturedStrips([]);
         setSweepProgress(0);
         setSpeedStatus("idle");
+
+        if (!hasPermission) {
+            setDebugInfo("ジャイロなし - 手動撮影モード");
+        }
 
         // Start capture after brief delay for camera to initialize
         setTimeout(() => {
@@ -543,28 +613,46 @@ export default function VisionSimulator({
 
                 {/* Step: Capturing (iOS-like sweep) */}
                 {step === "capturing" && (
-                    <div className="w-full h-full relative bg-black">
-                        {/* Camera view - fullscreen */}
+                    <div className="fixed inset-0 bg-black">
+                        {/* Camera view - true fullscreen */}
                         {cameraStream ? (
                             <video
                                 ref={videoRef}
                                 autoPlay
                                 playsInline
                                 muted
-                                className="absolute inset-0 w-full h-full object-cover"
+                                style={{
+                                    position: "fixed",
+                                    top: 0,
+                                    left: 0,
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                    zIndex: 1,
+                                }}
                             />
                         ) : (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black">
-                                <p className="text-white/50">カメラを起動中...</p>
+                            <div className="fixed inset-0 flex items-center justify-center bg-black z-10">
+                                <div className="text-center">
+                                    <div className="animate-spin w-8 h-8 border-2 border-white/30 border-t-white rounded-full mx-auto mb-4" />
+                                    <p className="text-white/70">カメラを起動中...</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Debug info */}
+                        {debugInfo && (
+                            <div className="fixed top-16 left-4 right-4 z-30 bg-black/70 text-white text-xs p-2 rounded font-mono">
+                                {debugInfo}
                             </div>
                         )}
 
                         {/* Center guide line */}
-                        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1 bg-yellow-400/80 z-10" />
+                        <div className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-1 bg-yellow-400/80 z-20" />
 
                         {/* Guide arrow (moves with device tilt) */}
                         <motion.div
-                            className="absolute top-1/2 -translate-y-1/2 z-10"
+                            className="fixed top-1/2 -translate-y-1/2 z-20"
                             animate={{
                                 left: `${50 + guideArrowOffset * 20}%`,
                                 x: "-50%",
@@ -585,7 +673,7 @@ export default function VisionSimulator({
                         </motion.div>
 
                         {/* Progress bar */}
-                        <div className="absolute bottom-32 left-4 right-4 z-10">
+                        <div className="fixed bottom-36 left-4 right-4 z-20">
                             <div className="h-2 bg-white/20 rounded-full overflow-hidden">
                                 <motion.div
                                     className="h-full bg-yellow-400"
@@ -593,8 +681,8 @@ export default function VisionSimulator({
                                     transition={{ type: "spring", stiffness: 100 }}
                                 />
                             </div>
-                            <p className="text-center text-white/80 text-sm mt-2">
-                                {Math.round(sweepProgress * 100)}%
+                            <p className="text-center text-white/80 text-sm mt-2 drop-shadow-lg">
+                                {Math.round(sweepProgress * 100)}% ({capturedStrips.length}枚)
                             </p>
                         </div>
 
@@ -605,7 +693,7 @@ export default function VisionSimulator({
                                     initial={{ opacity: 0, y: -20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0 }}
-                                    className="absolute top-24 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full flex items-center gap-2 z-10"
+                                    className="fixed top-32 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full flex items-center gap-2 z-20"
                                 >
                                     <AlertCircle size={18} />
                                     <span className="font-bold">ゆっくり動かしてください</span>
@@ -615,9 +703,9 @@ export default function VisionSimulator({
 
                         {/* Preview strip */}
                         {capturedStrips.length > 0 && (
-                            <div className="absolute top-20 left-4 right-4 h-16 bg-black/50 rounded-lg overflow-hidden flex z-10">
-                                {capturedStrips.slice(-10).map((strip, i) => (
-                                    <div key={i} className="h-full flex-shrink-0" style={{ width: 20 }}>
+                            <div className="fixed top-24 left-4 right-4 h-16 bg-black/50 rounded-lg overflow-hidden flex z-20">
+                                {capturedStrips.slice(-15).map((strip, i) => (
+                                    <div key={i} className="h-full flex-shrink-0" style={{ width: 24 }}>
                                         <img src={strip} alt="" className="h-full w-full object-cover opacity-80" />
                                     </div>
                                 ))}
@@ -625,16 +713,18 @@ export default function VisionSimulator({
                         )}
 
                         {/* Instruction */}
-                        <div className="absolute bottom-48 left-1/2 -translate-x-1/2 text-center z-10">
+                        <div className="fixed bottom-52 left-1/2 -translate-x-1/2 text-center z-20">
                             <p className="text-white text-lg font-medium drop-shadow-lg">
                                 {isCapturing
-                                    ? "ゆっくり右へ回転してください"
+                                    ? gyroscopeAvailable
+                                        ? "ゆっくり右へ回転してください"
+                                        : "手動で撮影ボタンを押してください"
                                     : "準備中..."}
                             </p>
                         </div>
 
                         {/* Manual controls (fallback) - positioned at bottom */}
-                        <div className="absolute bottom-0 left-0 right-0 p-4 pb-8 bg-gradient-to-t from-black/90 via-black/60 to-transparent z-10 space-y-3">
+                        <div className="fixed bottom-0 left-0 right-0 p-4 pb-8 bg-gradient-to-t from-black/90 via-black/60 to-transparent z-20 space-y-3">
                             <div className="flex gap-2">
                                 <button
                                     onClick={captureManualFrame}
