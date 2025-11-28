@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+// import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, EyeOff } from "lucide-react";
-import VisionSimulator from "@/components/story/VisionSimulator";
+import { ArrowLeft } from "lucide-react";
+// import { EyeOff } from "lucide-react";
+// import VisionSimulator from "@/components/story/VisionSimulator";
 
 export default function StoryPage() {
-    const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
+    // const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
 
     return (
         <main
@@ -22,7 +23,7 @@ export default function StoryPage() {
                     Coming Soon...
                 </p>
 
-                {/* 視覚体験ボタン */}
+                {/* 視覚体験ボタン - 準備中のためコメントアウト
                 <button
                     onClick={() => setIsSimulatorOpen(true)}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-full font-medium hover:opacity-80 transition-opacity mb-6"
@@ -31,6 +32,7 @@ export default function StoryPage() {
                     <EyeOff size={20} aria-hidden="true" />
                     <span>私の見え方を体験する</span>
                 </button>
+                */}
 
                 <div>
                     <Link
@@ -44,11 +46,12 @@ export default function StoryPage() {
                 </div>
             </div>
 
-            {/* 視覚シミュレーター */}
+            {/* 視覚シミュレーター - 準備中のためコメントアウト
             <VisionSimulator
                 isOpen={isSimulatorOpen}
                 onClose={() => setIsSimulatorOpen(false)}
             />
+            */}
         </main>
     );
 }
