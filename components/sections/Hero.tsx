@@ -53,6 +53,7 @@ export default function Hero() {
                         </p>
                     </div>
 
+                    {/* ストーリーボタン - 一時的にコメントアウト
                     <div className="pt-2 sm:pt-4">
                         <Link
                             href="/story"
@@ -63,6 +64,7 @@ export default function Hero() {
                             <ArrowRight size={18} className="sm:w-5 sm:h-5" aria-hidden="true" />
                         </Link>
                     </div>
+                    */}
                 </motion.div>
 
                 {/* Portrait Image */}
