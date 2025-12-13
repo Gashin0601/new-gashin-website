@@ -16,7 +16,7 @@ const inter = Inter({
   display: "swap",
 });
 
-const baseUrl = "https://gashinsuzuki.com";
+const baseUrl = "https://gashin.me";
 
 export const viewport: Viewport = {
   width: "device-width",
