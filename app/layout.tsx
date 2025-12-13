@@ -31,7 +31,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "鈴木我信",
+    default: "鈴木我信｜Suzuki Gashin",
     template: "%s | 鈴木我信",
   },
   description:
@@ -72,8 +72,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ja_JP",
     url: baseUrl,
-    siteName: "鈴木我信",
-    title: "鈴木我信",
+    siteName: "鈴木我信｜Suzuki Gashin",
+    title: "鈴木我信｜Suzuki Gashin",
     description:
       "慶應義塾大学 環境情報学部 1年。生まれつきの視覚障害（弱視）で、SNSでの発信やアプリ開発を通して、障害を強みに変えるために活動中。",
     images: [
@@ -90,7 +90,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@suzuki_gashin",
     creator: "@suzuki_gashin",
-    title: "鈴木我信",
+    title: "鈴木我信｜Suzuki Gashin",
     description:
       "慶應義塾大学 環境情報学部 1年。生まれつきの視覚障害（弱視）で、SNSでの発信やアプリ開発を通して、障害を強みに変えるために活動中。",
     images: ["/images/og/og-image-large.png"],
