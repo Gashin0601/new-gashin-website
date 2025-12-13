@@ -58,11 +58,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         localStorage.setItem("theme", newTheme);
     };
 
-    // Prevent flash by not rendering until mounted
-    if (!mounted) {
-        return null;
-    }
-
+    // Always render children for SSR, use default values before mount
     return (
         <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
             {children}
