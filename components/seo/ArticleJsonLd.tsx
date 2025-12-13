@@ -15,7 +15,7 @@ export default function ArticleJsonLd({
   datePublished,
   author = "鈴木我信",
 }: ArticleJsonLdProps) {
-  const baseUrl = "https://gashinsuzuki.com";
+  const baseUrl = "https://gashin.me";
 
   const articleSchema = {
     "@context": "https://schema.org",

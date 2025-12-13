@@ -1,23 +1,33 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "ストーリー - 弱視というレンズを通して",
+  title: "ストーリー",
   description:
-    "鈴木我信（Gashin Suzuki）の人生ストーリー。生まれつきの弱視という視覚障害を持ちながら、どのように世界を見て、どのような道を歩んできたのかを紹介します。",
+    "鈴木我信のストーリー。生まれつきの視覚障害（弱視）を持ちながら、どのように成長し、テクノロジーと出会い、今の活動に至ったのかを紹介。",
+  keywords: [
+    "鈴木我信",
+    "ストーリー",
+    "視覚障害",
+    "弱視",
+    "人生",
+    "経歴",
+    "慶應義塾大学",
+    "環境情報学部",
+  ],
   openGraph: {
-    title: "ストーリー - 弱視というレンズを通して | 鈴木我信",
+    title: "ストーリー | 鈴木我信",
     description:
-      "鈴木我信の人生ストーリー。生まれつきの弱視という視覚障害を持ちながら歩んできた道のり。",
-    url: "https://gashinsuzuki.com/story",
+      "鈴木我信のストーリー。生まれつきの視覚障害を持ちながら、どのように成長し、今の活動に至ったのか。",
+    url: "https://gashin.me/story",
     type: "article",
   },
   twitter: {
-    title: "ストーリー - 弱視というレンズを通して | 鈴木我信",
+    title: "ストーリー | 鈴木我信",
     description:
-      "鈴木我信の人生ストーリー。生まれつきの弱視という視覚障害を持ちながら歩んできた道のり。",
+      "鈴木我信のストーリー。生まれつきの視覚障害を持ちながら、どのように成長し、今の活動に至ったのか。",
   },
   alternates: {
-    canonical: "https://gashinsuzuki.com/story",
+    canonical: "https://gashin.me/story",
   },
 };
 

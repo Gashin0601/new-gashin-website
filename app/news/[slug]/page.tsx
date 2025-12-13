@@ -5,7 +5,7 @@ import { Metadata } from 'next';
 import newsData from '@/data/news.json';
 import ArticleJsonLd from '@/components/seo/ArticleJsonLd';
 
-const baseUrl = 'https://gashinsuzuki.com';
+const baseUrl = 'https://gashin.me';
 
 export function generateStaticParams() {
   return newsData.map((news) => ({
