@@ -1,7 +1,7 @@
 {
-  "name": "鈴木我信 | Gashin Suzuki",
+  "name": "鈴木我信｜Suzuki Gashin",
   "short_name": "鈴木我信",
-  "description": "慶應義塾大学SFCの学生・鈴木我信の公式サイト。視覚とテクノロジーで、学びと社会の垣根をゆるめる実験をしています。",
+  "description": "慶應義塾大学 環境情報学部 1年。生まれつきの視覚障害（弱視）で、SNSでの発信やアプリ開発を通して、障害を強みに変えるために活動中。",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -9,16 +9,32 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icon.png",
-      "sizes": "512x512",
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/apple-icon.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "lang": "ja",
