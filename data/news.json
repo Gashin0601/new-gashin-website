@@ -1,5 +1,64 @@
 [
   {
+    "slug": "2026-business-insider",
+    "title": "具現化される「アクセシビリティ＝人権」。Appleの思想と、慶應SFC学生たちの実践",
+    "summary": "Business Insider Japanにて、Appleのアクセシビリティ思想と慶應SFCの学生たちの実践が特集されました。",
+    "content": [
+      "「国際障害者デー」に合わせ、Appleのアクセシビリティ担当シニアディレクター、サラ・ハーリンガー氏と慶應SFC生の対話が取り上げられました。",
+      "「アクセシビリティは特別な配慮ではなく、学びや行動が可能になるための前提条件」という学生たちの実践が紹介されています。"
+    ],
+    "source": "Business Insider Japan",
+    "date": "2026-01-05",
+    "externalUrl": "https://www.businessinsider.jp/article/2601-apple-sfc/",
+    "ogpImageFetch": false,
+    "image": "/images/news/business-insider.jpg",
+    "type": "article",
+    "linkText": "記事を読む"
+  },
+  {
+    "slug": "2025-ascii",
+    "title": "アクセシビリティは誰のため？ Apple担当者と日本の学生に聞く、テクノロジーと社会の調和",
+    "summary": "ASCII.jpの連載「松村太郎のアップル時評」（第322回）にて、Appleのアクセシビリティ担当者と慶應SFC生の取り組みが8ページにわたり特集されました。",
+    "content": [
+      "「SYNC25 アカウンタビリティサミット」でのサラ・ハーリンガー氏へのインタビューを軸に、アクセシビリティが企業・学生・社会をどうつなぐかが深く掘り下げられています。",
+      "テクノロジーと社会の調和をテーマに、アクセシビリティが「テクノロジーと社会の関係を映す鏡」であるという視点で書かれた記事です。"
+    ],
+    "source": "ASCII.jp",
+    "date": "2025-12-09",
+    "externalUrl": "https://ascii.jp/elem/000/004/358/4358108/",
+    "ogpImageFetch": false,
+    "image": "/images/news/ascii.jpg",
+    "type": "article",
+    "linkText": "記事を読む"
+  },
+  {
+    "slug": "2025-abema-prime",
+    "title": "スマホが目の代わり？「弱視」の生きづらさ",
+    "summary": "ABEMAプライムに生出演し、弱視当事者としての日常の困難や生きづらさについて語りました。",
+    "content": [
+      "スマートフォンの拡大鏡機能を「目の代わり」として使う日常や、それが盗撮と誤解される問題、夜間にほぼ全盲に近い状態になることなど、弱視ならではの困難が取り上げられました。"
+    ],
+    "source": "ABEMA Prime",
+    "date": "2025-11-25",
+    "externalUrl": "https://times.abema.tv/articles/-/10211274",
+    "ogpImageFetch": false,
+    "image": "/images/news/abema-prime.jpg",
+    "type": "article",
+    "linkText": "記事を読む"
+  },
+  {
+    "slug": "2025-miterundesu",
+    "title": "拡大して見るための、まったく新しいアプリ「ミテルンデス」をリリース",
+    "summary": "視覚障害者の「見たい」を叶える、新しい拡大鏡アプリをリリースしました。",
+    "source": "Miterundesu",
+    "date": "2025-11-24",
+    "externalUrl": "https://www.miterundesu.jp",
+    "ogpImageFetch": false,
+    "image": "/images/news/miterundesu.png",
+    "type": "app",
+    "linkText": "公式サイトへ"
+  },
+  {
     "slug": "2025-nikkan-spa",
     "title": "日刊SPA!に取材していただきました",
     "summary": "障害があるが故の悩み、そして私の人生について語りました。",
@@ -22,17 +81,5 @@
     "image": "/images/news/j-cast-lawson.jpg",
     "type": "article",
     "linkText": "記事を読む"
-  },
-  {
-    "slug": "2025-miterundesu",
-    "title": "拡大して見るための、まったく新しいアプリ「ミテルンデス」をリリース",
-    "summary": "視覚障害者の「見たい」を叶える、新しい拡大鏡アプリをリリースしました。",
-    "source": "Miterundesu",
-    "date": "2025-11-24",
-    "externalUrl": "https://www.miterundesu.jp",
-    "ogpImageFetch": false,
-    "image": "/images/news/miterundesu.png",
-    "type": "app",
-    "linkText": "公式サイトへ"
   }
 ]

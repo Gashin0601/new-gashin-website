@@ -129,9 +129,18 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
             </figure>
           )}
 
-          {/* Summary */}
-          <section className="prose prose-lg max-w-none mb-8" aria-label="記事概要">
+          {/* Article Content */}
+          <section className="max-w-none mb-8 space-y-4" aria-label="記事内容">
             <p className="text-xl leading-relaxed text-[var(--text-secondary)]">{newsItem.summary}</p>
+            {'content' in newsItem && Array.isArray((newsItem as Record<string, unknown>).content) && (
+              <div className="mt-6 space-y-4">
+                {((newsItem as Record<string, unknown>).content as string[]).map((paragraph, index) => (
+                  <p key={index} className="text-base leading-relaxed text-[var(--text-secondary)]">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* External Link - Hyperlink style */}
