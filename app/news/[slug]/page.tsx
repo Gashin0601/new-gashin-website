@@ -143,18 +143,35 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
             )}
           </section>
 
-          {/* External Link - Hyperlink style */}
-          <div className="mb-8">
-            <a
-              href={newsItem.externalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[var(--accent)] hover:text-[var(--accent-hover)] underline underline-offset-2 text-lg"
-              aria-label={`${linkText}（新しいタブで開きます）`}
-            >
-              {linkText}
-              <ExternalLink size={18} aria-hidden="true" />
-            </a>
+          {/* External Links */}
+          <div className="mb-8 flex flex-wrap gap-4">
+            {'links' in newsItem && Array.isArray((newsItem as Record<string, unknown>).links)
+              ? ((newsItem as Record<string, unknown>).links as { url: string; text: string }[]).map((link, index) => (
+                  <a
+                    key={index}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-[var(--accent)] hover:text-[var(--accent-hover)] underline underline-offset-2 text-lg"
+                    aria-label={`${link.text}（新しいタブで開きます）`}
+                  >
+                    {link.text}
+                    <ExternalLink size={18} aria-hidden="true" />
+                  </a>
+                ))
+              : (
+                  <a
+                    href={newsItem.externalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-[var(--accent)] hover:text-[var(--accent-hover)] underline underline-offset-2 text-lg"
+                    aria-label={`${linkText}（新しいタブで開きます）`}
+                  >
+                    {linkText}
+                    <ExternalLink size={18} aria-hidden="true" />
+                  </a>
+                )
+            }
           </div>
 
           {/* Navigation */}

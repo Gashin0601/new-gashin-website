@@ -40,11 +40,15 @@
     ],
     "source": "ABEMA Prime",
     "date": "2025-11-25",
-    "externalUrl": "https://times.abema.tv/articles/-/10211274",
+    "externalUrl": "https://www.youtube.com/watch?v=UswRF9MEhwg",
     "ogpImageFetch": false,
     "image": "/images/news/abema-prime.jpg",
     "type": "article",
-    "linkText": "記事を読む"
+    "linkText": "YouTubeで見る",
+    "links": [
+      { "url": "https://www.youtube.com/watch?v=UswRF9MEhwg", "text": "YouTubeで見る" },
+      { "url": "https://times.abema.tv/articles/-/10211274", "text": "記事を読む" }
+    ]
   },
   {
     "slug": "2025-miterundesu",
