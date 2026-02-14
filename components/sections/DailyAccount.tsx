@@ -78,15 +78,12 @@ export default function DailyAccount() {
                 <header className="text-center mb-8 md:mb-10 space-y-3 md:space-y-4">
                     <div
                         className="relative w-24 h-24 mx-auto mb-6 rounded-full overflow-hidden shadow-xl border-2 border-white/10"
-                        role="img"
-                        aria-label="鈴木我信のプロフィール画像"
                     >
                         <Image
                             src="/images/profile/suzuki_gashin.jpeg"
-                            alt=""
+                            alt="鈴木我信のプロフィール画像"
                             fill
                             className="object-cover"
-                            aria-hidden="true"
                         />
                     </div>
                     <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)]" id="daily-account-title">

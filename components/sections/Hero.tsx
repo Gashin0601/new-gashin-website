@@ -24,15 +24,13 @@ export default function Hero() {
                         aria-label ensures screen readers read this as one cohesive phrase
                         The visual <br> is hidden from screen readers with aria-hidden
                     */}
-                    <h1
+                    <p
                         className="text-4xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-tight tracking-tight text-[var(--text-primary)]"
                         aria-label="我を信じて突き進む。"
                     >
-                        <span aria-hidden="true">
-                            我を信じて<br />
-                            突き進む。
-                        </span>
-                    </h1>
+                        我を信じて<br aria-hidden="true" />
+                        突き進む。
+                    </p>
 
                     {/*
                         Profile description - grouped as one readable block for screen readers
@@ -40,15 +38,13 @@ export default function Hero() {
                     */}
                     <div
                         className="space-y-3 sm:space-y-4 text-base sm:text-lg md:text-xl text-[var(--text-secondary)] max-w-md"
-                        role="paragraph"
-                        aria-label="慶應義塾大学 環境情報学部 1年。生まれつきの視覚障害（弱視）で、SNSでの発信やアプリ開発を通して、障害を強みに変えるために活動中。"
                     >
-                        <p aria-hidden="true">
+                        <p>
                             慶應義塾大学 環境情報学部 1年。
                         </p>
-                        <p aria-hidden="true">
-                            生まれつきの視覚障害（弱視）で、<br />
-                            SNSでの発信やアプリ開発を通して、<br />
+                        <p>
+                            生まれつきの視覚障害（弱視）で、<br aria-hidden="true" />
+                            SNSでの発信やアプリ開発を通して、<br aria-hidden="true" />
                             障害を強みに変えるために活動中。
                         </p>
                     </div>
@@ -73,17 +69,14 @@ export default function Hero() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.8, duration: 0.8 }}
                     className="relative w-full max-w-md mx-auto"
-                    role="img"
-                    aria-label="鈴木我信のポートレート写真"
                 >
                     <Image
                         src="/images/profile/profile.png"
-                        alt=""
+                        alt="鈴木我信のポートレート写真"
                         width={500}
                         height={600}
                         className="object-contain drop-shadow-xl"
                         priority
-                        aria-hidden="true"
                     />
                 </motion.div>
             </div>

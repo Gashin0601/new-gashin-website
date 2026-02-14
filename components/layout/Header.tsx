@@ -6,6 +6,13 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const navLinks = [
+    { href: "/", label: "TOP", srLabel: "トップページへ" },
+    { href: "/videos", label: "VIDEOS", srLabel: "動画一覧ページへ" },
+    { href: "/story", label: "STORY", srLabel: "ストーリーページへ" },
+    { href: "/news", label: "NEWS", srLabel: "ニュースページへ" },
+];
+
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
@@ -28,9 +35,8 @@ export default function Header() {
                 >
                     <img
                         src="/logo-handwritten-square.png"
-                        alt=""
+                        alt="鈴木我信"
                         className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24"
-                        aria-hidden="true"
                     />
                 </Link>
 
@@ -49,6 +55,15 @@ export default function Header() {
                     <Menu size={20} className="sm:w-6 sm:h-6" aria-hidden="true" />
                 </button>
             </div>
+
+            {/* SSR-visible navigation for crawlers */}
+            <nav className="sr-only" aria-label="メインナビゲーション">
+                {navLinks.map(({ href, label, srLabel }) => (
+                    <Link key={href} href={href}>
+                        {label}（{srLabel}）
+                    </Link>
+                ))}
+            </nav>
 
             {/* Fullscreen Menu Overlay */}
             <AnimatePresence>
@@ -82,18 +97,17 @@ export default function Header() {
                                 className="flex flex-col items-center space-y-8 text-2xl font-light tracking-wider text-black"
                                 aria-label="メインナビゲーション"
                             >
-                                <Link href="/" onClick={() => setIsOpen(false)} className="hover:text-gray-600 transition-colors">
-                                    TOP
-                                    <span className="sr-only">（トップページへ）</span>
-                                </Link>
-                                <Link href="/story" onClick={() => setIsOpen(false)} className="hover:text-gray-600 transition-colors">
-                                    STORY
-                                    <span className="sr-only">（ストーリーページへ）</span>
-                                </Link>
-                                <Link href="/news" onClick={() => setIsOpen(false)} className="hover:text-gray-600 transition-colors">
-                                    NEWS
-                                    <span className="sr-only">（ニュースページへ）</span>
-                                </Link>
+                                {navLinks.map(({ href, label, srLabel }) => (
+                                    <Link
+                                        key={href}
+                                        href={href}
+                                        onClick={() => setIsOpen(false)}
+                                        className="hover:text-gray-600 transition-colors"
+                                    >
+                                        {label}
+                                        <span className="sr-only">（{srLabel}）</span>
+                                    </Link>
+                                ))}
                             </nav>
                         </div>
                     </motion.div>

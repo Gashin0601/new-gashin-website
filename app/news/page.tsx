@@ -43,11 +43,10 @@ export default function NewsPage() {
                     <div className="flex-shrink-0 w-full sm:w-48 md:w-56 aspect-video bg-[var(--border-color)] rounded-lg overflow-hidden">
                       <Image
                         src={item.image}
-                        alt=""
+                        alt={`${item.title} - ${item.source}`}
                         width={224}
                         height={126}
                         className="w-full h-full object-cover"
-                        aria-hidden="true"
                       />
                     </div>
                   )}

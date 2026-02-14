@@ -66,11 +66,10 @@ export default function MediaSection() {
                                     <div className="aspect-video bg-[var(--bg-secondary)] rounded-xl overflow-hidden mb-4 relative w-full">
                                         <Image
                                             src={news.image || "/images/news/placeholder.png"}
-                                            alt=""
+                                            alt={`${news.title} - ${news.source}`}
                                             fill
                                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
                                             className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                            aria-hidden="true"
                                         />
                                     </div>
 

@@ -121,13 +121,11 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
             <figure className="mb-8 rounded-xl overflow-hidden">
               <Image
                 src={newsItem.image}
-                alt=""
+                alt={`${newsItem.title}のサムネイル画像`}
                 width={800}
                 height={450}
                 className="w-full h-auto"
-                aria-hidden="true"
               />
-              <figcaption className="sr-only">{newsItem.title}のサムネイル画像</figcaption>
             </figure>
           )}
 

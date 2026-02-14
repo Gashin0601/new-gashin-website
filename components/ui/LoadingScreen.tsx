@@ -6,10 +6,15 @@ import videosData from "@/data/videos.json";
 import { preloadAllVideos, isVideoPreloaded } from "@/lib/videoPreloader";
 
 export default function LoadingScreen() {
-  const [isLoading, setIsLoading] = useState(true);
+  // Start with false for SSR - crawlers will see actual content
+  const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
+    // Mark as mounted (client-side only)
+    setMounted(true);
+
     // Check if we've already shown the loading screen in this session
     const hasLoaded = sessionStorage.getItem("hasLoaded");
 
@@ -31,6 +36,8 @@ export default function LoadingScreen() {
     }
 
     // First visit: show loading screen with progress
+    setIsLoading(true);
+
     const loadVideos = async () => {
       await preloadAllVideos(videosData, (loaded, total) => {
         setLoadingProgress(Math.round((loaded / total) * 100));
@@ -58,6 +65,11 @@ export default function LoadingScreen() {
     };
   }, [isLoading]);
 
+  // Don't render anything on server - crawlers will see actual page content
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <AnimatePresence>
       {isLoading && (
@@ -74,20 +86,16 @@ export default function LoadingScreen() {
             {/* Logo Container */}
             <div
               className="relative w-48 h-48 mb-8 flex items-center justify-center"
-              role="img"
-              aria-label="鈴木我信のロゴ"
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 1 }}
               >
-                {/* Handwritten Logo */}
                 <img
                   src="/logo-handwritten.png"
-                  alt=""
+                  alt="鈴木我信のロゴ"
                   className="w-full h-full object-contain invert"
-                  aria-hidden="true"
                 />
               </motion.div>
             </div>
